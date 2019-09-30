@@ -1,29 +1,27 @@
-package errcode
+package paapi5
 
-import (
-	"fmt"
-	"testing"
+import "fmt"
+
+//Error is error codes for books-data
+type Error int
+
+const (
+	ErrNullPointer Error = iota + 1
+	ErrHTTPStatus
+	ErrNoData
 )
 
-func TestError(t *testing.T) {
-	testCases := []struct {
-		err error
-		str string
-	}{
-		{err: Error(0), str: "unknown error (0)"},
-		{err: ErrNullPointer, str: "Null reference instance"},
-		{err: ErrHTTPStatus, str: "Bad HTTP status"},
-		{err: ErrNoData, str: "No response data"},
-		{err: Error(4), str: "unknown error (4)"},
-	}
+var errMessages = map[Error]string{
+	ErrNullPointer: "Null reference instance",
+	ErrHTTPStatus:  "Bad HTTP status",
+	ErrNoData:      "No response data",
+}
 
-	for _, tc := range testCases {
-		errStr := tc.err.Error()
-		if errStr != tc.str {
-			t.Errorf("\"%v\" != \"%v\"", errStr, tc.str)
-		}
-		fmt.Printf("Info(TestError): %+v\n", tc.err)
+func (e Error) Error() string {
+	if s, ok := errMessages[e]; ok {
+		return s
 	}
+	return fmt.Sprintf("unknown error (%d)", int(e))
 }
 
 /* Copyright 2019 Spiegel

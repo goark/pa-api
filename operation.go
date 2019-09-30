@@ -1,4 +1,4 @@
-package query
+package paapi5
 
 import (
 	"path"
@@ -9,7 +9,8 @@ import (
 type Operation int
 
 const (
-	GetVariations Operation = iota + 1
+	NullOperation Operation = iota
+	GetVariations
 	GetItems
 	SearchItems
 )

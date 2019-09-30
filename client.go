@@ -12,14 +12,17 @@ import (
 	"time"
 
 	"github.com/spiegel-im-spiegel/errs"
-	"github.com/spiegel-im-spiegel/pa-api/entity"
-	"github.com/spiegel-im-spiegel/pa-api/errcode"
-	"github.com/spiegel-im-spiegel/pa-api/query"
 )
 
 const (
 	defaultPartnerType = "Associates"
 )
+
+//Query interface for Client type
+type Query interface {
+	Operation() Operation
+	Payload() ([]byte, error)
+}
 
 //Client is http.Client for Aozora API Server
 type Client struct {
@@ -46,33 +49,19 @@ func (c *Client) PartnerType() string {
 	return defaultPartnerType
 }
 
-//NewQuery creates new Query instance
-func (c *Client) NewQuery(op query.Operation) *query.Query {
-	return query.New(op, c.Marketplace(), c.PartnerTag(), c.PartnerType())
-}
-
-func (c *Client) RequestJSON(q *query.Query) ([]byte, error) {
-	payload, err := q.JSON()
+func (c *Client) Request(q Query) ([]byte, error) {
+	payload, err := q.Payload()
 	if err != nil {
-		return nil, errs.Wrap(err, "", errs.WithParam("Operation", q.Operation.String()))
+		return nil, errs.Wrap(err, "", errs.WithParam("Operation", q.Operation().String()))
 	}
-	b, err := c.post(q.Operation, payload)
+	b, err := c.post(q.Operation(), payload)
 	if err != nil {
-		return nil, errs.Wrap(err, "", errs.WithParam("Operation", q.Operation.String()), errs.WithParam("payload", string(payload)))
+		return nil, errs.Wrap(err, "", errs.WithParam("Operation", q.Operation().String()), errs.WithParam("payload", string(payload)))
 	}
 	return b, nil
 }
 
-func (c *Client) Request(q *query.Query) (*entity.Response, error) {
-	body, err := c.RequestJSON(q)
-	if err != nil {
-		return nil, errs.Wrap(err, "", errs.WithParam("Operation", q.Operation.String()))
-	}
-	r, err := entity.DecodeResponse(body)
-	return r, errs.Wrap(err, "", errs.WithParam("Operation", q.Operation.String()))
-}
-
-func (c *Client) post(cmd query.Operation, payload []byte) ([]byte, error) {
+func (c *Client) post(cmd Operation, payload []byte) ([]byte, error) {
 	dt := NewTimeStamp(time.Now())
 	u := c.server.URL(cmd.Path())
 	hds := newHeaders(c.server, cmd, dt)
@@ -97,7 +86,7 @@ func (c *Client) post(cmd query.Operation, payload []byte) ([]byte, error) {
 	defer resp.Body.Close()
 
 	if !(resp.StatusCode != 0 && resp.StatusCode < http.StatusBadRequest) {
-		return nil, errs.Wrap(errcode.ErrHTTPStatus, "", errs.WithParam("url", u.String()), errs.WithParam("payload", string(payload)), errs.WithParam("status", resp.Status))
+		return nil, errs.Wrap(ErrHTTPStatus, "", errs.WithParam("url", u.String()), errs.WithParam("payload", string(payload)), errs.WithParam("status", resp.Status))
 	}
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
@@ -155,13 +144,13 @@ func hashedString(data []byte) string {
 }
 
 type headers struct {
-	cmd       query.Operation
+	cmd       Operation
 	dt        TimeStamp
 	headers   []string
 	valueList map[string]string
 }
 
-func newHeaders(svr *Server, cmd query.Operation, dt TimeStamp) *headers {
+func newHeaders(svr *Server, cmd Operation, dt TimeStamp) *headers {
 	hds := &headers{cmd: cmd, dt: dt, headers: []string{"content-encoding", "host", "x-amz-date", "x-amz-target"}, valueList: map[string]string{}}
 	hds.valueList["content-encoding"] = svr.ContentEncoding()
 	hds.valueList["host"] = svr.HostName()

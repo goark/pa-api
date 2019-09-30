@@ -5,16 +5,16 @@ import (
 	"testing"
 )
 
-func TestQueryNil(t *testing.T) {
-	q := (*Query)(nil)
-	if _, err := q.JSON(); err == nil {
+func TestGetItemsNil(t *testing.T) {
+	q := (*GetItems)(nil)
+	if _, err := q.Payload(); err == nil {
 		t.Errorf("(*Query)(nil) is nil, not want nil")
 	} else {
 		fmt.Printf("Info: %+v\n", err)
 	}
-	res := `{"Operation":"","Marketplace":"","PartnerTag":"","PartnerType":"","Resources":["ItemInfo.ByLineInfo","ItemInfo.ContentInfo","ItemInfo.ContentRating","ItemInfo.Classifications","ItemInfo.ExternalIds","ItemInfo.Features","ItemInfo.ManufactureInfo","ItemInfo.ProductInfo","ItemInfo.TechnicalInfo","ItemInfo.Title","ItemInfo.TradeInInfo"]}`
-	q = newNil()
-	b, err := q.JSON()
+	res := `{"Operation":"GetItems","Marketplace":"","PartnerTag":"","PartnerType":"","Resources":["ItemInfo.ByLineInfo","ItemInfo.ContentInfo","ItemInfo.ContentRating","ItemInfo.Classifications","ItemInfo.ExternalIds","ItemInfo.Features","ItemInfo.ManufactureInfo","ItemInfo.ProductInfo","ItemInfo.TechnicalInfo","ItemInfo.Title","ItemInfo.TradeInInfo"]}`
+	q = newNilGetItems()
+	b, err := q.Payload()
 	if err != nil {
 		t.Errorf("nil-Query is \"%v\", want nil", err)
 		fmt.Printf("Info: %+v\n", err)
