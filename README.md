@@ -18,23 +18,31 @@ import (
 )
 
 func main() {
+    //Create client
     client := paapi5.DefaultClient("mytag-20", "AKIAIOSFODNN7EXAMPLE", "1234567890")
 
-    q := query.NewGetItems(client.Marketplace(), client.PartnerTag(), client.PartnerType())
-    q.ASINs([]string{"B07TYKJQFK"}).EnableImages(true).EnableParentASIN(true)
+    //Make query
+    q := query.NewGetItems(
+        client.Marketplace(),
+        client.PartnerTag(),
+        client.PartnerType(),
+    ).ASINs([]string{"B07YCM5K55"}).EnableImages(true).EnableParentASIN(true)
+
+    //Requet and response
     body, err := client.Request(q)
     if err != nil {
         fmt.Printf("%+v\n", err)
         return
     }
     //io.Copy(os.Stdout, bytes.NewReader(body))
+
+    //Decode JSON
     res, err := entity.DecodeResponse(body)
     if err != nil {
         fmt.Printf("%+v\n", err)
         return
     }
     fmt.Println(res.String())
-    return
 }
 ```
 

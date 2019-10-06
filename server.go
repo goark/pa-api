@@ -113,23 +113,55 @@ func (s *Server) ContentEncoding() string {
 	return defaultContentEncoding
 }
 
+//ClientOptFunc is self-referential function for functional options pattern
+type ClientOptFunc func(*Client)
+
 //CreateClient returns new Client instance
-func (s *Server) CreateClient(ctx context.Context, client *http.Client, associateTag, accessKey, secretKey string) *Client {
+func (s *Server) CreateClient(associateTag, accessKey, secretKey string, opts ...ClientOptFunc) *Client {
 	if s == nil {
 		s = New()
 	}
-	if client == nil {
-		client = http.DefaultClient
+	cli := &Client{
+		server:     s,
+		client:     nil,
+		ctx:        nil,
+		partnerTag: associateTag,
+		accessKey:  accessKey,
+		secretKey:  secretKey,
 	}
-	if ctx == nil {
-		ctx = context.Background()
+	for _, opt := range opts {
+		opt(cli)
 	}
-	return &Client{server: s, client: client, ctx: ctx, partnerTag: associateTag, accessKey: accessKey, secretKey: secretKey}
+	if cli.client == nil {
+		cli.client = http.DefaultClient
+	}
+	if cli.ctx == nil {
+		cli.ctx = context.Background()
+	}
+	return cli
+}
+
+//WithContext returns function for setting context.Context
+func WithContext(ctx context.Context) ClientOptFunc {
+	return func(c *Client) {
+		if c != nil {
+			c.ctx = ctx
+		}
+	}
+}
+
+//WithHttpCilent returns function for setting http.Client
+func WithHttpCilent(client *http.Client) ClientOptFunc {
+	return func(c *Client) {
+		if c != nil {
+			c.client = client
+		}
+	}
 }
 
 //DefaultClient returns new Client instance with default setting
 func DefaultClient(associateTag, accessKey, secretKey string) *Client {
-	return New().CreateClient(nil, nil, associateTag, accessKey, secretKey)
+	return New().CreateClient(associateTag, accessKey, secretKey)
 }
 
 /* Copyright 2019 Spiegel
