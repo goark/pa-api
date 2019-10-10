@@ -30,6 +30,7 @@ type GenInfoFloat struct {
 	DisplayValue float64
 	Label        string `json:",omitempty"`
 	Locale       string `json:",omitempty"`
+	Unit         string `json:",omitempty"`
 }
 
 type GenInfoTime struct {
@@ -75,7 +76,7 @@ type Item struct {
 			Medium *Image `json:",omitempty"`
 			Small  *Image `json:",omitempty"`
 		} `json:",omitempty"`
-		Variants *struct {
+		Variants []*struct {
 			Large  *Image `json:",omitempty"`
 			Medium *Image `json:",omitempty"`
 			Small  *Image `json:",omitempty"`
