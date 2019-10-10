@@ -23,6 +23,7 @@ const (
 type Server struct {
 	scheme      string
 	marketplace string
+	region      string
 }
 
 //ServerOptFunc is self-referential function for functional options pattern
@@ -30,7 +31,7 @@ type ServerOptFunc func(*Server)
 
 //New returns new Server instance
 func New(opts ...ServerOptFunc) *Server {
-	server := &Server{scheme: "https", marketplace: defaultMarketplace}
+	server := &Server{scheme: "https", marketplace: defaultMarketplace, region: defaultRegion}
 	for _, opt := range opts {
 		opt(server)
 	}
@@ -98,9 +99,21 @@ func (s *Server) ServiceName() string {
 	return defaultServiceName
 }
 
+//WithRegion returns function for setting AWS region
+func WithRegion(region string) ServerOptFunc {
+	return func(s *Server) {
+		if s != nil {
+			s.region = region
+		}
+	}
+}
+
 //Region returns Region parameter for PA-API v5
 func (s *Server) Region() string {
-	return defaultRegion
+	if s == nil {
+		return ""
+	}
+	return s.region
 }
 
 //AWS4Request returns AWS4Request parameter for PA-API v5
@@ -150,8 +163,8 @@ func WithContext(ctx context.Context) ClientOptFunc {
 	}
 }
 
-//WithHttpCilent returns function for setting http.Client
-func WithHttpCilent(client *http.Client) ClientOptFunc {
+//WithHttpClient returns function for setting http.Client
+func WithHttpClient(client *http.Client) ClientOptFunc {
 	return func(c *Client) {
 		if c != nil {
 			c.client = client
