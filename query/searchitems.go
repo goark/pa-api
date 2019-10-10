@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"strconv"
 
-	paapi5 "github.com/hackmac89/pa-api"
 	"github.com/spiegel-im-spiegel/errs"
+	paapi5 "github.com/spiegel-im-spiegel/pa-api"
 )
 
 // the available (valid) filter parameters

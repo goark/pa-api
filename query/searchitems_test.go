@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"testing"
 
-	paapi5 "github.com/hackmac89/pa-api"
+	paapi5 "github.com/spiegel-im-spiegel/pa-api"
 )
 
 func TestNewSearchItems(t *testing.T) {
