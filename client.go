@@ -52,11 +52,11 @@ func (c *Client) PartnerType() string {
 func (c *Client) Request(q Query) ([]byte, error) {
 	payload, err := q.Payload()
 	if err != nil {
-		return nil, errs.Wrap(err, "", errs.WithParam("Operation", q.Operation().String()))
+		return nil, errs.Wrap(err, "", errs.WithContext("Operation", q.Operation().String()))
 	}
 	b, err := c.post(q.Operation(), payload)
 	if err != nil {
-		return nil, errs.Wrap(err, "", errs.WithParam("Operation", q.Operation().String()), errs.WithParam("payload", string(payload)))
+		return nil, errs.Wrap(err, "", errs.WithContext("Operation", q.Operation().String()), errs.WithContext("payload", string(payload)))
 	}
 	return b, nil
 }
@@ -68,7 +68,7 @@ func (c *Client) post(cmd Operation, payload []byte) ([]byte, error) {
 	sig := c.signiture(c.signedString(hds, payload), hds)
 	req, err := http.NewRequestWithContext(c.ctx, "POST", u.String(), bytes.NewReader(payload))
 	if err != nil {
-		return nil, errs.Wrap(err, "", errs.WithParam("url", u.String()), errs.WithParam("payload", string(payload)))
+		return nil, errs.Wrap(err, "", errs.WithContext("url", u.String()), errs.WithContext("payload", string(payload)))
 	}
 	req.Header.Add("Accept", c.server.Accept())
 	req.Header.Add("Accept-Language", c.server.AcceptLanguage())
@@ -81,16 +81,16 @@ func (c *Client) post(cmd Operation, payload []byte) ([]byte, error) {
 
 	resp, err := c.client.Do(req)
 	if err != nil {
-		return nil, errs.Wrap(err, "", errs.WithParam("url", u.String()), errs.WithParam("payload", string(payload)))
+		return nil, errs.Wrap(err, "", errs.WithContext("url", u.String()), errs.WithContext("payload", string(payload)))
 	}
 	defer resp.Body.Close()
 
 	if !(resp.StatusCode != 0 && resp.StatusCode < http.StatusBadRequest) {
-		return nil, errs.Wrap(ErrHTTPStatus, "", errs.WithParam("url", u.String()), errs.WithParam("payload", string(payload)), errs.WithParam("status", resp.Status))
+		return nil, errs.Wrap(ErrHTTPStatus, "", errs.WithContext("url", u.String()), errs.WithContext("payload", string(payload)), errs.WithContext("status", resp.Status))
 	}
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return nil, errs.Wrap(err, "", errs.WithParam("url", u.String()), errs.WithParam("payload", string(payload)))
+		return nil, errs.Wrap(err, "", errs.WithContext("url", u.String()), errs.WithContext("payload", string(payload)))
 	}
 	return body, nil
 }

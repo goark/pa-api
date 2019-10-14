@@ -1,19 +1,23 @@
 package paapi5
 
 import (
+	"encoding/json"
 	"path"
 	"strconv"
 	"strings"
 )
 
-//Operation is represent PA-API operation
+//Operation is enumeration of PA-API operation
 type Operation int
 
+var _ json.Marshaler = Operation(0)        //Operation type is compatible with json.Marshaler interface
+var _ json.Unmarshaler = (*Operation)(nil) //Operation type is compatible with json.Unmarshaler interface
+
 const (
-	NullOperation Operation = iota
-	GetVariations
-	GetItems
-	SearchItems
+	NullOperation Operation = iota //Unknown
+	GetVariations                  //GetVariations
+	GetItems                       //GetItems
+	SearchItems                    //SearchItems
 )
 
 var nameMap = map[Operation]string{
@@ -22,7 +26,7 @@ var nameMap = map[Operation]string{
 	SearchItems:   "SearchItems",
 }
 
-//Stringer interface
+//String method is a implementation of fmt.Stringer interface.
 func (c Operation) String() string {
 	if s, ok := nameMap[c]; ok {
 		return s
@@ -30,7 +34,7 @@ func (c Operation) String() string {
 	return ""
 }
 
-//Path returns URL path for PA-API command
+//Path method returns URL path of PA-API operation
 func (c Operation) Path() string {
 	cmd := c.String()
 	if len(cmd) == 0 {
@@ -39,7 +43,7 @@ func (c Operation) Path() string {
 	return path.Join("/paapi5", strings.ToLower(cmd))
 }
 
-//Target returns taget name for PA-API command
+//Target method returns taget name of PA-API operation
 func (c Operation) Target() string {
 	cmd := c.String()
 	if len(cmd) == 0 {
@@ -48,7 +52,7 @@ func (c Operation) Target() string {
 	return strings.Join([]string{"com.amazon.paapi5.v1.ProductAdvertisingAPIv1", cmd}, ".")
 }
 
-//UnmarshalJSON returns result of Unmarshal for json.Unmarshal()
+//UnmarshalJSON method implements json.Unmarshaler interface.
 func (c *Operation) UnmarshalJSON(b []byte) error {
 	s := string(b)
 	if ss, err := strconv.Unquote(s); err == nil {
@@ -62,7 +66,7 @@ func (c *Operation) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
-//MarshalJSON returns time string with RFC3339 format
+//MarshalJSON method implements the json.Marshaler interface.
 func (c Operation) MarshalJSON() ([]byte, error) {
 	return []byte(strconv.Quote(c.String())), nil
 }
