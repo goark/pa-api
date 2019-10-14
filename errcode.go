@@ -2,13 +2,13 @@ package paapi5
 
 import "fmt"
 
-//Error is error codes for books-data
+//Error is error codes for paapi5 package
 type Error int
 
 const (
-	ErrNullPointer Error = iota + 1
-	ErrHTTPStatus
-	ErrNoData
+	ErrNullPointer Error = iota + 1 //Null reference instance
+	ErrHTTPStatus                   //Bad HTTP status
+	ErrNoData                       //No response data
 )
 
 var errMessages = map[Error]string{
@@ -17,6 +17,8 @@ var errMessages = map[Error]string{
 	ErrNoData:      "No response data",
 }
 
+//Error method returns error message.
+//This method is a implementation of error interface.
 func (e Error) Error() string {
 	if s, ok := errMessages[e]; ok {
 		return s

@@ -4,42 +4,41 @@ import (
 	"context"
 	"net/http"
 	"net/url"
-	"strings"
 )
 
 const (
-	defaultMarketplace     = "www.amazon.co.jp"
-	defaultAccept          = "application/json, text/javascript"
-	defaultAcceptLanguage  = "en-US"
-	defaultContentType     = "application/json; charset=UTF-8"
-	defaultHMACAlgorithm   = "AWS4-HMAC-SHA256"
-	defaultServiceName     = "ProductAdvertisingAPI"
-	defaultRegion          = "us-west-2"
-	defaultContentEncoding = "amz-1.0"
-	defaultAWS4Request     = "aws4_request"
+	defaultMarketplace     Marketplace = LocaleUnitedStates
+	defaultScheme                      = "https"
+	defaultAccept                      = "application/json, text/javascript"
+	defaultContentType                 = "application/json; charset=UTF-8"
+	defaultHMACAlgorithm               = "AWS4-HMAC-SHA256"
+	defaultServiceName                 = "ProductAdvertisingAPI"
+	defaultContentEncoding             = "amz-1.0"
+	defaultAWS4Request                 = "aws4_request"
 )
 
-//Server is informations of Aozora API
+//Server type is a implementation of PA-API service.
 type Server struct {
 	scheme      string
-	marketplace string
-	region      string
+	marketplace Marketplace
+	language    string
 }
 
-//ServerOptFunc is self-referential function for functional options pattern
+//ServerOptFunc type is self-referential function type for New functions. (functional options pattern)
 type ServerOptFunc func(*Server)
 
-//New returns new Server instance
+//New function returns an Server instance with options.
 func New(opts ...ServerOptFunc) *Server {
-	server := &Server{scheme: "https", marketplace: defaultMarketplace, region: defaultRegion}
+	server := &Server{scheme: defaultScheme, marketplace: defaultMarketplace, language: ""}
 	for _, opt := range opts {
 		opt(server)
 	}
 	return server
 }
 
-//WithMarketplace returns function for setting hostname
-func WithMarketplace(marketplace string) ServerOptFunc {
+//WithMarketplace function returns ServerOptFunc function value.
+//This function is used in New functions that represents Marketplace data.
+func WithMarketplace(marketplace Marketplace) ServerOptFunc {
 	return func(s *Server) {
 		if s != nil {
 			s.marketplace = marketplace
@@ -47,26 +46,17 @@ func WithMarketplace(marketplace string) ServerOptFunc {
 	}
 }
 
-//Marketplace returns name of Marketplace parameter for PA-API v5
-func (s *Server) Marketplace() string {
-	if s == nil {
-		return ""
+//WithLanguage function returns ServerOptFunc function value.
+//This function is used in New functions that represents Accept-Language parameter.
+func WithLanguage(language string) ServerOptFunc {
+	return func(s *Server) {
+		if s != nil {
+			s.language = language
+		}
 	}
-	return s.marketplace
 }
 
-//HostName returns host name for PA-API v5
-func (s *Server) HostName() string {
-	if s == nil || len(s.marketplace) == 0 {
-		return ""
-	}
-	if strings.HasPrefix(s.marketplace, "www.") {
-		return strings.Replace(s.marketplace, "www", "webservices", 1)
-	}
-	return ""
-}
-
-//URL returns url.URL instance
+//URL method returns url of service server information for PA-API v5.
 func (s *Server) URL(path string) *url.URL {
 	if s == nil {
 		s = New()
@@ -74,62 +64,75 @@ func (s *Server) URL(path string) *url.URL {
 	return &url.URL{Scheme: s.scheme, Host: s.HostName(), Path: path}
 }
 
-//Accept returns Accept parameter for PA-API v5
+//Marketplace method returns marketplace name for PA-API v5.
+func (s *Server) Marketplace() string {
+	if s == nil {
+		s = New()
+	}
+	return s.marketplace.String()
+}
+
+//HostName method returns hostname for PA-API v5.
+func (s *Server) HostName() string {
+	if s == nil {
+		s = New()
+	}
+	return s.marketplace.HostName()
+}
+
+//Region method returns region name for PA-API v5
+func (s *Server) Region() string {
+	if s == nil {
+		s = New()
+	}
+	return s.marketplace.Region()
+}
+
+//Accept method returns Accept parameter for PA-API v5
 func (s *Server) Accept() string {
 	return defaultAccept
 }
 
-//AcceptLanguage returns Accept-Language parameter for PA-API v5
+//AcceptLanguage method returns Accept-Language parameter for PA-API v5
 func (s *Server) AcceptLanguage() string {
-	return defaultAcceptLanguage
+	if s == nil {
+		s = New()
+	}
+	if len(s.language) > 0 {
+		return s.language
+	}
+	return s.marketplace.Language() //default language
 }
 
-//ContentType returns Content-Type parameter for PA-API v5
+//ContentType method returns Content-Type parameter for PA-API v5
 func (s *Server) ContentType() string {
 	return defaultContentType
 }
 
-//HMACAlgorithm returns HMAC-Algorithm parameter for PA-API v5
+//HMACAlgorithm method returns HMAC-Algorithm parameter for PA-API v5
 func (s *Server) HMACAlgorithm() string {
 	return defaultHMACAlgorithm
 }
 
-//ServiceName returns ServiceName parameter for PA-API v5
+//ServiceName method returns ServiceName parameter for PA-API v5
 func (s *Server) ServiceName() string {
 	return defaultServiceName
 }
 
-//WithRegion returns function for setting AWS region
-func WithRegion(region string) ServerOptFunc {
-	return func(s *Server) {
-		if s != nil {
-			s.region = region
-		}
-	}
-}
-
-//Region returns Region parameter for PA-API v5
-func (s *Server) Region() string {
-	if s == nil {
-		return ""
-	}
-	return s.region
-}
-
-//AWS4Request returns AWS4Request parameter for PA-API v5
+//AWS4Request method returns AWS4Request parameter for PA-API v5
 func (s *Server) AWS4Request() string {
 	return defaultAWS4Request
 }
 
-//ContentEncoding returns Content-Encoding parameter for PA-API v5
+//ContentEncoding method returns Content-Encoding parameter for PA-API v5
 func (s *Server) ContentEncoding() string {
 	return defaultContentEncoding
 }
 
-//ClientOptFunc is self-referential function for functional options pattern
+//ClientOptFunc type is self-referential function type for Server.CreateClient method. (functional options pattern)
 type ClientOptFunc func(*Client)
 
-//CreateClient returns new Client instance
+//CreateClient method returns an Client instance with associate-tag, access-key, secret-key, and other options.
 func (s *Server) CreateClient(associateTag, accessKey, secretKey string, opts ...ClientOptFunc) *Client {
 	if s == nil {
 		s = New()
@@ -154,7 +157,8 @@ func (s *Server) CreateClient(associateTag, accessKey, secretKey string, opts ..
 	return cli
 }
 
-//WithContext returns function for setting context.Context
+//WithContext function returns ClientOptFunc function value.
+//This function is used in Server.CreateClient method that represents context.Context.
 func WithContext(ctx context.Context) ClientOptFunc {
 	return func(c *Client) {
 		if c != nil {
@@ -163,7 +167,8 @@ func WithContext(ctx context.Context) ClientOptFunc {
 	}
 }
 
-//WithHttpClient returns function for setting http.Client
+//WithHttpClient function returns ClientOptFunc function value.
+//This function is used in Server.CreateClient method that represents http.Client.
 func WithHttpClient(client *http.Client) ClientOptFunc {
 	return func(c *Client) {
 		if c != nil {
@@ -172,22 +177,22 @@ func WithHttpClient(client *http.Client) ClientOptFunc {
 	}
 }
 
-//DefaultClient returns new Client instance with default setting
+//DefaultClient function returns an default Client instance with associate-tag, access-key, and secret-key parameters.
 func DefaultClient(associateTag, accessKey, secretKey string) *Client {
 	return New().CreateClient(associateTag, accessKey, secretKey)
 }
 
 /* Copyright 2019 Spiegel
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-* 	http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * 	http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
