@@ -146,10 +146,10 @@ func main() {
 
     //Make query
     q := query.NewSearchItems(
-		client.Marketplace(),
-		client.PartnerTag(),
-		client.PartnerType(),
-	).Search("数学ガール", query.Keywords)
+        client.Marketplace(),
+        client.PartnerTag(),
+        client.PartnerType(),
+    ).Search("数学ガール", query.Keywords)
 
     //Requet and response
     body, err := client.Request(q)
