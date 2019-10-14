@@ -217,7 +217,7 @@ type Response struct {
 func DecodeResponse(b []byte) (*Response, error) {
 	rsp := Response{}
 	if err := json.NewDecoder(bytes.NewReader(b)).Decode(&rsp); err != nil {
-		return &rsp, errs.Wrap(err, "", errs.WithParam("JSON", string(b)))
+		return &rsp, errs.Wrap(err, "", errs.WithContext("JSON", string(b)))
 	}
 	return &rsp, nil
 }
