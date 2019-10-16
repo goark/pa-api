@@ -3,7 +3,6 @@ package entity
 import (
 	"bytes"
 	"encoding/json"
-	"time"
 
 	"github.com/spiegel-im-spiegel/errs"
 )
@@ -34,7 +33,7 @@ type GenInfoFloat struct {
 }
 
 type GenInfoTime struct {
-	DisplayValue time.Time
+	DisplayValue Date
 	Label        string `json:",omitempty"`
 	Locale       string `json:",omitempty"`
 }
@@ -111,11 +110,7 @@ type Item struct {
 				Label        string
 				Locale       string
 			}
-			PublicationDate struct {
-				DisplayValue time.Time
-				Label        string
-				Locale       string
-			}
+			PublicationDate GenInfoTime
 		} `json:",omitempty"`
 		ContentRating *struct {
 			AudienceRating GenInfo
