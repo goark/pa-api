@@ -21,6 +21,12 @@ func NewDate(tm time.Time) Date {
 var timeTemplate = []string{
 	time.RFC3339,
 	"2006-01T",
+	"2006-01-02",
+	"2006-01",
+	"2006/01/02",
+	"2006/01",
+	"2006",
+	"2006T",
 }
 
 //UnmarshalJSON returns result of Unmarshal for json.Unmarshal()
