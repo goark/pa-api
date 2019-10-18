@@ -16,6 +16,12 @@ func TestUnmarshal(t *testing.T) {
 	}{
 		{s: `{"date_taken": "2005-03-26T15:04:05Z"}`, jsn: `{"date_taken":"2005-03-26T15:04:05Z"}`},
 		{s: `{"date_taken": "2005-03T"}`, jsn: `{"date_taken":"2005-03-01T00:00:00Z"}`},
+		{s: `{"date_taken": "2005T"}`, jsn: `{"date_taken":"2005-01-01T00:00:00Z"}`},
+		{s: `{"date_taken": "2005-03-26"}`, jsn: `{"date_taken":"2005-03-26T00:00:00Z"}`},
+		{s: `{"date_taken": "2005-03"}`, jsn: `{"date_taken":"2005-03-01T00:00:00Z"}`},
+		{s: `{"date_taken": "2005"}`, jsn: `{"date_taken":"2005-01-01T00:00:00Z"}`},
+		{s: `{"date_taken": "2005/03/26"}`, jsn: `{"date_taken":"2005-03-26T00:00:00Z"}`},
+		{s: `{"date_taken": "2005/03"}`, jsn: `{"date_taken":"2005-03-01T00:00:00Z"}`},
 		{s: `{}`, jsn: `{"date_taken":"0001-01-01T00:00:00Z"}`},
 	}
 
