@@ -3,8 +3,8 @@ package query
 import (
 	"encoding/json"
 
-	"github.com/spiegel-im-spiegel/errs"
 	paapi5 "github.com/spiegel-im-spiegel/pa-api"
+	"github.com/spiegel-im-spiegel/errs"
 )
 
 //GetItems is query data class for PA-API v5
@@ -143,32 +143,32 @@ func (q *GetItems) Payload() ([]byte, error) {
 			"ItemInfo.TradeInInfo",
 		)
 	}
-	// if q.enableOffers {
-	// 	q.Resources = append(
-	// 		q.Resources,
-	// 		"Offers.Listings.Availability.MaxOrderQuantity",
-	// 		"Offers.Listings.Availability.Message",
-	// 		"Offers.Listings.Availability.MinOrderQuantity",
-	// 		"Offers.Listings.Availability.Type",
-	// 		"Offers.Listings.Condition",
-	// 		"Offers.Listings.Condition.SubCondition",
-	// 		"Offers.Listings.DeliveryInfo.IsAmazonFulfilled",
-	// 		"Offers.Listings.DeliveryInfo.IsFreeShippingEligible",
-	// 		"Offers.Listings.DeliveryInfo.IsPrimeEligible",
-	// 		"Offers.Listings.DeliveryInfo.ShippingCharges",
-	// 		"Offers.Listings.IsBuyBoxWinner",
-	// 		"Offers.Listings.LoyaltyPoints.Points",
-	// 		"Offers.Listings.MerchantInfo",
-	// 		"Offers.Listings.Price",
-	// 		"Offers.Listings.ProgramEligibility.IsPrimeExclusive",
-	// 		"Offers.Listings.ProgramEligibility.IsPrimePantry",
-	// 		"Offers.Listings.Promotions",
-	// 		"Offers.Listings.SavingBasis",
-	// 		"Offers.Summaries.HighestPrice",
-	// 		"Offers.Summaries.LowestPrice",
-	// 		"Offers.Summaries.OfferCount",
-	// 	)
-	// }
+	if q.enableOffers {
+		q.Resources = append(
+			q.Resources,
+			"Offers.Listings.Availability.MaxOrderQuantity",
+			"Offers.Listings.Availability.Message",
+			"Offers.Listings.Availability.MinOrderQuantity",
+			"Offers.Listings.Availability.Type",
+			"Offers.Listings.Condition",
+			"Offers.Listings.Condition.SubCondition",
+			"Offers.Listings.DeliveryInfo.IsAmazonFulfilled",
+			"Offers.Listings.DeliveryInfo.IsFreeShippingEligible",
+			"Offers.Listings.DeliveryInfo.IsPrimeEligible",
+			"Offers.Listings.DeliveryInfo.ShippingCharges",
+			"Offers.Listings.IsBuyBoxWinner",
+			"Offers.Listings.LoyaltyPoints.Points",
+			"Offers.Listings.MerchantInfo",
+			"Offers.Listings.Price",
+			"Offers.Listings.ProgramEligibility.IsPrimeExclusive",
+			"Offers.Listings.ProgramEligibility.IsPrimePantry",
+			"Offers.Listings.Promotions",
+			"Offers.Listings.SavingBasis",
+			"Offers.Summaries.HighestPrice",
+			"Offers.Summaries.LowestPrice",
+			"Offers.Summaries.OfferCount",
+		)
+	}
 	if q.enableParentASIN {
 		q.Resources = append(
 			q.Resources,
