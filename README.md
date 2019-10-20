@@ -99,7 +99,7 @@ func main() {
         client.Marketplace(),
         client.PartnerTag(),
         client.PartnerType(),
-    ).ASINs([]string{"B07YCM5K55"}).EnableImages(true).EnableParentASIN(true)
+    ).ASINs([]string{"B07YCM5K55"}).EnableImages().EnableItemInfo().EnableParentASIN()
 
     //Requet and response
     body, err := client.Request(q)
@@ -149,7 +149,7 @@ func main() {
         client.Marketplace(),
         client.PartnerTag(),
         client.PartnerType(),
-    ).Search("数学ガール", query.Keywords)
+    ).Search(query.Keywords, "数学ガール").EnableImages().EnableItemInfo().EnableParentASIN()
 
     //Requet and response
     body, err := client.Request(q)

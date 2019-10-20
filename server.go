@@ -182,7 +182,7 @@ func DefaultClient(associateTag, accessKey, secretKey string) *Client {
 	return New().CreateClient(associateTag, accessKey, secretKey)
 }
 
-/* Copyright 2019 Spiegel
+/* Copyright 2019 Spiegel and contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
