@@ -67,21 +67,21 @@ func (f RequestFilter) isVlidString(value string) bool {
 		if _, err := strconv.ParseInt(value, 10, 64); err == nil {
 			return true
 		}
-	default:
-		if params, ok := validationMap[f]; ok {
-			for _, param := range params {
-				if value == param {
-					return true
-				}
+	case Availability, Condition, DeliveryFlags, ItemIdType, Merchant, PartnerType, SearchIndex, SortBy:
+		for _, param := range validationMap[f] {
+			if value == param {
+				return true
 			}
-		} else if len(value) > 0 {
+		}
+	default:
+		if len(value) > 0 {
 			return true
 		}
 	}
 	return false
 }
 
-//request is the private and anonymously imported struct, which selects the filters to be used
+//request is the private and anonymously imported struct, which selects the filters to be used
 type request struct {
 	Actor                 string            `json:",omitempty"`
 	Artist                string            `json:",omitempty"`
@@ -119,35 +119,35 @@ type request struct {
 func (r *request) mapFilter(filter RequestFilter, filterValue interface{}) {
 	switch filter {
 	case Actor:
-		if param := filterValue.(string); filter.isVlidString(param) {
+		if param, ok := filterValue.(string); ok && filter.isVlidString(param) {
 			r.Actor = param
 		}
 	case Artist:
-		if param := filterValue.(string); filter.isVlidString(param) {
+		if param, ok := filterValue.(string); ok && filter.isVlidString(param) {
 			r.Artist = param
 		}
 	case Availability:
-		if param := filterValue.(string); filter.isVlidString(param) {
+		if param, ok := filterValue.(string); ok && filter.isVlidString(param) {
 			r.Availability = param
 		}
 	case Author:
-		if param := filterValue.(string); filter.isVlidString(param) {
+		if param, ok := filterValue.(string); ok && filter.isVlidString(param) {
 			r.Author = param
 		}
 	case Brand:
-		if param := filterValue.(string); filter.isVlidString(param) {
+		if param, ok := filterValue.(string); ok && filter.isVlidString(param) {
 			r.Brand = param
 		}
 	case BrowseNodeID:
-		if param := filterValue.(string); filter.isVlidString(param) {
+		if param, ok := filterValue.(string); ok && filter.isVlidString(param) {
 			r.BrowseNodeID = param
 		}
 	case Condition:
-		if param := filterValue.(string); filter.isVlidString(param) {
+		if param, ok := filterValue.(string); ok && filter.isVlidString(param) {
 			r.Condition = param
 		}
 	case CurrencyOfPreference:
-		if param := filterValue.(string); filter.isVlidString(param) {
+		if param, ok := filterValue.(string); ok && filter.isVlidString(param) {
 			r.CurrencyOfPreference = param
 		}
 	case DeliveryFlags:
@@ -179,19 +179,19 @@ func (r *request) mapFilter(filter RequestFilter, filterValue interface{}) {
 			}
 		}
 	case ItemIdType:
-		if param := filterValue.(string); filter.isVlidString(param) {
+		if param, ok := filterValue.(string); ok && filter.isVlidString(param) {
 			r.ItemIdType = param
 		}
 	case ItemCount:
-		if count := filterValue.(int); 0 < count && count < 11 {
+		if count, ok := filterValue.(int); ok && 0 < count && count < 11 {
 			r.ItemCount = count
 		}
 	case ItemPage:
-		if page := filterValue.(int); 0 < page && page < 11 {
+		if page, ok := filterValue.(int); ok && 0 < page && page < 11 {
 			r.ItemPage = page
 		}
 	case Keywords:
-		if param := filterValue.(string); filter.isVlidString(param) {
+		if param, ok := filterValue.(string); ok && filter.isVlidString(param) {
 			r.Keywords = param
 		}
 	case LanguagesOfPreference:
@@ -209,55 +209,55 @@ func (r *request) mapFilter(filter RequestFilter, filterValue interface{}) {
 			}
 		}
 	case Marketplace:
-		if param := filterValue.(string); filter.isVlidString(param) {
+		if param, ok := filterValue.(string); ok && filter.isVlidString(param) {
 			r.Marketplace = param
 		}
 	case MaxPrice: // Yet, here is not further check if the given price is meaningful (it is assumed to already be the lowest currency denomination, e.g 3241 => 31.41)
-		if price := filterValue.(int); price > 0 {
+		if price, ok := filterValue.(int); ok && price > 0 {
 			r.MaxPrice = price
 		}
 	case Merchant:
-		if param := filterValue.(string); filter.isVlidString(param) {
+		if param, ok := filterValue.(string); ok && filter.isVlidString(param) {
 			r.Merchant = param
 		}
 	case MinPrice: // Yet, here is not further check if the given price is meaningful (it is assumed to already be the lowest currency denomination, e.g 3241 => 31.41)
-		if price := filterValue.(int); price > 0 {
+		if price, ok := filterValue.(int); ok && price > 0 {
 			r.MinPrice = price
 		}
 	case MinReviewsRating:
-		if minRating := filterValue.(int); 0 < minRating && minRating < 5 {
+		if minRating, ok := filterValue.(int); ok && 0 < minRating && minRating < 5 {
 			r.MinReviewsRating = minRating
 		}
 	case MinSavingPercent:
-		if minSaving := filterValue.(int); 0 < minSaving && minSaving < 100 {
+		if minSaving, ok := filterValue.(int); ok && 0 < minSaving && minSaving < 100 {
 			r.MinSavingPercent = minSaving
 		}
 	case OfferCount:
-		if oCount := filterValue.(int); oCount > 0 {
+		if oCount, ok := filterValue.(int); ok && oCount > 0 {
 			r.OfferCount = oCount
 		}
 	case PartnerTag:
-		if param := filterValue.(string); filter.isVlidString(param) {
+		if param, ok := filterValue.(string); ok && filter.isVlidString(param) {
 			r.PartnerTag = param
 		}
 	case PartnerType:
-		if param := filterValue.(string); filter.isVlidString(param) {
+		if param, ok := filterValue.(string); ok && filter.isVlidString(param) {
 			r.PartnerType = param
 		}
 	case Properties:
-		if params := filterValue.(map[string]string); len(params) > 0 {
+		if params, ok := filterValue.(map[string]string); ok && len(params) > 0 {
 			r.Properties = params
 		}
 	case SearchIndex:
-		if param := filterValue.(string); filter.isVlidString(param) {
+		if param, ok := filterValue.(string); ok && filter.isVlidString(param) {
 			r.SearchIndex = param
 		}
 	case SortBy:
-		if param := filterValue.(string); filter.isVlidString(param) {
+		if param, ok := filterValue.(string); ok && filter.isVlidString(param) {
 			r.SortBy = param
 		}
 	case Title:
-		if param := filterValue.(string); filter.isVlidString(param) {
+		if param, ok := filterValue.(string); ok && filter.isVlidString(param) {
 			r.Title = param
 		}
 	}
