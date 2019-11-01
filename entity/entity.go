@@ -212,7 +212,7 @@ type Item struct {
 			Promotions *[]struct {
 				Amount          float64
 				Currency        string
-				DiscountPercent string
+				DiscountPercent json.Number
 				DisplayAmount   string
 				PricePerUnit    float64
 				Type            string
