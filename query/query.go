@@ -11,8 +11,8 @@ import (
 type Query struct {
 	OpeCode paapi5.Operation `json:"Operation"`
 	request
-	enableResources map[resource]bool
 	Resources       []string `json:",omitempty"`
+	enableResources map[resource]bool
 }
 
 var _ paapi5.Query = (*Query)(nil) //Query is compatible with paapi5.Query interface
