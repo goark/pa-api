@@ -2,4 +2,4 @@ module github.com/spiegel-im-spiegel/pa-api
 
 go 1.13
 
-require github.com/spiegel-im-spiegel/errs v0.3.2
+require github.com/spiegel-im-spiegel/errs v0.3.3
