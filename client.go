@@ -134,7 +134,10 @@ func (c *Client) canonicalRequest(hds *headers, payload []byte) string {
 
 func hmacSHA256(key, data []byte) []byte {
 	hasher := hmac.New(sha256.New, key)
-	hasher.Write(data)
+	_, err := hasher.Write(data)
+	if err != nil {
+		return []byte{}
+	}
 	return hasher.Sum(nil)
 }
 

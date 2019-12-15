@@ -151,31 +151,31 @@ func (r *request) mapFilter(filter RequestFilter, filterValue interface{}) {
 			r.CurrencyOfPreference = param
 		}
 	case DeliveryFlags:
-		switch filterValue.(type) {
+		switch v := filterValue.(type) {
 		case []string:
 			r.DeliveryFlags = []string{}
-			for _, param := range filterValue.([]string) {
+			for _, param := range v {
 				if filter.isVlidString(param) {
 					r.DeliveryFlags = append(r.DeliveryFlags, param)
 				}
 			}
 		case string:
-			if param := filterValue.(string); filter.isVlidString(param) {
-				r.DeliveryFlags = []string{param}
+			if filter.isVlidString(v) {
+				r.DeliveryFlags = []string{v}
 			}
 		}
 	case ItemIds:
-		switch filterValue.(type) {
+		switch v := filterValue.(type) {
 		case []string:
 			r.ItemIds = []string{}
-			for _, param := range filterValue.([]string) {
+			for _, param := range v {
 				if filter.isVlidString(param) {
 					r.ItemIds = append(r.ItemIds, param)
 				}
 			}
 		case string:
-			if param := filterValue.(string); filter.isVlidString(param) {
-				r.ItemIds = []string{param}
+			if filter.isVlidString(v) {
+				r.ItemIds = []string{v}
 			}
 		}
 	case ItemIdType:
@@ -195,17 +195,17 @@ func (r *request) mapFilter(filter RequestFilter, filterValue interface{}) {
 			r.Keywords = param
 		}
 	case LanguagesOfPreference:
-		switch filterValue.(type) {
+		switch v := filterValue.(type) {
 		case []string:
 			r.LanguagesOfPreference = []string{}
-			for _, param := range filterValue.([]string) {
+			for _, param := range v {
 				if filter.isVlidString(param) {
 					r.LanguagesOfPreference = append(r.LanguagesOfPreference, param)
 				}
 			}
 		case string:
-			if param := filterValue.(string); filter.isVlidString(param) {
-				r.LanguagesOfPreference = []string{param}
+			if filter.isVlidString(v) {
+				r.LanguagesOfPreference = []string{v}
 			}
 		}
 	case Marketplace:
