@@ -3,13 +3,12 @@ package query
 type resource int
 
 const (
-	resourceUnknown           resource = iota //Unknown resource
-	resourceBrowseNodeInfo                    //BrowseNodeInfo resource
-	resourceImages                            //Images resource
-	resourceItemInfo                          //ItemInfo resource
-	resourceOffers                            //Offers resource
-	resourceSearchRefinements                 //SearchRefinements resource
-	resourceParentASIN                        //ParentASIN resource
+	resourceBrowseNodeInfo    resource = 1 + iota //BrowseNodeInfo resource
+	resourceImages                                //Images resource
+	resourceItemInfo                              //ItemInfo resource
+	resourceOffers                                //Offers resource
+	resourceSearchRefinements                     //SearchRefinements resource
+	resourceParentASIN                            //ParentASIN resource
 )
 
 var (
