@@ -24,8 +24,16 @@ type Query interface {
 	Payload() ([]byte, error)
 }
 
-//Client is http.Client for Aozora API Server
-type Client struct {
+//Client interface
+type Client interface {
+	Marketplace() string
+	PartnerTag() string
+	PartnerType() string
+	Request(Query) ([]byte, error)
+}
+
+//client is http.Client for Aozora API Server
+type client struct {
 	server     *Server
 	client     *http.Client
 	ctx        context.Context
@@ -35,21 +43,21 @@ type Client struct {
 }
 
 //Marketplace returns name of Marketplace parameter for PA-API v5
-func (c *Client) Marketplace() string {
+func (c *client) Marketplace() string {
 	return c.server.Marketplace()
 }
 
 //PartnerTag returns PartnerTag parameter for PA-API v5
-func (c *Client) PartnerTag() string {
+func (c *client) PartnerTag() string {
 	return c.partnerTag
 }
 
 //PartnerType returns PartnerType parameter for PA-API v5
-func (c *Client) PartnerType() string {
+func (c *client) PartnerType() string {
 	return defaultPartnerType
 }
 
-func (c *Client) Request(q Query) ([]byte, error) {
+func (c *client) Request(q Query) ([]byte, error) {
 	payload, err := q.Payload()
 	if err != nil {
 		return nil, errs.Wrap(err, "", errs.WithContext("Operation", q.Operation().String()))
@@ -61,7 +69,7 @@ func (c *Client) Request(q Query) ([]byte, error) {
 	return b, nil
 }
 
-func (c *Client) post(cmd Operation, payload []byte) ([]byte, error) {
+func (c *client) post(cmd Operation, payload []byte) ([]byte, error) {
 	dt := NewTimeStamp(time.Now())
 	u := c.server.URL(cmd.Path())
 	hds := newHeaders(c.server, cmd, dt)
@@ -95,7 +103,7 @@ func (c *Client) post(cmd Operation, payload []byte) ([]byte, error) {
 	return body, nil
 }
 
-func (c *Client) authorization(sig string, hds *headers) string {
+func (c *client) authorization(sig string, hds *headers) string {
 	buf := bytes.Buffer{}
 	buf.WriteString(c.server.HMACAlgorithm())
 	buf.WriteString(" Credential=")
@@ -107,7 +115,7 @@ func (c *Client) authorization(sig string, hds *headers) string {
 	return buf.String()
 }
 
-func (c *Client) signiture(signed string, hds *headers) string {
+func (c *client) signiture(signed string, hds *headers) string {
 	dateKey := hmacSHA256([]byte("AWS4"+c.secretKey), []byte(hds.dt.StringDate()))
 	regionKey := hmacSHA256(dateKey, []byte(c.server.Region()))
 	serviceKey := hmacSHA256(regionKey, []byte(c.server.ServiceName()))
@@ -115,7 +123,7 @@ func (c *Client) signiture(signed string, hds *headers) string {
 	return hex.EncodeToString(hmacSHA256(requestKey, []byte(signed)))
 }
 
-func (c *Client) signedString(hds *headers, payload []byte) string {
+func (c *client) signedString(hds *headers, payload []byte) string {
 	return strings.Join(
 		[]string{
 			c.server.HMACAlgorithm(),
@@ -127,7 +135,7 @@ func (c *Client) signedString(hds *headers, payload []byte) string {
 	)
 }
 
-func (c *Client) canonicalRequest(hds *headers, payload []byte) string {
+func (c *client) canonicalRequest(hds *headers, payload []byte) string {
 	request := []string{"POST", hds.cmd.Path(), "", hds.values(), "", hds.list(), hashedString(payload)}
 	return strings.Join(request, "\n")
 }
@@ -181,7 +189,7 @@ func (h *headers) values() string {
 	return strings.Join(list, "\n")
 }
 
-/* Copyright 2019 Spiegel
+/* Copyright 2019,2020 Spiegel
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.

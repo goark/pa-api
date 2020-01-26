@@ -130,14 +130,14 @@ func (s *Server) ContentEncoding() string {
 }
 
 //ClientOptFunc type is self-referential function type for Server.CreateClient method. (functional options pattern)
-type ClientOptFunc func(*Client)
+type ClientOptFunc func(*client)
 
 //CreateClient method returns an Client instance with associate-tag, access-key, secret-key, and other options.
-func (s *Server) CreateClient(associateTag, accessKey, secretKey string, opts ...ClientOptFunc) *Client {
+func (s *Server) CreateClient(associateTag, accessKey, secretKey string, opts ...ClientOptFunc) Client {
 	if s == nil {
 		s = New()
 	}
-	cli := &Client{
+	cli := &client{
 		server:     s,
 		client:     nil,
 		ctx:        nil,
@@ -160,7 +160,7 @@ func (s *Server) CreateClient(associateTag, accessKey, secretKey string, opts ..
 //WithContext function returns ClientOptFunc function value.
 //This function is used in Server.CreateClient method that represents context.Context.
 func WithContext(ctx context.Context) ClientOptFunc {
-	return func(c *Client) {
+	return func(c *client) {
 		if c != nil {
 			c.ctx = ctx
 		}
@@ -169,20 +169,20 @@ func WithContext(ctx context.Context) ClientOptFunc {
 
 //WithHttpClient function returns ClientOptFunc function value.
 //This function is used in Server.CreateClient method that represents http.Client.
-func WithHttpClient(client *http.Client) ClientOptFunc {
-	return func(c *Client) {
+func WithHttpClient(hc *http.Client) ClientOptFunc {
+	return func(c *client) {
 		if c != nil {
-			c.client = client
+			c.client = hc
 		}
 	}
 }
 
 //DefaultClient function returns an default Client instance with associate-tag, access-key, and secret-key parameters.
-func DefaultClient(associateTag, accessKey, secretKey string) *Client {
+func DefaultClient(associateTag, accessKey, secretKey string) Client {
 	return New().CreateClient(associateTag, accessKey, secretKey)
 }
 
-/* Copyright 2019 Spiegel and contributors
+/* Copyright 2019,2020 Spiegel and contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.

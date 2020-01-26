@@ -40,17 +40,17 @@ func TestClient(t *testing.T) {
 		},
 	}
 	for _, tc := range testCases {
-		client := New().CreateClient(tc.partnerTag, tc.accessKey, tc.secretKey)
-		if client.Marketplace() != tc.marketplace {
-			t.Errorf("Client.Marketplace() is \"%v\", want \"%v\"", client.Marketplace(), tc.marketplace)
+		c := New().CreateClient(tc.partnerTag, tc.accessKey, tc.secretKey)
+		if c.Marketplace() != tc.marketplace {
+			t.Errorf("Client.Marketplace() is \"%v\", want \"%v\"", c.Marketplace(), tc.marketplace)
 		}
-		if client.PartnerTag() != tc.partnerTag {
-			t.Errorf("Client.PartnerTag() is \"%v\", want \"%v\"", client.PartnerTag(), tc.partnerTag)
+		if c.PartnerTag() != tc.partnerTag {
+			t.Errorf("Client.PartnerTag() is \"%v\", want \"%v\"", c.PartnerTag(), tc.partnerTag)
 		}
-		if client.PartnerType() != tc.partnerType {
-			t.Errorf("Client.PartnerType() is \"%v\", want \"%v\"", client.PartnerType(), tc.partnerType)
+		if c.PartnerType() != tc.partnerType {
+			t.Errorf("Client.PartnerType() is \"%v\", want \"%v\"", c.PartnerType(), tc.partnerType)
 		}
-		hds := newHeaders(client.server, GetItems, tc.date)
+		hds := newHeaders(c.(*client).server, GetItems, tc.date)
 		if hds.get("Content-Encoding") != tc.contentEncoding {
 			t.Errorf("headers.get(\"Content-Encoding\") is \"%v\", want \"%v\"", hds.get("Content-Encoding"), tc.contentEncoding)
 		}
@@ -63,22 +63,22 @@ func TestClient(t *testing.T) {
 		if hds.get("X-Amz-Target") != tc.xAmzTarget {
 			t.Errorf("headers.get(\"X-Amz-Target\") is \"%v\", want \"%v\"", hds.get("X-Amz-Target"), tc.xAmzTarget)
 		}
-		str := client.signedString(hds, tc.payload)
+		str := c.(*client).signedString(hds, tc.payload)
 		if str != tc.sigedText {
 			t.Errorf("Client.signedString() is \"%v\", want \"%v\"", str, tc.sigedText)
 		}
-		sig := client.signiture(str, hds)
+		sig := c.(*client).signiture(str, hds)
 		if sig != tc.sig {
 			t.Errorf("Client.signiture() is \"%v\", want \"%v\"", sig, tc.sig)
 		}
-		auth := client.authorization(sig, hds)
+		auth := c.(*client).authorization(sig, hds)
 		if auth != tc.authorization {
 			t.Errorf("Client.authorization() is \"%v\", want \"%v\"", auth, tc.authorization)
 		}
 	}
 }
 
-/* Copyright 2019 Spiegel
+/* Copyright 2019,2020 Spiegel
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
