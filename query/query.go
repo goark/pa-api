@@ -111,6 +111,12 @@ func (q *Query) ParentASIN() *Query {
 	return q
 }
 
+//CustomerReviews sets the resource of CustomerReviews resource
+func (q *Query) CustomerReviews() *Query {
+	q.enableResources[resourceCustomerReviews] = true
+	return q
+}
+
 /* Copyright 2019 Spiegel and contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");

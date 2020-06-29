@@ -67,8 +67,14 @@ type GenPriceInfo struct {
 }
 
 type Item struct {
-	ASIN           string
-	DetailPageURL  string
+	ASIN            string
+	DetailPageURL   string
+	CustomerReviews *struct {
+		Count      *int `json:",omitempty"`
+		StarRating *struct {
+			Value *float64 `json:",omitempty"`
+		} `json:",omitempty"`
+	} `json:",omitempty"`
 	BrowseNodeInfo *struct {
 		BrowseNodes []struct {
 			Id               string

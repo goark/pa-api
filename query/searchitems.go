@@ -50,7 +50,7 @@ var (
 	searchTypes = []RequestFilter{Actor, Artist, Author, Brand, Keywords, Title}
 )
 
-//RequestFilters adds RequestFilter to Query instance
+//Request adds RequestFilter to Query instance
 func (q *SearchItems) Request(request RequestFilter, value interface{}) *SearchItems {
 	if request.findIn(requestsOfSearchItems) {
 		q.With().RequestFilters(RequestMap{request: value})
@@ -99,6 +99,12 @@ func (q *SearchItems) EnableSearchRefinements() *SearchItems {
 //EnableParentASIN sets the enableParentASIN flag in SearchItems instance
 func (q *SearchItems) EnableParentASIN() *SearchItems {
 	q.With().ParentASIN()
+	return q
+}
+
+//EnableCustomerReviews sets the enableCustomerReviews flag in SearchItems instance
+func (q *SearchItems) EnableCustomerReviews() *SearchItems {
+	q.With().CustomerReviews()
 	return q
 }
 
