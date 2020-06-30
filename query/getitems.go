@@ -50,7 +50,7 @@ func (q *GetItems) EnableBrowseNodeInfo() *GetItems {
 	return q
 }
 
-//Images sets the resource of Images
+//EnableImages sets the resource of Images
 func (q *GetItems) EnableImages() *GetItems {
 	q.With().Images()
 	return q
@@ -71,6 +71,12 @@ func (q *GetItems) EnableOffers() *GetItems {
 //EnableParentASIN sets the resource of ParentASIN
 func (q *GetItems) EnableParentASIN() *GetItems {
 	q.With().ParentASIN()
+	return q
+}
+
+//EnableCustomerReviews sets the resource of CustomerReviews
+func (q *GetItems) EnableCustomerReviews() *GetItems {
+	q.With().CustomerReviews()
 	return q
 }
 

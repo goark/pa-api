@@ -172,6 +172,7 @@ func TestResourcesInSearchItems(t *testing.T) {
 		{q: NewSearchItems("", "", "").EnableOffers(), str: `{"Operation":"SearchItems","Resources":["Offers.Listings.Availability.MaxOrderQuantity","Offers.Listings.Availability.Message","Offers.Listings.Availability.MinOrderQuantity","Offers.Listings.Availability.Type","Offers.Listings.Condition","Offers.Listings.Condition.SubCondition","Offers.Listings.DeliveryInfo.IsAmazonFulfilled","Offers.Listings.DeliveryInfo.IsFreeShippingEligible","Offers.Listings.DeliveryInfo.IsPrimeEligible","Offers.Listings.DeliveryInfo.ShippingCharges","Offers.Listings.IsBuyBoxWinner","Offers.Listings.LoyaltyPoints.Points","Offers.Listings.MerchantInfo","Offers.Listings.Price","Offers.Listings.ProgramEligibility.IsPrimeExclusive","Offers.Listings.ProgramEligibility.IsPrimePantry","Offers.Listings.Promotions","Offers.Listings.SavingBasis","Offers.Summaries.HighestPrice","Offers.Summaries.LowestPrice","Offers.Summaries.OfferCount"]}`},
 		{q: NewSearchItems("", "", "").EnableSearchRefinements(), str: `{"Operation":"SearchItems","Resources":["SearchRefinements"]}`},
 		{q: NewSearchItems("", "", "").EnableParentASIN(), str: `{"Operation":"SearchItems","Resources":["ParentASIN"]}`},
+		{q: NewSearchItems("", "", "").EnableCustomerReviews(), str: `{"Operation":"SearchItems","Resources":["CustomerReviews.Count","CustomerReviews.StarRating"]}`},
 	}
 
 	for _, tc := range testCases {

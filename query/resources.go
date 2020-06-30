@@ -9,6 +9,7 @@ const (
 	resourceOffers                                //Offers resource
 	resourceSearchRefinements                     //SearchRefinements resource
 	resourceParentASIN                            //ParentASIN resource
+	resourceCustomerReviews                       //CustomerReviews resource
 )
 
 var (
@@ -74,6 +75,11 @@ var (
 	resourcesParentASIN = []string{
 		"ParentASIN",
 	}
+	//CustomerReviews resource
+	resourcesCustomerReviews = []string{
+		"CustomerReviews.Count",
+		"CustomerReviews.StarRating",
+	}
 	resourcesMap = map[resource][]string{
 		resourceBrowseNodeInfo:    resourcesBrowseNodeInfo,    //BrowseNodeInfo resource
 		resourceImages:            resourcesImages,            //Images resource
@@ -81,6 +87,7 @@ var (
 		resourceOffers:            resourcesOffers,            //Offers resource
 		resourceSearchRefinements: resourcesSearchRefinements, //SearchRefinements resource
 		resourceParentASIN:        resourcesParentASIN,        //ParentASIN resource
+		resourceCustomerReviews:   resourcesCustomerReviews,   //CustomerReviews resource
 	}
 )
 
