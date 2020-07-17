@@ -183,11 +183,11 @@ func (r *request) mapFilter(filter RequestFilter, filterValue interface{}) {
 			r.ItemIdType = param
 		}
 	case ItemCount:
-		if count, ok := filterValue.(int); ok && 0 < count && count < 11 {
+		if count, convErr := strconv.Atoi(filterValue.(string)); convErr == nil && 0 < count && count < 11 {
 			r.ItemCount = count
 		}
 	case ItemPage:
-		if page, ok := filterValue.(int); ok && 0 < page && page < 11 {
+		if page, convErr := strconv.Atoi(filterValue.(string)); convErr == nil && 0 < page && page < 11 {
 			r.ItemPage = page
 		}
 	case Keywords:
@@ -213,7 +213,7 @@ func (r *request) mapFilter(filter RequestFilter, filterValue interface{}) {
 			r.Marketplace = param
 		}
 	case MaxPrice: // Yet, here is not further check if the given price is meaningful (it is assumed to already be the lowest currency denomination, e.g 3241 => 31.41)
-		if price, ok := filterValue.(int); ok && price > 0 {
+		if price, convErr := strconv.Atoi(filterValue.(string)); convErr == nil && price > 0 {
 			r.MaxPrice = price
 		}
 	case Merchant:
@@ -221,19 +221,19 @@ func (r *request) mapFilter(filter RequestFilter, filterValue interface{}) {
 			r.Merchant = param
 		}
 	case MinPrice: // Yet, here is not further check if the given price is meaningful (it is assumed to already be the lowest currency denomination, e.g 3241 => 31.41)
-		if price, ok := filterValue.(int); ok && price > 0 {
+		if price, convErr := strconv.Atoi(filterValue.(string)); convErr == nil && price > 0 {
 			r.MinPrice = price
 		}
 	case MinReviewsRating:
-		if minRating, ok := filterValue.(int); ok && 0 < minRating && minRating < 5 {
+		if minRating, convErr := strconv.Atoi(filterValue.(string)); convErr == nil && 0 < minRating && minRating < 5 {
 			r.MinReviewsRating = minRating
 		}
 	case MinSavingPercent:
-		if minSaving, ok := filterValue.(int); ok && 0 < minSaving && minSaving < 100 {
+		if minSaving, convErr := strconv.Atoi(filterValue.(string)); convErr == nil && 0 < minSaving && minSaving < 100 {
 			r.MinSavingPercent = minSaving
 		}
 	case OfferCount:
-		if oCount, ok := filterValue.(int); ok && oCount > 0 {
+		if oCount, convErr := strconv.Atoi(filterValue.(string)); convErr == nil && oCount > 0 {
 			r.OfferCount = oCount
 		}
 	case PartnerTag:
