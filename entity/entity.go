@@ -289,7 +289,7 @@ type Response struct {
 func DecodeResponse(b []byte) (*Response, error) {
 	rsp := Response{}
 	if err := json.NewDecoder(bytes.NewReader(b)).Decode(&rsp); err != nil {
-		return &rsp, errs.Wrap(err, "", errs.WithContext("JSON", string(b)))
+		return &rsp, errs.Wrap(err, errs.WithContext("JSON", string(b)))
 	}
 	return &rsp, nil
 }
@@ -297,7 +297,7 @@ func DecodeResponse(b []byte) (*Response, error) {
 //JSON returns JSON data from Response instance
 func (r *Response) JSON() ([]byte, error) {
 	b, err := json.Marshal(r)
-	return b, errs.Wrap(err, "")
+	return b, errs.Wrap(err)
 }
 
 //Stringer
@@ -309,7 +309,7 @@ func (r *Response) String() string {
 	return string(b)
 }
 
-/* Copyright 2019 Spiegel and contributors
+/* Copyright 2019,2020 Spiegel and contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
