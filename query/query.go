@@ -33,7 +33,7 @@ func (q *Query) Operation() paapi5.Operation {
 //Payload defines the resources to be returned
 func (q *Query) Payload() ([]byte, error) {
 	if q == nil {
-		return nil, errs.Wrap(paapi5.ErrNullPointer, "")
+		return nil, errs.Wrap(paapi5.ErrNullPointer)
 	}
 	q.Resources = []string{}
 	for r, flag := range q.enableResources {
@@ -42,7 +42,7 @@ func (q *Query) Payload() ([]byte, error) {
 		}
 	}
 	b, err := json.Marshal(q)
-	return b, errs.Wrap(err, "")
+	return b, errs.Wrap(err)
 }
 
 //Stringer interface
@@ -117,7 +117,7 @@ func (q *Query) CustomerReviews() *Query {
 	return q
 }
 
-/* Copyright 2019 Spiegel and contributors
+/* Copyright 2019,2020 Spiegel and contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
