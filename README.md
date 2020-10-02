@@ -1,6 +1,7 @@
 # [pa-api] -- APIs for Amazon Product Advertising API v5 by Golang
 
-[![Build Status](https://travis-ci.org/spiegel-im-spiegel/pa-api.svg?branch=master)](https://travis-ci.org/spiegel-im-spiegel/pa-api)
+[![check vulns](https://github.com/spiegel-im-spiegel/pa-api/workflows/vulns/badge.svg)](https://github.com/spiegel-im-spiegel/pa-api/actions)
+[![lint status](https://github.com/spiegel-im-spiegel/pa-api/workflows/lint/badge.svg)](https://github.com/spiegel-im-spiegel/pa-api/actions)
 [![GitHub license](https://img.shields.io/badge/license-Apache%202-blue.svg)](https://raw.githubusercontent.com/spiegel-im-spiegel/pa-api/master/LICENSE)
 [![GitHub release](https://img.shields.io/github/release/spiegel-im-spiegel/pa-api.svg)](https://github.com/spiegel-im-spiegel/pa-api/releases/latest)
 
