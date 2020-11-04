@@ -14,7 +14,11 @@ const (
 	LocaleItaly                                 //Italy
 	LocaleJapan                                 //Japan
 	LocaleMexico                                //Mexico
+	LocaleNetherlands                           //Netherlands
+	LocaleSingapore                             //Singapore
+	LocaleSaudiArabia                           //SaudiArabia
 	LocaleSpain                                 //Spain
+	LocaleSweden                                //Sweden
 	LocaleTurkey                                //Turkey
 	LocaleUnitedArabEmirates                    //United Arab Emirates
 	LocaleUnitedKingdom                         //United Kingdom
@@ -31,7 +35,11 @@ var marketplaceMap = map[Marketplace]string{
 	LocaleItaly:              "www.amazon.it",     //Italy
 	LocaleJapan:              "www.amazon.co.jp",  //Japan
 	LocaleMexico:             "www.amazon.com.mx", //Mexico
+	LocaleNetherlands:        "www.amazon.nl",     //Netherlands
+	LocaleSingapore:          "www.amazon.sg",     //Singapore
+	LocaleSaudiArabia:        "www.amazon.sa",     //SaudiArabia
 	LocaleSpain:              "www.amazon.es",     //Spain
+	LocaleSweden:             "www.amazon.se",     //Sweden
 	LocaleTurkey:             "www.amazon.com.tr", //Turkey
 	LocaleUnitedArabEmirates: "www.amazon.ae",     //United Arab Emirates
 	LocaleUnitedKingdom:      "www.amazon.co.uk",  //United Kingdom
@@ -48,7 +56,11 @@ var hostMap = map[Marketplace]string{
 	LocaleItaly:              "webservices.amazon.it",     //Italy
 	LocaleJapan:              "webservices.amazon.co.jp",  //Japan
 	LocaleMexico:             "webservices.amazon.com.mx", //Mexico
+	LocaleNetherlands:        "webservices.amazon.nl",     //Netherlands
+	LocaleSingapore:          "webservices.amazon.sg",     //Singapore
+	LocaleSaudiArabia:        "webservices.amazon.sa",     //SaudiArabia
 	LocaleSpain:              "webservices.amazon.es",     //Spain
+	LocaleSweden:             "webservices.amazon.se",     //Sweden
 	LocaleTurkey:             "webservices.amazon.com.tr", //Turkey
 	LocaleUnitedArabEmirates: "webservices.amazon.ae",     //United Arab Emirates
 	LocaleUnitedKingdom:      "webservices.amazon.co.uk",  //United Kingdom
@@ -65,7 +77,11 @@ var regionMap = map[Marketplace]string{
 	LocaleItaly:              "eu-west-1", //Italy
 	LocaleJapan:              "us-west-2", //Japan
 	LocaleMexico:             "us-east-1", //Mexico
+	LocaleNetherlands:        "eu-west-1", //Netherlands
+	LocaleSingapore:          "us-west-2", //Singapore
+	LocaleSaudiArabia:        "eu-west-1", //SaudiArabia
 	LocaleSpain:              "eu-west-1", //Spain
+	LocaleSweden:             "eu-west-1", //Sweden
 	LocaleTurkey:             "eu-west-1", //Turkey
 	LocaleUnitedArabEmirates: "eu-west-1", //United Arab Emirates
 	LocaleUnitedKingdom:      "eu-west-1", //United Kingdom
@@ -82,7 +98,11 @@ var languageMap = map[Marketplace]string{
 	LocaleItaly:              "it_IT", //Italy
 	LocaleJapan:              "ja_JP", //Japan
 	LocaleMexico:             "es_MX", //Mexico
+	LocaleNetherlands:        "nl_NL", //Netherlands
+	LocaleSingapore:          "en_SG", //Singapore
+	LocaleSaudiArabia:        "en_AE", //SaudiArabia
 	LocaleSpain:              "es_ES", //Spain
+	LocaleSweden:             "sv_SE", //Sweden
 	LocaleTurkey:             "tr_TR", //Turkey
 	LocaleUnitedArabEmirates: "en_AE", //United Arab Emirates
 	LocaleUnitedKingdom:      "en_GB", //United Kingdom
