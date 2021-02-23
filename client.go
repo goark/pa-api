@@ -6,7 +6,7 @@ import (
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/hex"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strings"
 	"time"
@@ -96,7 +96,7 @@ func (c *client) post(cmd Operation, payload []byte) ([]byte, error) {
 	if !(resp.StatusCode != 0 && resp.StatusCode < http.StatusBadRequest) {
 		return nil, errs.Wrap(ErrHTTPStatus, errs.WithContext("url", u.String()), errs.WithContext("payload", string(payload)), errs.WithContext("status", resp.Status))
 	}
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, errs.Wrap(err, errs.WithContext("url", u.String()), errs.WithContext("payload", string(payload)))
 	}
