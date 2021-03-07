@@ -62,7 +62,6 @@ client := paapi5.New(
     "mytag-20",
     "AKIAIOSFODNN7EXAMPLE",
     "1234567890",
-    paapi5.WithContext(context.Background()),
     paapi5.WithHttpClient(http.DefaultClient),
 )
 fmt.Println("Marketplace:", client.Marketplace())
@@ -93,8 +92,6 @@ func main() {
         "mytag-20",
         "AKIAIOSFODNN7EXAMPLE",
         "1234567890",
-        paapi5.WithContext(context.Background()),
-        paapi5.WithHttpClient(http.DefaultClient),
     )
 
     //Make query
@@ -143,8 +140,6 @@ func main() {
         "mytag-20",
         "AKIAIOSFODNN7EXAMPLE",
         "1234567890",
-        paapi5.WithContext(context.Background()),
-        paapi5.WithHttpClient(http.DefaultClient),
     )
 
     //Make query
@@ -170,6 +165,12 @@ func main() {
     }
     fmt.Println(res.String())
 }
+```
+
+#### Request With context.Context
+
+```go
+body, err := client.RequestContext(context.Background(), q)
 ```
 
 ## Contributors

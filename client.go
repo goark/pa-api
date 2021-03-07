@@ -6,12 +6,11 @@ import (
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/hex"
-	"io"
-	"net/http"
 	"strings"
 	"time"
 
 	"github.com/spiegel-im-spiegel/errs"
+	"github.com/spiegel-im-spiegel/fetch"
 )
 
 const (
@@ -30,13 +29,13 @@ type Client interface {
 	PartnerTag() string
 	PartnerType() string
 	Request(Query) ([]byte, error)
+	RequestContext(context.Context, Query) ([]byte, error)
 }
 
 //client is http.Client for Aozora API Server
 type client struct {
 	server     *Server
-	client     *http.Client
-	ctx        context.Context
+	client     fetch.Client
 	partnerTag string
 	accessKey  string
 	secretKey  string
@@ -57,46 +56,46 @@ func (c *client) PartnerType() string {
 	return defaultPartnerType
 }
 
+//Request method returns response data (JSON format) by PA-APIv5.
 func (c *client) Request(q Query) ([]byte, error) {
+	return c.RequestContext(context.Background(), q)
+}
+
+//RequestContext method returns response data (JSON format) by PA-APIv5. (with context.Context)
+func (c *client) RequestContext(ctx context.Context, q Query) ([]byte, error) {
 	payload, err := q.Payload()
 	if err != nil {
 		return nil, errs.Wrap(err, errs.WithContext("Operation", q.Operation().String()))
 	}
-	b, err := c.post(q.Operation(), payload)
+	b, err := c.post(ctx, q.Operation(), payload)
 	if err != nil {
 		return nil, errs.Wrap(err, errs.WithContext("Operation", q.Operation().String()), errs.WithContext("payload", string(payload)))
 	}
 	return b, nil
 }
 
-func (c *client) post(cmd Operation, payload []byte) ([]byte, error) {
+func (c *client) post(ctx context.Context, cmd Operation, payload []byte) ([]byte, error) {
 	dt := NewTimeStamp(time.Now())
 	u := c.server.URL(cmd.Path())
 	hds := newHeaders(c.server, cmd, dt)
 	sig := c.signiture(c.signedString(hds, payload), hds)
-	req, err := http.NewRequestWithContext(c.ctx, "POST", u.String(), bytes.NewReader(payload))
+	resp, err := c.client.Post(
+		u,
+		bytes.NewReader(payload),
+		fetch.WithContext(ctx),
+		fetch.WithRequestHeaderSet("Accept", c.server.Accept()),
+		fetch.WithRequestHeaderSet("Accept-Language", c.server.AcceptLanguage()),
+		fetch.WithRequestHeaderSet("Content-Type", c.server.ContentType()),
+		fetch.WithRequestHeaderSet("Content-Encoding", hds.get("Content-Encoding")),
+		fetch.WithRequestHeaderSet("Host", hds.get("Host")),
+		fetch.WithRequestHeaderSet("X-Amz-Date", hds.get("X-Amz-Date")),
+		fetch.WithRequestHeaderSet("X-Amz-Target", hds.get("X-Amz-Target")),
+		fetch.WithRequestHeaderSet("Authorization", c.authorization(sig, hds)),
+	)
 	if err != nil {
 		return nil, errs.Wrap(err, errs.WithContext("url", u.String()), errs.WithContext("payload", string(payload)))
 	}
-	req.Header.Add("Accept", c.server.Accept())
-	req.Header.Add("Accept-Language", c.server.AcceptLanguage())
-	req.Header.Add("Content-Type", c.server.ContentType())
-	req.Header.Add("Content-Encoding", hds.get("Content-Encoding"))
-	req.Header.Add("Host", hds.get("Host"))
-	req.Header.Add("X-Amz-Date", hds.get("X-Amz-Date"))
-	req.Header.Add("X-Amz-Target", hds.get("X-Amz-Target"))
-	req.Header.Add("Authorization", c.authorization(sig, hds))
-
-	resp, err := c.client.Do(req)
-	if err != nil {
-		return nil, errs.Wrap(err, errs.WithContext("url", u.String()), errs.WithContext("payload", string(payload)))
-	}
-	defer resp.Body.Close()
-
-	if !(resp.StatusCode != 0 && resp.StatusCode < http.StatusBadRequest) {
-		return nil, errs.Wrap(ErrHTTPStatus, errs.WithContext("url", u.String()), errs.WithContext("payload", string(payload)), errs.WithContext("status", resp.Status))
-	}
-	body, err := io.ReadAll(resp.Body)
+	body, err := resp.DumpBodyAndClose()
 	if err != nil {
 		return nil, errs.Wrap(err, errs.WithContext("url", u.String()), errs.WithContext("payload", string(payload)))
 	}
@@ -189,7 +188,7 @@ func (h *headers) values() string {
 	return strings.Join(list, "\n")
 }
 
-/* Copyright 2019,2020 Spiegel
+/* Copyright 2019-2021 Spiegel
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.

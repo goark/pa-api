@@ -4,17 +4,18 @@ import (
 	"context"
 	"net/http"
 	"net/url"
+
+	"github.com/spiegel-im-spiegel/fetch"
 )
 
 const (
-	defaultMarketplace     Marketplace = LocaleUnitedStates
-	defaultScheme                      = "https"
-	defaultAccept                      = "application/json, text/javascript"
-	defaultContentType                 = "application/json; charset=UTF-8"
-	defaultHMACAlgorithm               = "AWS4-HMAC-SHA256"
-	defaultServiceName                 = "ProductAdvertisingAPI"
-	defaultContentEncoding             = "amz-1.0"
-	defaultAWS4Request                 = "aws4_request"
+	defaultScheme          = "https"
+	defaultAccept          = "application/json, text/javascript"
+	defaultContentType     = "application/json; charset=UTF-8"
+	defaultHMACAlgorithm   = "AWS4-HMAC-SHA256"
+	defaultServiceName     = "ProductAdvertisingAPI"
+	defaultContentEncoding = "amz-1.0"
+	defaultAWS4Request     = "aws4_request"
 )
 
 //Server type is a implementation of PA-API service.
@@ -29,7 +30,7 @@ type ServerOptFunc func(*Server)
 
 //New function returns an Server instance with options.
 func New(opts ...ServerOptFunc) *Server {
-	server := &Server{scheme: defaultScheme, marketplace: defaultMarketplace, language: ""}
+	server := &Server{scheme: defaultScheme, marketplace: DefaultMarketplace, language: ""}
 	for _, opt := range opts {
 		opt(server)
 	}
@@ -140,7 +141,6 @@ func (s *Server) CreateClient(associateTag, accessKey, secretKey string, opts ..
 	cli := &client{
 		server:     s,
 		client:     nil,
-		ctx:        nil,
 		partnerTag: associateTag,
 		accessKey:  accessKey,
 		secretKey:  secretKey,
@@ -149,22 +149,14 @@ func (s *Server) CreateClient(associateTag, accessKey, secretKey string, opts ..
 		opt(cli)
 	}
 	if cli.client == nil {
-		cli.client = http.DefaultClient
-	}
-	if cli.ctx == nil {
-		cli.ctx = context.Background()
+		cli.client = fetch.New()
 	}
 	return cli
 }
 
-//WithContext function returns ClientOptFunc function value.
-//This function is used in Server.CreateClient method that represents context.Context.
+//WithContext is dummy function. Because this function is deprecated.
 func WithContext(ctx context.Context) ClientOptFunc {
-	return func(c *client) {
-		if c != nil {
-			c.ctx = ctx
-		}
-	}
+	return func(c *client) {}
 }
 
 //WithHttpClient function returns ClientOptFunc function value.
@@ -172,7 +164,7 @@ func WithContext(ctx context.Context) ClientOptFunc {
 func WithHttpClient(hc *http.Client) ClientOptFunc {
 	return func(c *client) {
 		if c != nil {
-			c.client = hc
+			c.client = fetch.New(fetch.WithHTTPClient(hc))
 		}
 	}
 }
@@ -182,7 +174,7 @@ func DefaultClient(associateTag, accessKey, secretKey string) Client {
 	return New().CreateClient(associateTag, accessKey, secretKey)
 }
 
-/* Copyright 2019,2020 Spiegel and contributors
+/* Copyright 2019-2021 Spiegel and contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.

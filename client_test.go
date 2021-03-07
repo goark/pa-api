@@ -26,7 +26,7 @@ func TestClient(t *testing.T) {
 			partnerTag:      "mytag-20",
 			accessKey:       "AKIAIOSFODNN7EXAMPLE",
 			secretKey:       "1234567890",
-			marketplace:     defaultMarketplace.String(),
+			marketplace:     DefaultMarketplace.String(),
 			partnerType:     defaultPartnerType,
 			date:            NewTimeStamp(time.Date(2019, time.September, 30, 8, 31, 54, 0, time.UTC)),
 			contentEncoding: "amz-1.0",

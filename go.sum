@@ -1,2 +1,4 @@
 github.com/spiegel-im-spiegel/errs v1.0.2 h1:v4amEwRDqRWjKHOILQnJSovYhZ4ZttEnBBXNXEzS6Sc=
 github.com/spiegel-im-spiegel/errs v1.0.2/go.mod h1:UoasJYYujMcdkbT9USv8dfZWoMyaY3btqQxoLJImw0A=
+github.com/spiegel-im-spiegel/fetch v0.2.3 h1:Zh5rHvOjfC81rxKvtUD21JT609smds+BRh+H84s8qEw=
+github.com/spiegel-im-spiegel/fetch v0.2.3/go.mod h1:ePIXxdC9OvSarXEO6HW1MgQwtBaKQo0qgDLOhKFXkQ0=
