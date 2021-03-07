@@ -1,31 +1,39 @@
 package paapi5
 
-//Marketplace is enumeration of locale information
-type Marketplace int
+type Marketplace interface {
+	String() string
+	HostName() string
+	Region() string
+	Language() string
+}
+
+//marketplaceEnum is enumeration of locale information
+type marketplaceEnum int
 
 const (
-	LocaleUnknown            Marketplace = iota //Unknown local
-	LocaleAustralia                             //Australia
-	LocaleBrazil                                //Brazil
-	LocaleCanada                                //Canada
-	LocaleFrance                                //France
-	LocaleGermany                               //Germany
-	LocaleIndia                                 //India
-	LocaleItaly                                 //Italy
-	LocaleJapan                                 //Japan
-	LocaleMexico                                //Mexico
-	LocaleNetherlands                           //Netherlands
-	LocaleSingapore                             //Singapore
-	LocaleSaudiArabia                           //SaudiArabia
-	LocaleSpain                                 //Spain
-	LocaleSweden                                //Sweden
-	LocaleTurkey                                //Turkey
-	LocaleUnitedArabEmirates                    //United Arab Emirates
-	LocaleUnitedKingdom                         //United Kingdom
-	LocaleUnitedStates                          //United States
+	LocaleUnknown            marketplaceEnum = iota //Unknown local
+	LocaleAustralia                                 //Australia
+	LocaleBrazil                                    //Brazil
+	LocaleCanada                                    //Canada
+	LocaleFrance                                    //France
+	LocaleGermany                                   //Germany
+	LocaleIndia                                     //India
+	LocaleItaly                                     //Italy
+	LocaleJapan                                     //Japan
+	LocaleMexico                                    //Mexico
+	LocaleNetherlands                               //Netherlands
+	LocaleSingapore                                 //Singapore
+	LocaleSaudiArabia                               //SaudiArabia
+	LocaleSpain                                     //Spain
+	LocaleSweden                                    //Sweden
+	LocaleTurkey                                    //Turkey
+	LocaleUnitedArabEmirates                        //United Arab Emirates
+	LocaleUnitedKingdom                             //United Kingdom
+	LocaleUnitedStates                              //United States
+	DefaultMarketplace       = LocaleUnitedStates
 )
 
-var marketplaceMap = map[Marketplace]string{
+var marketplaceMap = map[marketplaceEnum]string{
 	LocaleAustralia:          "www.amazon.com.au", //Australia
 	LocaleBrazil:             "www.amazon.com.br", //Brazil
 	LocaleCanada:             "www.amazon.ca",     //Canada
@@ -46,7 +54,7 @@ var marketplaceMap = map[Marketplace]string{
 	LocaleUnitedStates:       "www.amazon.com",    //United States
 }
 
-var hostMap = map[Marketplace]string{
+var hostMap = map[marketplaceEnum]string{
 	LocaleAustralia:          "webservices.amazon.com.au", //Australia
 	LocaleBrazil:             "webservices.amazon.com.br", //Brazil
 	LocaleCanada:             "webservices.amazon.ca",     //Canada
@@ -67,7 +75,7 @@ var hostMap = map[Marketplace]string{
 	LocaleUnitedStates:       "webservices.amazon.com",    //United States
 }
 
-var regionMap = map[Marketplace]string{
+var regionMap = map[marketplaceEnum]string{
 	LocaleAustralia:          "us-west-2", //Australia
 	LocaleBrazil:             "us-east-1", //Brazil
 	LocaleCanada:             "us-east-1", //Canada
@@ -88,7 +96,7 @@ var regionMap = map[Marketplace]string{
 	LocaleUnitedStates:       "us-east-1", //United States
 }
 
-var languageMap = map[Marketplace]string{
+var languageMap = map[marketplaceEnum]string{
 	LocaleAustralia:          "en_AU", //Australia
 	LocaleBrazil:             "pt_BR", //Brazil
 	LocaleCanada:             "en_CA", //Canada
@@ -120,15 +128,15 @@ func MarketplaceOf(s string) Marketplace {
 }
 
 //String returns marketplace name of Marketplace
-func (m Marketplace) String() string {
+func (m marketplaceEnum) String() string {
 	if s, ok := marketplaceMap[m]; ok {
 		return s
 	}
-	return marketplaceMap[LocaleUnitedStates]
+	return marketplaceMap[DefaultMarketplace]
 }
 
 //HostName returns hostname of Marketplace
-func (m Marketplace) HostName() string {
+func (m marketplaceEnum) HostName() string {
 	if s, ok := hostMap[m]; ok {
 		return s
 	}
@@ -136,22 +144,22 @@ func (m Marketplace) HostName() string {
 }
 
 //Region returns region name of Marketplace
-func (m Marketplace) Region() string {
+func (m marketplaceEnum) Region() string {
 	if s, ok := regionMap[m]; ok {
 		return s
 	}
-	return regionMap[LocaleUnitedStates]
+	return regionMap[DefaultMarketplace]
 }
 
 //Language returns region name of Marketplace
-func (m Marketplace) Language() string {
+func (m marketplaceEnum) Language() string {
 	if s, ok := languageMap[m]; ok {
 		return s
 	}
-	return languageMap[LocaleUnitedStates]
+	return languageMap[DefaultMarketplace]
 }
 
-/* Copyright 2019 Spiegel
+/* Copyright 2019-2021 Spiegel
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
