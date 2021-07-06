@@ -7,11 +7,11 @@ type Marketplace interface {
 	Language() string
 }
 
-//marketplaceEnum is enumeration of locale information
-type marketplaceEnum int
+// MarketplaceEnum is enumeration of locale information
+type MarketplaceEnum int
 
 const (
-	LocaleUnknown            marketplaceEnum = iota //Unknown local
+	LocaleUnknown            MarketplaceEnum = iota //Unknown local
 	LocaleAustralia                                 //Australia
 	LocaleBrazil                                    //Brazil
 	LocaleCanada                                    //Canada
@@ -33,7 +33,7 @@ const (
 	DefaultMarketplace       = LocaleUnitedStates
 )
 
-var marketplaceMap = map[marketplaceEnum]string{
+var marketplaceMap = map[MarketplaceEnum]string{
 	LocaleAustralia:          "www.amazon.com.au", //Australia
 	LocaleBrazil:             "www.amazon.com.br", //Brazil
 	LocaleCanada:             "www.amazon.ca",     //Canada
@@ -54,7 +54,7 @@ var marketplaceMap = map[marketplaceEnum]string{
 	LocaleUnitedStates:       "www.amazon.com",    //United States
 }
 
-var hostMap = map[marketplaceEnum]string{
+var hostMap = map[MarketplaceEnum]string{
 	LocaleAustralia:          "webservices.amazon.com.au", //Australia
 	LocaleBrazil:             "webservices.amazon.com.br", //Brazil
 	LocaleCanada:             "webservices.amazon.ca",     //Canada
@@ -75,7 +75,7 @@ var hostMap = map[marketplaceEnum]string{
 	LocaleUnitedStates:       "webservices.amazon.com",    //United States
 }
 
-var regionMap = map[marketplaceEnum]string{
+var regionMap = map[MarketplaceEnum]string{
 	LocaleAustralia:          "us-west-2", //Australia
 	LocaleBrazil:             "us-east-1", //Brazil
 	LocaleCanada:             "us-east-1", //Canada
@@ -96,7 +96,7 @@ var regionMap = map[marketplaceEnum]string{
 	LocaleUnitedStates:       "us-east-1", //United States
 }
 
-var languageMap = map[marketplaceEnum]string{
+var languageMap = map[MarketplaceEnum]string{
 	LocaleAustralia:          "en_AU", //Australia
 	LocaleBrazil:             "pt_BR", //Brazil
 	LocaleCanada:             "en_CA", //Canada
@@ -128,7 +128,7 @@ func MarketplaceOf(s string) Marketplace {
 }
 
 //String returns marketplace name of Marketplace
-func (m marketplaceEnum) String() string {
+func (m MarketplaceEnum) String() string {
 	if s, ok := marketplaceMap[m]; ok {
 		return s
 	}
@@ -136,7 +136,7 @@ func (m marketplaceEnum) String() string {
 }
 
 //HostName returns hostname of Marketplace
-func (m marketplaceEnum) HostName() string {
+func (m MarketplaceEnum) HostName() string {
 	if s, ok := hostMap[m]; ok {
 		return s
 	}
@@ -144,7 +144,7 @@ func (m marketplaceEnum) HostName() string {
 }
 
 //Region returns region name of Marketplace
-func (m marketplaceEnum) Region() string {
+func (m MarketplaceEnum) Region() string {
 	if s, ok := regionMap[m]; ok {
 		return s
 	}
@@ -152,7 +152,7 @@ func (m marketplaceEnum) Region() string {
 }
 
 //Language returns region name of Marketplace
-func (m marketplaceEnum) Language() string {
+func (m MarketplaceEnum) Language() string {
 	if s, ok := languageMap[m]; ok {
 		return s
 	}
