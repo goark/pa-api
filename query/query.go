@@ -42,7 +42,10 @@ func (q *Query) Payload() ([]byte, error) {
 		}
 	}
 	b, err := json.Marshal(q)
-	return b, errs.Wrap(err)
+	if err != nil {
+		return nil, errs.Wrap(err)
+	}
+	return b, nil
 }
 
 //Stringer interface
