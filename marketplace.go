@@ -1,5 +1,6 @@
 package paapi5
 
+// Marketplace is interface class of locale information.
 type Marketplace interface {
 	String() string
 	HostName() string
@@ -7,7 +8,7 @@ type Marketplace interface {
 	Language() string
 }
 
-// MarketplaceEnum is enumeration of locale information
+// MarketplaceEnum is enumeration of locale information.
 type MarketplaceEnum int
 
 const (
@@ -117,7 +118,7 @@ var languageMap = map[MarketplaceEnum]string{
 	LocaleUnitedStates:       "en_US", //United States
 }
 
-//MarketplaceOf function returns Marketplace instance from service domain
+// MarketplaceOf function returns Marketplace instance from service domain.
 func MarketplaceOf(s string) Marketplace {
 	for k, v := range marketplaceMap {
 		if s == v {
@@ -127,7 +128,7 @@ func MarketplaceOf(s string) Marketplace {
 	return LocaleUnknown
 }
 
-//String returns marketplace name of Marketplace
+// String returns marketplace name of Marketplace.
 func (m MarketplaceEnum) String() string {
 	if s, ok := marketplaceMap[m]; ok {
 		return s
@@ -135,7 +136,7 @@ func (m MarketplaceEnum) String() string {
 	return marketplaceMap[DefaultMarketplace]
 }
 
-//HostName returns hostname of Marketplace
+// HostName returns hostname of Marketplace.
 func (m MarketplaceEnum) HostName() string {
 	if s, ok := hostMap[m]; ok {
 		return s
@@ -143,7 +144,7 @@ func (m MarketplaceEnum) HostName() string {
 	return hostMap[LocaleUnitedStates]
 }
 
-//Region returns region name of Marketplace
+// Region returns region name of Marketplace.
 func (m MarketplaceEnum) Region() string {
 	if s, ok := regionMap[m]; ok {
 		return s
@@ -151,7 +152,7 @@ func (m MarketplaceEnum) Region() string {
 	return regionMap[DefaultMarketplace]
 }
 
-//Language returns region name of Marketplace
+// Language returns language name of Marketplace.
 func (m MarketplaceEnum) Language() string {
 	if s, ok := languageMap[m]; ok {
 		return s
