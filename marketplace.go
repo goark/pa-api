@@ -16,6 +16,7 @@ const (
 	LocaleAustralia                                 //Australia
 	LocaleBrazil                                    //Brazil
 	LocaleCanada                                    //Canada
+	LocaleEgypt                                     //Egypt
 	LocaleFrance                                    //France
 	LocaleGermany                                   //Germany
 	LocaleIndia                                     //India
@@ -23,6 +24,7 @@ const (
 	LocaleJapan                                     //Japan
 	LocaleMexico                                    //Mexico
 	LocaleNetherlands                               //Netherlands
+	LocalePoland                                    //Poland
 	LocaleSingapore                                 //Singapore
 	LocaleSaudiArabia                               //SaudiArabia
 	LocaleSpain                                     //Spain
@@ -38,6 +40,7 @@ var marketplaceMap = map[MarketplaceEnum]string{
 	LocaleAustralia:          "www.amazon.com.au", //Australia
 	LocaleBrazil:             "www.amazon.com.br", //Brazil
 	LocaleCanada:             "www.amazon.ca",     //Canada
+	LocaleEgypt:              "www.amazon.eg",     //Egypt
 	LocaleFrance:             "www.amazon.fr",     //France
 	LocaleGermany:            "www.amazon.de",     //Germany
 	LocaleIndia:              "www.amazon.in",     //India
@@ -45,6 +48,7 @@ var marketplaceMap = map[MarketplaceEnum]string{
 	LocaleJapan:              "www.amazon.co.jp",  //Japan
 	LocaleMexico:             "www.amazon.com.mx", //Mexico
 	LocaleNetherlands:        "www.amazon.nl",     //Netherlands
+	LocalePoland:             "www.amazon.pl",     //Poland
 	LocaleSingapore:          "www.amazon.sg",     //Singapore
 	LocaleSaudiArabia:        "www.amazon.sa",     //SaudiArabia
 	LocaleSpain:              "www.amazon.es",     //Spain
@@ -59,6 +63,7 @@ var hostMap = map[MarketplaceEnum]string{
 	LocaleAustralia:          "webservices.amazon.com.au", //Australia
 	LocaleBrazil:             "webservices.amazon.com.br", //Brazil
 	LocaleCanada:             "webservices.amazon.ca",     //Canada
+	LocaleEgypt:              "webservices.amazon.eg",     //Egypt
 	LocaleFrance:             "webservices.amazon.fr",     //France
 	LocaleGermany:            "webservices.amazon.de",     //Germany
 	LocaleIndia:              "webservices.amazon.in",     //India
@@ -66,6 +71,7 @@ var hostMap = map[MarketplaceEnum]string{
 	LocaleJapan:              "webservices.amazon.co.jp",  //Japan
 	LocaleMexico:             "webservices.amazon.com.mx", //Mexico
 	LocaleNetherlands:        "webservices.amazon.nl",     //Netherlands
+	LocalePoland:             "webservices.amazon.pl",     //Poland
 	LocaleSingapore:          "webservices.amazon.sg",     //Singapore
 	LocaleSaudiArabia:        "webservices.amazon.sa",     //SaudiArabia
 	LocaleSpain:              "webservices.amazon.es",     //Spain
@@ -80,6 +86,7 @@ var regionMap = map[MarketplaceEnum]string{
 	LocaleAustralia:          "us-west-2", //Australia
 	LocaleBrazil:             "us-east-1", //Brazil
 	LocaleCanada:             "us-east-1", //Canada
+	LocaleEgypt:              "us-west-1", //Egypt
 	LocaleFrance:             "eu-west-1", //France
 	LocaleGermany:            "eu-west-1", //Germany
 	LocaleIndia:              "eu-west-1", //India
@@ -87,6 +94,7 @@ var regionMap = map[MarketplaceEnum]string{
 	LocaleJapan:              "us-west-2", //Japan
 	LocaleMexico:             "us-east-1", //Mexico
 	LocaleNetherlands:        "eu-west-1", //Netherlands
+	LocalePoland:             "eu-west-1", //Poland
 	LocaleSingapore:          "us-west-2", //Singapore
 	LocaleSaudiArabia:        "eu-west-1", //SaudiArabia
 	LocaleSpain:              "eu-west-1", //Spain
@@ -101,6 +109,7 @@ var languageMap = map[MarketplaceEnum]string{
 	LocaleAustralia:          "en_AU", //Australia
 	LocaleBrazil:             "pt_BR", //Brazil
 	LocaleCanada:             "en_CA", //Canada
+	LocaleEgypt:              "ar_EG", //Egypt
 	LocaleFrance:             "fr_FR", //France
 	LocaleGermany:            "de_DE", //Germany
 	LocaleIndia:              "en_IN", //India
@@ -108,6 +117,7 @@ var languageMap = map[MarketplaceEnum]string{
 	LocaleJapan:              "ja_JP", //Japan
 	LocaleMexico:             "es_MX", //Mexico
 	LocaleNetherlands:        "nl_NL", //Netherlands
+	LocalePoland:             "pl_PL", //Poland
 	LocaleSingapore:          "en_SG", //Singapore
 	LocaleSaudiArabia:        "en_AE", //SaudiArabia
 	LocaleSpain:              "es_ES", //Spain
