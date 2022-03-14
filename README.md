@@ -1,11 +1,13 @@
 # [pa-api] -- APIs for Amazon Product Advertising API v5 by Golang
 
-[![check vulns](https://github.com/spiegel-im-spiegel/pa-api/workflows/vulns/badge.svg)](https://github.com/spiegel-im-spiegel/pa-api/actions)
-[![lint status](https://github.com/spiegel-im-spiegel/pa-api/workflows/lint/badge.svg)](https://github.com/spiegel-im-spiegel/pa-api/actions)
-[![GitHub license](https://img.shields.io/badge/license-Apache%202-blue.svg)](https://raw.githubusercontent.com/spiegel-im-spiegel/pa-api/master/LICENSE)
-[![GitHub release](https://img.shields.io/github/release/spiegel-im-spiegel/pa-api.svg)](https://github.com/spiegel-im-spiegel/pa-api/releases/latest)
+[![check vulns](https://github.com/goark/pa-api/workflows/vulns/badge.svg)](https://github.com/goark/pa-api/actions)
+[![lint status](https://github.com/goark/pa-api/workflows/lint/badge.svg)](https://github.com/goark/pa-api/actions)
+[![GitHub license](https://img.shields.io/badge/license-Apache%202-blue.svg)](https://raw.githubusercontent.com/goark/pa-api/master/LICENSE)
+[![GitHub release](https://img.shields.io/github/release/goark/pa-api.svg)](https://github.com/goark/pa-api/releases/latest)
 
 This package is required Go 1.16 or later.
+
+**Migrated repository to [github.com/goark/pa-api][pa-api]**
 
 ## Usage
 
@@ -79,9 +81,9 @@ package main
 import (
     "fmt"
 
-    paapi5 "github.com/spiegel-im-spiegel/pa-api"
-    "github.com/spiegel-im-spiegel/pa-api/entity"
-    "github.com/spiegel-im-spiegel/pa-api/query"
+    paapi5 "github.com/goark/pa-api"
+    "github.com/goark/pa-api/entity"
+    "github.com/goark/pa-api/query"
 )
 
 func main() {
@@ -127,9 +129,9 @@ package main
 import (
     "fmt"
 
-    paapi5 "github.com/spiegel-im-spiegel/pa-api"
-    "github.com/spiegel-im-spiegel/pa-api/entity"
-    "github.com/spiegel-im-spiegel/pa-api/query"
+    paapi5 "github.com/goark/pa-api"
+    "github.com/goark/pa-api/entity"
+    "github.com/goark/pa-api/query"
 )
 
 func main() {
@@ -175,10 +177,10 @@ body, err := client.RequestContext(context.Background(), q)
 
 ## Contributors
 
-Many thanks for [contributors](https://github.com/spiegel-im-spiegel/pa-api/graphs/contributors "Contributors to spiegel-im-spiegel/pa-api")
+Many thanks for [contributors](https://github.com/goark/pa-api/graphs/contributors "Contributors to goark/pa-api")
 
 ## Links
 
 - [Go 言語用 PA-API v5 クライアント・パッケージ — リリース情報 | text.Baldanders.info](https://text.baldanders.info/release/pa-api-v5/)
 
-[pa-api]: https://github.com/spiegel-im-spiegel/pa-api "spiegel-im-spiegel/pa-api: APIs for Amazon Product Advertising API v5 by Golang"
+[pa-api]: https://github.com/goark/pa-api "goark/pa-api: APIs for Amazon Product Advertising API v5 by Golang"

@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/spiegel-im-spiegel/fetch"
+	"github.com/goark/fetch"
 )
 
 const (
