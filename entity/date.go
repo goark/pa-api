@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/spiegel-im-spiegel/errs"
+	"github.com/goark/errs"
 )
 
 //Time is wrapper class of time.Time

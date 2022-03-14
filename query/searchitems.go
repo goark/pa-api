@@ -1,7 +1,7 @@
 package query
 
 import (
-	paapi5 "github.com/spiegel-im-spiegel/pa-api"
+	paapi5 "github.com/goark/pa-api"
 )
 
 //SearchItems type is embedded Query for SearchItems operation in PA-API v5

@@ -3,8 +3,8 @@ package query
 import (
 	"encoding/json"
 
-	"github.com/spiegel-im-spiegel/errs"
-	paapi5 "github.com/spiegel-im-spiegel/pa-api"
+	"github.com/goark/errs"
+	paapi5 "github.com/goark/pa-api"
 )
 
 //Query is a query data class for PA-API v5

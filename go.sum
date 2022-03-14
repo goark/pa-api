@@ -1,4 +1,4 @@
-github.com/spiegel-im-spiegel/errs v1.0.5 h1:5qAUEXPZgF4ZIUmw2vpe7OgDP0C8DIV67BKwjfLidJI=
-github.com/spiegel-im-spiegel/errs v1.0.5/go.mod h1:mOsWcUc9hpRXjwdgJqJ3E2n6ibkYFvhNck1QD0ZVGOM=
-github.com/spiegel-im-spiegel/fetch v0.2.5 h1:S3yMboi2AT8DqubEed3OQfRHLABK+R44ooEHNw5fqTk=
-github.com/spiegel-im-spiegel/fetch v0.2.5/go.mod h1:1O8nwPhJvt5JGBwVPzngcT71Y65us4GCyjuVyvCN4sk=
+github.com/goark/errs v1.1.0 h1:FKnyw4LVyRADIjM8Nj0Up6r0/y5cfADvZAd1E+tthXE=
+github.com/goark/errs v1.1.0/go.mod h1:TtaPEoadm2mzqzfXdkkfpN2xuniCFm2q4JH+c1qzaqw=
+github.com/goark/fetch v0.3.0 h1:2m32EGOLBi99RzI5urFfmv5++CMqfenVw7NH8z/lbX8=
+github.com/goark/fetch v0.3.0/go.mod h1:sqDdPbbHeIjDVeHrgvzhHpkUr8X9pVC9DgJoVwU02x0=

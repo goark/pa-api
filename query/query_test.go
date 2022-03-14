@@ -4,7 +4,7 @@ import (
 	"errors"
 	"testing"
 
-	paapi5 "github.com/spiegel-im-spiegel/pa-api"
+	paapi5 "github.com/goark/pa-api"
 )
 
 func TestNilQuery(t *testing.T) {
