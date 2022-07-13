@@ -49,14 +49,14 @@ func (f RequestFilter) findIn(list []RequestFilter) bool {
 //available (valid) filter parameters
 var (
 	validationMap = map[RequestFilter][]string{
-		Availability:  []string{"Available", "IncludeOutOfStock"},
-		Condition:     []string{"Any", "New", "Used", "Collectible", "Refurbished"},
-		DeliveryFlags: []string{"AmazonGlobal", "FreeShipping", "FulfilledByAmazon", "Prime"},
-		ItemIdType:    []string{"ASIN"},
-		Merchant:      []string{"All", "Amazon"},
-		PartnerType:   []string{"Associates"},
-		SearchIndex:   []string{"All", "AmazonVideo", "Apparel", "Appliances", "ArtsAndCrafts", "Automotive", "Baby", "Beauty", "Books", "Classical", "Collectibles", "Computers", "DigitalMusic", "Electronics", "EverythingElse", "Fashion", "FashionBaby", "FashionBoys", "FashionGirls", "FashionMen", "FashionWomen", "GardenAndOutdoor", "GiftCards", "GroceryAndGourmetFood", "Handmade", "HealthPersonalCare", "HomeAndKitchen", "Industrial", "Jewelry", "KindleStore", "LocalServices", "Luggage", "LuxuryBeauty", "Magazines", "MobileAndAccessories", "MobileApps", "MoviesAndTV", "Music", "MusicalInstruments", "OfficeProducts", "PetSupplies", "Photo", "Shoes", "Software", "SportsAndOutdoors", "ToolsAndHomeImprovement", "ToysAndGames", "VHS", "VideoGames", "Watches"},
-		SortBy:        []string{"AvgCustomerReviews", "Featured", "NewestArrivals", "Price:HighToLow", "Price:LowToHigh", "Relevance"},
+		Availability:  {"Available", "IncludeOutOfStock"},
+		Condition:     {"Any", "New", "Used", "Collectible", "Refurbished"},
+		DeliveryFlags: {"AmazonGlobal", "FreeShipping", "FulfilledByAmazon", "Prime"},
+		ItemIdType:    {"ASIN"},
+		Merchant:      {"All", "Amazon"},
+		PartnerType:   {"Associates"},
+		SearchIndex:   {"All", "AmazonVideo", "Apparel", "Appliances", "ArtsAndCrafts", "Automotive", "Baby", "Beauty", "Books", "Classical", "Collectibles", "Computers", "DigitalMusic", "Electronics", "EverythingElse", "Fashion", "FashionBaby", "FashionBoys", "FashionGirls", "FashionMen", "FashionWomen", "GardenAndOutdoor", "GiftCards", "GroceryAndGourmetFood", "Handmade", "HealthPersonalCare", "HomeAndKitchen", "Industrial", "Jewelry", "KindleStore", "LocalServices", "Luggage", "LuxuryBeauty", "Magazines", "MobileAndAccessories", "MobileApps", "MoviesAndTV", "Music", "MusicalInstruments", "OfficeProducts", "PetSupplies", "Photo", "Shoes", "Software", "SportsAndOutdoors", "ToolsAndHomeImprovement", "ToysAndGames", "VHS", "VideoGames", "Watches"},
+		SortBy:        {"AvgCustomerReviews", "Featured", "NewestArrivals", "Price:HighToLow", "Price:LowToHigh", "Relevance"},
 	}
 )
 
