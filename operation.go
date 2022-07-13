@@ -14,16 +14,18 @@ var _ json.Marshaler = Operation(0)        //Operation type is compatible with j
 var _ json.Unmarshaler = (*Operation)(nil) //Operation type is compatible with json.Unmarshaler interface
 
 const (
-	NullOperation Operation = iota //Unknown
-	GetVariations                  //GetVariations
-	GetItems                       //GetItems
-	SearchItems                    //SearchItems
+	NullOperation  Operation = iota //Unknown
+	GetVariations                   //GetVariations
+	GetItems                        //GetItems
+	SearchItems                     //SearchItems
+	GetBrowseNodes                  //GetBrowseNodes
 )
 
 var nameMap = map[Operation]string{
-	GetVariations: "GetVariations",
-	GetItems:      "GetItems",
-	SearchItems:   "SearchItems",
+	GetVariations:  "GetVariations",
+	GetItems:       "GetItems",
+	SearchItems:    "SearchItems",
+	GetBrowseNodes: "GetBrowseNodes",
 }
 
 //String method is a implementation of fmt.Stringer interface.
@@ -71,7 +73,7 @@ func (c Operation) MarshalJSON() ([]byte, error) {
 	return []byte(strconv.Quote(c.String())), nil
 }
 
-/* Copyright 2019 Spiegel
+/* Copyright 2019-2022 Spiegel
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.

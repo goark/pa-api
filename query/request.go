@@ -21,6 +21,7 @@ const (
 	ItemCount
 	ItemPage
 	Keywords
+	BrowseNodeIds
 	LanguagesOfPreference
 	Marketplace
 	MaxPrice
@@ -63,7 +64,7 @@ var (
 //isVlidString methos checks if the given parameter is valid for the chosen filter option
 func (f RequestFilter) isVlidString(value string) bool {
 	switch f {
-	case BrowseNodeID:
+	case BrowseNodeID, BrowseNodeIds:
 		if _, err := strconv.ParseInt(value, 10, 64); err == nil {
 			return true
 		}
@@ -97,6 +98,7 @@ type request struct {
 	ItemCount             int               `json:",omitempty"`
 	ItemPage              int               `json:",omitempty"`
 	Keywords              string            `json:",omitempty"`
+	BrowseNodeIds         []string          `json:",omitempty"`
 	LanguagesOfPreference []string          `json:",omitempty"`
 	Marketplace           string            `json:",omitempty"`
 	MaxPrice              int               `json:",omitempty"`
@@ -194,6 +196,20 @@ func (r *request) mapFilter(filter RequestFilter, filterValue interface{}) {
 		if param, ok := filterValue.(string); ok && filter.isVlidString(param) {
 			r.Keywords = param
 		}
+	case BrowseNodeIds:
+		switch v := filterValue.(type) {
+		case []string:
+			r.BrowseNodeIds = []string{}
+			for _, param := range v {
+				if filter.isVlidString(param) {
+					r.BrowseNodeIds = append(r.BrowseNodeIds, param)
+				}
+			}
+		case string:
+			if filter.isVlidString(v) {
+				r.BrowseNodeIds = []string{v}
+			}
+		}
 	case LanguagesOfPreference:
 		switch v := filterValue.(type) {
 		case []string:
@@ -263,7 +279,7 @@ func (r *request) mapFilter(filter RequestFilter, filterValue interface{}) {
 	}
 }
 
-/* Copyright 2019 Spiegel and contributors
+/* Copyright 2019-2022 Spiegel and contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.

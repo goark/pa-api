@@ -10,6 +10,7 @@ const (
 	resourceSearchRefinements                     //SearchRefinements resource
 	resourceParentASIN                            //ParentASIN resource
 	resourceCustomerReviews                       //CustomerReviews resource
+	resourceBrowseNodes                           //BrowseNodes resource
 )
 
 var (
@@ -80,6 +81,11 @@ var (
 		"CustomerReviews.Count",
 		"CustomerReviews.StarRating",
 	}
+	//BrowseNodes resource
+	resourcesBrowseNodes = []string{
+		"BrowseNodes.Ancestor",
+		"BrowseNodes.Children",
+	}
 	resourcesMap = map[resource][]string{
 		resourceBrowseNodeInfo:    resourcesBrowseNodeInfo,    //BrowseNodeInfo resource
 		resourceImages:            resourcesImages,            //Images resource
@@ -88,6 +94,7 @@ var (
 		resourceSearchRefinements: resourcesSearchRefinements, //SearchRefinements resource
 		resourceParentASIN:        resourcesParentASIN,        //ParentASIN resource
 		resourceCustomerReviews:   resourcesCustomerReviews,   //CustomerReviews resource
+		resourceBrowseNodes:       resourcesBrowseNodes,       //CustomerReviews resource
 	}
 )
 
@@ -98,7 +105,7 @@ func (r resource) Strings() []string {
 	return []string{}
 }
 
-/* Copyright 2019 Spiegel and contributors
+/* Copyright 2019-2022 Spiegel and contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.

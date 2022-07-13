@@ -75,6 +75,8 @@ func TestRequestFilters(t *testing.T) {
 		{q: empty.With().RequestFilters(RequestMap{ItemPage: 10}), str: `{"Operation":"","ItemPage":10}`},
 		{q: empty.With().RequestFilters(RequestMap{ItemPage: 11}), str: `{"Operation":""}`},
 		{q: empty.With().RequestFilters(RequestMap{Keywords: "foo"}), str: `{"Operation":"","Keywords":"foo"}`},
+		{q: empty.With().RequestFilters(RequestMap{BrowseNodeIds: "123"}), str: `{"Operation":"","BrowseNodeIds":["123"]}`},
+		{q: empty.With().RequestFilters(RequestMap{BrowseNodeIds: []string{"123", "456"}}), str: `{"Operation":"","BrowseNodeIds":["123","456"]}`},
 		{q: empty.With().RequestFilters(RequestMap{LanguagesOfPreference: "foo"}), str: `{"Operation":"","LanguagesOfPreference":["foo"]}`},
 		{q: empty.With().RequestFilters(RequestMap{LanguagesOfPreference: []string{"foo", "bar"}}), str: `{"Operation":"","LanguagesOfPreference":["foo","bar"]}`},
 		{q: empty.With().RequestFilters(RequestMap{Marketplace: "foo.bar"}), str: `{"Operation":"","Marketplace":"foo.bar"}`},
