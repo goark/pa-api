@@ -45,6 +45,8 @@ func TestRequestFiltersInGetItems(t *testing.T) {
 		{q: NewGetItems("", "", "").Request(ItemPage, 1), str: `{"Operation":"GetItems"}`},
 		{q: NewGetItems("", "", "").Request(ItemPage, 1), str: `{"Operation":"GetItems"}`},
 		{q: NewGetItems("", "", "").Request(Keywords, "foo"), str: `{"Operation":"GetItems"}`},
+		{q: NewGetItems("", "", "").Request(BrowseNodeIds, "123"), str: `{"Operation":"GetItems"}`},
+		{q: NewGetItems("", "", "").Request(BrowseNodeIds, []string{"123", "456"}), str: `{"Operation":"GetItems"}`},
 		{q: NewGetItems("", "", "").Request(LanguagesOfPreference, "foo"), str: `{"Operation":"GetItems","LanguagesOfPreference":["foo"]}`},
 		{q: NewGetItems("", "", "").Request(LanguagesOfPreference, []string{"foo", "bar"}), str: `{"Operation":"GetItems","LanguagesOfPreference":["foo","bar"]}`},
 		{q: NewGetItems("", "", "").Request(Marketplace, "foo.bar"), str: `{"Operation":"GetItems","Marketplace":"foo.bar"}`},
@@ -95,7 +97,7 @@ func TestResourcesInGetItems(t *testing.T) {
 	}
 }
 
-/* Copyright 2019 Spiegel and contributors
+/* Copyright 2019-2022 Spiegel and contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.

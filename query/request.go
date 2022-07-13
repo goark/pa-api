@@ -21,6 +21,7 @@ const (
 	ItemCount
 	ItemPage
 	Keywords
+	BrowseNodeIds
 	LanguagesOfPreference
 	Marketplace
 	MaxPrice
@@ -49,21 +50,21 @@ func (f RequestFilter) findIn(list []RequestFilter) bool {
 //available (valid) filter parameters
 var (
 	validationMap = map[RequestFilter][]string{
-		Availability:  []string{"Available", "IncludeOutOfStock"},
-		Condition:     []string{"Any", "New", "Used", "Collectible", "Refurbished"},
-		DeliveryFlags: []string{"AmazonGlobal", "FreeShipping", "FulfilledByAmazon", "Prime"},
-		ItemIdType:    []string{"ASIN"},
-		Merchant:      []string{"All", "Amazon"},
-		PartnerType:   []string{"Associates"},
-		SearchIndex:   []string{"All", "AmazonVideo", "Apparel", "Appliances", "ArtsAndCrafts", "Automotive", "Baby", "Beauty", "Books", "Classical", "Collectibles", "Computers", "DigitalMusic", "Electronics", "EverythingElse", "Fashion", "FashionBaby", "FashionBoys", "FashionGirls", "FashionMen", "FashionWomen", "GardenAndOutdoor", "GiftCards", "GroceryAndGourmetFood", "Handmade", "HealthPersonalCare", "HomeAndKitchen", "Industrial", "Jewelry", "KindleStore", "LocalServices", "Luggage", "LuxuryBeauty", "Magazines", "MobileAndAccessories", "MobileApps", "MoviesAndTV", "Music", "MusicalInstruments", "OfficeProducts", "PetSupplies", "Photo", "Shoes", "Software", "SportsAndOutdoors", "ToolsAndHomeImprovement", "ToysAndGames", "VHS", "VideoGames", "Watches"},
-		SortBy:        []string{"AvgCustomerReviews", "Featured", "NewestArrivals", "Price:HighToLow", "Price:LowToHigh", "Relevance"},
+		Availability:  {"Available", "IncludeOutOfStock"},
+		Condition:     {"Any", "New", "Used", "Collectible", "Refurbished"},
+		DeliveryFlags: {"AmazonGlobal", "FreeShipping", "FulfilledByAmazon", "Prime"},
+		ItemIdType:    {"ASIN"},
+		Merchant:      {"All", "Amazon"},
+		PartnerType:   {"Associates"},
+		SearchIndex:   {"All", "AmazonVideo", "Apparel", "Appliances", "ArtsAndCrafts", "Automotive", "Baby", "Beauty", "Books", "Classical", "Collectibles", "Computers", "DigitalMusic", "Electronics", "EverythingElse", "Fashion", "FashionBaby", "FashionBoys", "FashionGirls", "FashionMen", "FashionWomen", "GardenAndOutdoor", "GiftCards", "GroceryAndGourmetFood", "Handmade", "HealthPersonalCare", "HomeAndKitchen", "Industrial", "Jewelry", "KindleStore", "LocalServices", "Luggage", "LuxuryBeauty", "Magazines", "MobileAndAccessories", "MobileApps", "MoviesAndTV", "Music", "MusicalInstruments", "OfficeProducts", "PetSupplies", "Photo", "Shoes", "Software", "SportsAndOutdoors", "ToolsAndHomeImprovement", "ToysAndGames", "VHS", "VideoGames", "Watches"},
+		SortBy:        {"AvgCustomerReviews", "Featured", "NewestArrivals", "Price:HighToLow", "Price:LowToHigh", "Relevance"},
 	}
 )
 
 //isVlidString methos checks if the given parameter is valid for the chosen filter option
 func (f RequestFilter) isVlidString(value string) bool {
 	switch f {
-	case BrowseNodeID:
+	case BrowseNodeID, BrowseNodeIds:
 		if _, err := strconv.ParseInt(value, 10, 64); err == nil {
 			return true
 		}
@@ -97,6 +98,7 @@ type request struct {
 	ItemCount             int               `json:",omitempty"`
 	ItemPage              int               `json:",omitempty"`
 	Keywords              string            `json:",omitempty"`
+	BrowseNodeIds         []string          `json:",omitempty"`
 	LanguagesOfPreference []string          `json:",omitempty"`
 	Marketplace           string            `json:",omitempty"`
 	MaxPrice              int               `json:",omitempty"`
@@ -194,6 +196,20 @@ func (r *request) mapFilter(filter RequestFilter, filterValue interface{}) {
 		if param, ok := filterValue.(string); ok && filter.isVlidString(param) {
 			r.Keywords = param
 		}
+	case BrowseNodeIds:
+		switch v := filterValue.(type) {
+		case []string:
+			r.BrowseNodeIds = []string{}
+			for _, param := range v {
+				if filter.isVlidString(param) {
+					r.BrowseNodeIds = append(r.BrowseNodeIds, param)
+				}
+			}
+		case string:
+			if filter.isVlidString(v) {
+				r.BrowseNodeIds = []string{v}
+			}
+		}
 	case LanguagesOfPreference:
 		switch v := filterValue.(type) {
 		case []string:
@@ -263,7 +279,7 @@ func (r *request) mapFilter(filter RequestFilter, filterValue interface{}) {
 	}
 }
 
-/* Copyright 2019 Spiegel and contributors
+/* Copyright 2019-2022 Spiegel and contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.

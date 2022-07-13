@@ -120,7 +120,13 @@ func (q *Query) CustomerReviews() *Query {
 	return q
 }
 
-/* Copyright 2019,2020 Spiegel and contributors
+//BrowseNodes sets the resource of BrowseNodes resource
+func (q *Query) BrowseNodes() *Query {
+	q.enableResources[resourceBrowseNodes] = true
+	return q
+}
+
+/* Copyright 2019-2022 Spiegel and contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
