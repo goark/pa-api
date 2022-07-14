@@ -79,6 +79,7 @@ fmt.Println("Marketplace:", client.Marketplace())
 package main
 
 import (
+    "context"
     "fmt"
 
     paapi5 "github.com/goark/pa-api"
@@ -127,6 +128,7 @@ func main() {
 package main
 
 import (
+    "context"
     "fmt"
 
     paapi5 "github.com/goark/pa-api"
@@ -175,6 +177,7 @@ func main() {
 package main
 
 import (
+    "context"
     "fmt"
 
     paapi5 "github.com/goark/pa-api"
