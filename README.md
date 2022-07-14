@@ -197,15 +197,14 @@ func main() {
         client.Marketplace(),
         client.PartnerTag(),
         client.PartnerType(),
-    ).BrowseNodeIds([]string{"465610"}).EnableBrowseNodes()
+    ).BrowseNodeIds([]string{"3040", "3045"}).EnableBrowseNodes()
 
     //Requet and response
-    body, err := client.RequestContext(context.Background(), q)
+    body, err := client.Request(q)
     if err != nil {
         fmt.Printf("%+v\n", err)
         return
     }
-    //io.Copy(os.Stdout, bytes.NewReader(body))
 
     //Decode JSON
     res, err := entity.DecodeResponse(body)
