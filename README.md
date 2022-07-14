@@ -104,7 +104,7 @@ func main() {
     ).ASINs([]string{"B07YCM5K55"}).EnableImages().EnableItemInfo().EnableParentASIN()
 
     //Requet and response
-    body, err := client.Request(q)
+    body, err := client.RequestContext(context.Background(), q)
     if err != nil {
         fmt.Printf("%+v\n", err)
         return
@@ -152,7 +152,7 @@ func main() {
     ).Search(query.Keywords, "数学ガール").EnableImages().EnableItemInfo().EnableParentASIN()
 
     //Requet and response
-    body, err := client.Request(q)
+    body, err := client.RequestContext(context.Background(), q)
     if err != nil {
         fmt.Printf("%+v\n", err)
         return
@@ -214,12 +214,6 @@ func main() {
     }
     fmt.Println(res.String())
 }
-```
-
-#### Request With context.Context
-
-```go
-body, err := client.RequestContext(context.Background(), q)
 ```
 
 ## Contributors
