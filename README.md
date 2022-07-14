@@ -169,6 +169,53 @@ func main() {
 }
 ```
 
+### Operation GetBrowseNodes
+
+```go
+package main
+
+import (
+    "fmt"
+
+    paapi5 "github.com/goark/pa-api"
+    "github.com/goark/pa-api/entity"
+    "github.com/goark/pa-api/query"
+)
+
+func main() {
+    //Create client
+    client := paapi5.New(
+        paapi5.WithMarketplace(paapi5.LocaleJapan),
+    ).CreateClient(
+        "mytag-20",
+        "AKIAIOSFODNN7EXAMPLE",
+        "1234567890",
+    )
+
+    //Make query
+    q := query.NewGetBrowseNodes(
+        client.Marketplace(),
+        client.PartnerTag(),
+        client.PartnerType(),
+    ).BrowseNodeIds([]string{"3040", "3045"}).EnableBrowseNodes()
+
+    //Requet and response
+    body, err := client.Request(q)
+    if err != nil {
+        fmt.Printf("%+v\n", err)
+        return
+    }
+
+    //Decode JSON
+    res, err := entity.DecodeResponse(body)
+    if err != nil {
+        fmt.Printf("%+v\n", err)
+        return
+    }
+    fmt.Println(res.String())
+}
+```
+
 #### Request With context.Context
 
 ```go
