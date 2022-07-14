@@ -200,7 +200,7 @@ func main() {
     ).BrowseNodeIds([]string{"3040", "3045"}).EnableBrowseNodes()
 
     //Requet and response
-    body, err := client.Request(q)
+    body, err := client.RequestContext(context.Background(), q)
     if err != nil {
         fmt.Printf("%+v\n", err)
         return
