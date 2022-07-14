@@ -283,6 +283,20 @@ type Response struct {
 		} `json:",omitempty"`
 		VariationDimensions []VariationDimension `json:",omitempty"`
 	} `json:",omitempty"`
+	BrowseNodesResult *struct {
+		BrowseNodes []*struct {
+			Ancestor *Ancestor `json:",omitempty"`
+			Children []*struct {
+				Id              string
+				DisplayName     string
+				ContextFreeName string
+			} `json:",omitempty"`
+			Id              string
+			DisplayName     string
+			ContextFreeName string
+			IsRoot          bool
+		} `json:",omitempty"`
+	} `json:",omitempty"`
 }
 
 //DecodeResponse returns array of Response instance from byte buffer
@@ -309,7 +323,7 @@ func (r *Response) String() string {
 	return string(b)
 }
 
-/* Copyright 2019,2020 Spiegel and contributors
+/* Copyright 2019-2022 Spiegel and contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
