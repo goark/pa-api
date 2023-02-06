@@ -68,6 +68,7 @@ type GenPriceInfo struct {
 
 type Item struct {
 	ASIN            string
+	ParentASIN      string
 	DetailPageURL   string
 	CustomerReviews *struct {
 		Count      *int `json:",omitempty"`
