@@ -1,6 +1,6 @@
 module github.com/goark/pa-api
 
-go 1.18
+go 1.20
 
 require (
 	github.com/goark/errs v1.1.0
