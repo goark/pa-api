@@ -11,6 +11,7 @@ const (
 	resourceParentASIN                            //ParentASIN resource
 	resourceCustomerReviews                       //CustomerReviews resource
 	resourceBrowseNodes                           //BrowseNodes resource
+	resourceVariationSummary                      //VariationSummary resource
 )
 
 var (
@@ -86,6 +87,14 @@ var (
 		"BrowseNodes.Ancestor",
 		"BrowseNodes.Children",
 	}
+
+	//VariationSummary resource
+	resourcesVariationSummary = []string{
+		"VariationSummary.Price.HighestPrice",
+		"VariationSummary.Price.LowestPrice",
+		"VariationSummary.VariationDimension",
+	}
+
 	resourcesMap = map[resource][]string{
 		resourceBrowseNodeInfo:    resourcesBrowseNodeInfo,    //BrowseNodeInfo resource
 		resourceImages:            resourcesImages,            //Images resource
@@ -94,7 +103,8 @@ var (
 		resourceSearchRefinements: resourcesSearchRefinements, //SearchRefinements resource
 		resourceParentASIN:        resourcesParentASIN,        //ParentASIN resource
 		resourceCustomerReviews:   resourcesCustomerReviews,   //CustomerReviews resource
-		resourceBrowseNodes:       resourcesBrowseNodes,       //CustomerReviews resource
+		resourceBrowseNodes:       resourcesBrowseNodes,       //BrowseNodes resource
+		resourceVariationSummary:  resourcesVariationSummary,  //VariationSummary resource
 	}
 )
 
