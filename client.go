@@ -17,13 +17,13 @@ const (
 	defaultPartnerType = "Associates"
 )
 
-//Query interface for Client type
+// Query interface for Client type
 type Query interface {
 	Operation() Operation
 	Payload() ([]byte, error)
 }
 
-//Client interface
+// Client interface
 type Client interface {
 	Marketplace() string
 	PartnerTag() string
@@ -32,7 +32,7 @@ type Client interface {
 	RequestContext(context.Context, Query) ([]byte, error)
 }
 
-//client is http.Client for Aozora API Server
+// client is http.Client for Aozora API Server
 type client struct {
 	server     *Server
 	client     fetch.Client
@@ -41,27 +41,27 @@ type client struct {
 	secretKey  string
 }
 
-//Marketplace returns name of Marketplace parameter for PA-API v5
+// Marketplace returns name of Marketplace parameter for PA-API v5
 func (c *client) Marketplace() string {
 	return c.server.Marketplace()
 }
 
-//PartnerTag returns PartnerTag parameter for PA-API v5
+// PartnerTag returns PartnerTag parameter for PA-API v5
 func (c *client) PartnerTag() string {
 	return c.partnerTag
 }
 
-//PartnerType returns PartnerType parameter for PA-API v5
+// PartnerType returns PartnerType parameter for PA-API v5
 func (c *client) PartnerType() string {
 	return defaultPartnerType
 }
 
-//Request method returns response data (JSON format) by PA-APIv5.
+// Request method returns response data (JSON format) by PA-APIv5.
 func (c *client) Request(q Query) ([]byte, error) {
 	return c.RequestContext(context.Background(), q)
 }
 
-//RequestContext method returns response data (JSON format) by PA-APIv5. (with context.Context)
+// RequestContext method returns response data (JSON format) by PA-APIv5. (with context.Context)
 func (c *client) RequestContext(ctx context.Context, q Query) ([]byte, error) {
 	payload, err := q.Payload()
 	if err != nil {
@@ -79,10 +79,10 @@ func (c *client) post(ctx context.Context, cmd Operation, payload []byte) ([]byt
 	u := c.server.URL(cmd.Path())
 	hds := newHeaders(c.server, cmd, dt)
 	sig := c.signiture(c.signedString(hds, payload), hds)
-	resp, err := c.client.Post(
+	resp, err := c.client.PostWithContext(
+		ctx,
 		u,
 		bytes.NewReader(payload),
-		fetch.WithContext(ctx),
 		fetch.WithRequestHeaderSet("Accept", c.server.Accept()),
 		fetch.WithRequestHeaderSet("Accept-Language", c.server.AcceptLanguage()),
 		fetch.WithRequestHeaderSet("Content-Type", c.server.ContentType()),
