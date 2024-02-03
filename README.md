@@ -121,6 +121,54 @@ func main() {
     fmt.Println(res.String())
 }
 ```
+### Operation GetVariations
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+
+    paapi5 "github.com/goark/pa-api"
+    "github.com/goark/pa-api/entity"
+    "github.com/goark/pa-api/query"
+)
+
+func main() {
+    //Create client
+    client := paapi5.New(
+        paapi5.WithMarketplace(paapi5.LocaleJapan),
+    ).CreateClient(
+        "mytag-20",
+        "AKIAIOSFODNN7EXAMPLE",
+        "1234567890",
+    )
+
+    //Make query
+    q := query.NewGetVariations(
+        client.Marketplace(),
+        client.PartnerTag(),
+        client.PartnerType(),
+    ).ASIN("B07YCM5K55").EnableImages().EnableItemInfo().EnableParentASIN()
+
+    //Request and response
+    body, err := client.RequestContext(context.Background(), q)
+    if err != nil {
+        fmt.Printf("%+v\n", err)
+        return
+    }
+    //io.Copy(os.Stdout, bytes.NewReader(body))
+
+    //Decode JSON
+    res, err := entity.DecodeResponse(body)
+    if err != nil {
+        fmt.Printf("%+v\n", err)
+        return
+    }
+    fmt.Println(res.String())
+}
+```
 
 ### Operation SearchItems
 
@@ -153,7 +201,7 @@ func main() {
         client.PartnerType(),
     ).Search(query.Keywords, "数学ガール").EnableImages().EnableItemInfo().EnableParentASIN()
 
-    //Requet and response
+    //Request and response
     body, err := client.RequestContext(context.Background(), q)
     if err != nil {
         fmt.Printf("%+v\n", err)
@@ -202,7 +250,7 @@ func main() {
         client.PartnerType(),
     ).BrowseNodeIds([]string{"3040", "3045"}).EnableBrowseNodes()
 
-    //Requet and response
+    //Request and response
     body, err := client.RequestContext(context.Background(), q)
     if err != nil {
         fmt.Printf("%+v\n", err)

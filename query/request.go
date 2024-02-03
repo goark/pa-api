@@ -2,13 +2,14 @@ package query
 
 import "strconv"
 
-//RequestFilter signals the types of filters to use
+// RequestFilter signals the types of filters to use
 type RequestFilter int
 
-//Constants for RequestFilter
+// Constants for RequestFilter
 const (
 	Actor RequestFilter = iota + 1
 	Artist
+	ASIN
 	Author
 	Availability
 	Brand
@@ -47,7 +48,7 @@ func (f RequestFilter) findIn(list []RequestFilter) bool {
 	return false
 }
 
-//available (valid) filter parameters
+// available (valid) filter parameters
 var (
 	validationMap = map[RequestFilter][]string{
 		Availability:  {"Available", "IncludeOutOfStock"},
@@ -61,7 +62,7 @@ var (
 	}
 )
 
-//isVlidString methos checks if the given parameter is valid for the chosen filter option
+// isVlidString methos checks if the given parameter is valid for the chosen filter option
 func (f RequestFilter) isVlidString(value string) bool {
 	switch f {
 	case BrowseNodeID, BrowseNodeIds:
@@ -82,10 +83,11 @@ func (f RequestFilter) isVlidString(value string) bool {
 	return false
 }
 
-//request is the private and anonymously imported struct, which selects the filters to be used
+// request is the private and anonymously imported struct, which selects the filters to be used
 type request struct {
 	Actor                 string            `json:",omitempty"`
 	Artist                string            `json:",omitempty"`
+	ASIN                  string            `json:",omitempty"`
 	Availability          string            `json:",omitempty"`
 	Author                string            `json:",omitempty"`
 	Brand                 string            `json:",omitempty"`
@@ -115,7 +117,7 @@ type request struct {
 	Title                 string            `json:",omitempty"`
 }
 
-//mapFilter is a helper function for (*filters).WithFilters
+// mapFilter is a helper function for (*filters).WithFilters
 // This function does not check, if the filters to be used match the chosen searchParam/searchType (Actor, Artist etc.pp.)
 // TODO: 	- reduce nesting
 func (r *request) mapFilter(filter RequestFilter, filterValue interface{}) {
@@ -127,6 +129,10 @@ func (r *request) mapFilter(filter RequestFilter, filterValue interface{}) {
 	case Artist:
 		if param, ok := filterValue.(string); ok && filter.isVlidString(param) {
 			r.Artist = param
+		}
+	case ASIN:
+		if param, ok := filterValue.(string); ok && filter.isVlidString(param) {
+			r.ASIN = param
 		}
 	case Availability:
 		if param, ok := filterValue.(string); ok && filter.isVlidString(param) {

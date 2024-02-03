@@ -45,6 +45,7 @@ func TestRequestFilters(t *testing.T) {
 		{q: empty.With().RequestFilters(RequestMap{RequestFilter(0): "foo"}), str: `{"Operation":""}`},
 		{q: empty.With().RequestFilters(RequestMap{Actor: "foo"}), str: `{"Operation":"","Actor":"foo"}`},
 		{q: empty.With().RequestFilters(RequestMap{Artist: "foo"}), str: `{"Operation":"","Artist":"foo"}`},
+		{q: empty.With().RequestFilters(RequestMap{ASIN: "4900900028"}), str: `{"Operation":"","ASIN":"4900900028"}`},
 		{q: empty.With().RequestFilters(RequestMap{Availability: "foo"}), str: `{"Operation":""}`},
 		{q: empty.With().RequestFilters(RequestMap{Availability: "Available"}), str: `{"Operation":"","Availability":"Available"}`},
 		{q: empty.With().RequestFilters(RequestMap{Availability: "IncludeOutOfStock"}), str: `{"Operation":"","Availability":"IncludeOutOfStock"}`},

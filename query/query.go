@@ -7,7 +7,7 @@ import (
 	paapi5 "github.com/goark/pa-api"
 )
 
-//Query is a query data class for PA-API v5
+// Query is a query data class for PA-API v5
 type Query struct {
 	OpeCode paapi5.Operation `json:"Operation"`
 	request
@@ -17,12 +17,12 @@ type Query struct {
 
 var _ paapi5.Query = (*Query)(nil) //Query is compatible with paapi5.Query interface
 
-//New creates a new Query instance
+// New creates a new Query instance
 func New(opeCode paapi5.Operation) *Query {
 	return &Query{OpeCode: opeCode, enableResources: map[resource]bool{}}
 }
 
-//Operation returns the type of the PA-API operation
+// Operation returns the type of the PA-API operation
 func (q *Query) Operation() paapi5.Operation {
 	if q == nil {
 		return paapi5.NullOperation
@@ -30,7 +30,7 @@ func (q *Query) Operation() paapi5.Operation {
 	return q.OpeCode
 }
 
-//Payload defines the resources to be returned
+// Payload defines the resources to be returned
 func (q *Query) Payload() ([]byte, error) {
 	if q == nil {
 		return nil, errs.Wrap(paapi5.ErrNullPointer)
@@ -48,7 +48,7 @@ func (q *Query) Payload() ([]byte, error) {
 	return b, nil
 }
 
-//Stringer interface
+// Stringer interface
 func (q *Query) String() string {
 	b, err := q.Payload()
 	if err != nil {
@@ -57,7 +57,7 @@ func (q *Query) String() string {
 	return string(b)
 }
 
-//With returns this instance
+// With returns this instance
 func (q *Query) With() *Query {
 	if q == nil {
 		q = New(paapi5.NullOperation)
@@ -65,10 +65,10 @@ func (q *Query) With() *Query {
 	return q
 }
 
-//RequestMap is mapping data for RequestFilter
+// RequestMap is mapping data for RequestFilter
 type RequestMap map[RequestFilter]interface{}
 
-//RequestFilters adds RequestFilter to Query instance
+// RequestFilters adds RequestFilter to Query instance
 func (q *Query) RequestFilters(requests ...RequestMap) *Query {
 	for _, request := range requests {
 		for name, value := range request {
@@ -78,51 +78,57 @@ func (q *Query) RequestFilters(requests ...RequestMap) *Query {
 	return q
 }
 
-//BrowseNodeInfo sets the resource of BrowseNodeInfo
+// BrowseNodeInfo sets the resource of BrowseNodeInfo
 func (q *Query) BrowseNodeInfo() *Query {
 	q.enableResources[resourceBrowseNodeInfo] = true
 	return q
 }
 
-//Images sets the resource of Images
+// Images sets the resource of Images
 func (q *Query) Images() *Query {
 	q.enableResources[resourceImages] = true
 	return q
 }
 
-//ItemInfo sets the resource of ItemInfo
+// ItemInfo sets the resource of ItemInfo
 func (q *Query) ItemInfo() *Query {
 	q.enableResources[resourceItemInfo] = true
 	return q
 }
 
-//Offers sets the resource of Offers
+// Offers sets the resource of Offers
 func (q *Query) Offers() *Query {
 	q.enableResources[resourceOffers] = true
 	return q
 }
 
-//SearchRefinements sets the resource of SearchRefinements
+// SearchRefinements sets the resource of SearchRefinements
 func (q *Query) SearchRefinements() *Query {
 	q.enableResources[resourceSearchRefinements] = true
 	return q
 }
 
-//ParentASIN sets the resource of ParentASIN
+// ParentASIN sets the resource of ParentASIN
 func (q *Query) ParentASIN() *Query {
 	q.enableResources[resourceParentASIN] = true
 	return q
 }
 
-//CustomerReviews sets the resource of CustomerReviews resource
+// CustomerReviews sets the resource of CustomerReviews resource
 func (q *Query) CustomerReviews() *Query {
 	q.enableResources[resourceCustomerReviews] = true
 	return q
 }
 
-//BrowseNodes sets the resource of BrowseNodes resource
+// BrowseNodes sets the resource of BrowseNodes resource
 func (q *Query) BrowseNodes() *Query {
 	q.enableResources[resourceBrowseNodes] = true
+	return q
+}
+
+// VariationSummary sets the resource of VariationSummary resource
+func (q *Query) VariationSummary() *Query {
+	q.enableResources[resourceVariationSummary] = true
 	return q
 }
 
