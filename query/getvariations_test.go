@@ -69,6 +69,11 @@ func TestRequestFiltersInGetVariations(t *testing.T) {
 		{q: NewGetVariations("", "", "").Request(SearchIndex, "All"), str: `{"Operation":"GetVariations"}`},
 		{q: NewGetVariations("", "", "").Request(SortBy, "AvgCustomerReviews"), str: `{"Operation":"GetVariations"}`},
 		{q: NewGetVariations("", "", "").Request(Title, "foo"), str: `{"Operation":"GetVariations"}`},
+		{q: NewGetVariations("", "", "").Request(VariationCount, 5), str: `{"Operation":"GetVariations","VariationCount":5}`},
+		{q: NewGetVariations("", "", "").Request(VariationCount, 11), str: `{"Operation":"GetVariations"}`},
+		{q: NewGetVariations("", "", "").Request(VariationCount, -1), str: `{"Operation":"GetVariations"}`},
+		{q: NewGetVariations("", "", "").Request(VariationPage, 2), str: `{"Operation":"GetVariations","VariationPage":2}`},
+		{q: NewGetVariations("", "", "").Request(VariationPage, 0), str: `{"Operation":"GetVariations"}`},
 	}
 
 	for _, tc := range testCases {

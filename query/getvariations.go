@@ -28,6 +28,8 @@ var requestsOfGetVariations = []RequestFilter{
 	OfferCount,
 	PartnerTag,
 	PartnerType,
+	VariationCount,
+	VariationPage,
 }
 
 // RequestFilters adds RequestFilter to Query instance
