@@ -37,6 +37,8 @@ const (
 	SearchIndex
 	SortBy
 	Title
+	VariationCount
+	VariationPage
 )
 
 func (f RequestFilter) findIn(list []RequestFilter) bool {
@@ -115,6 +117,8 @@ type request struct {
 	SearchIndex           string            `json:",omitempty"`
 	SortBy                string            `json:",omitempty"`
 	Title                 string            `json:",omitempty"`
+	VariationCount        int               `json:",omitempty"`
+	VariationPage         int               `json:",omitempty"`
 }
 
 // mapFilter is a helper function for (*filters).WithFilters
@@ -282,7 +286,16 @@ func (r *request) mapFilter(filter RequestFilter, filterValue interface{}) {
 		if param, ok := filterValue.(string); ok && filter.isVlidString(param) {
 			r.Title = param
 		}
+	case VariationCount:
+		if count, ok := filterValue.(int); ok && 0 < count && count < 11 {
+			r.VariationCount = count
+		}
+	case VariationPage:
+		if count, ok := filterValue.(int); ok && 0 < count {
+			r.VariationPage = count
+		}
 	}
+
 }
 
 /* Copyright 2019-2022 Spiegel and contributors
