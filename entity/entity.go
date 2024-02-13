@@ -66,6 +66,11 @@ type GenPriceInfo struct {
 	PricePerUnit  float64 `json:",omitempty"`
 }
 
+type VariationAttribute struct {
+	Name  string `json:",omitempty"`
+	Value string `json:",omitempty"`
+}
+
 type Item struct {
 	ASIN            string
 	ParentASIN      string
@@ -177,6 +182,7 @@ type Item struct {
 				Currency      string
 			}
 		} `json:",omitempty"`
+		VariationAttributes []VariationAttribute `json:",omitempty"`
 	}
 	Offers *struct {
 		Listings *[]struct {
