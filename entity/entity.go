@@ -275,14 +275,17 @@ type Response struct {
 		SearchURL        string
 		TotalResultCount int
 	} `json:",omitempty"`
-	VariationSummary *struct {
-		PageCount      int
-		VariationCount int
-		Price          *struct {
-			HighestPrice *Price `json:",omitempty"`
-			LowestPrice  *Price `json:",omitempty"`
+	VariationsResult *struct {
+		Items            []Item `json:",omitempty"`
+		VariationSummary *struct {
+			PageCount      int
+			VariationCount int
+			Price          *struct {
+				HighestPrice *Price `json:",omitempty"`
+				LowestPrice  *Price `json:",omitempty"`
+			} `json:",omitempty"`
+			VariationDimensions []VariationDimension `json:",omitempty"`
 		} `json:",omitempty"`
-		VariationDimensions []VariationDimension `json:",omitempty"`
 	} `json:",omitempty"`
 	BrowseNodesResult *struct {
 		BrowseNodes []*struct {
@@ -300,7 +303,7 @@ type Response struct {
 	} `json:",omitempty"`
 }
 
-//DecodeResponse returns array of Response instance from byte buffer
+// DecodeResponse returns array of Response instance from byte buffer
 func DecodeResponse(b []byte) (*Response, error) {
 	rsp := Response{}
 	if err := json.NewDecoder(bytes.NewReader(b)).Decode(&rsp); err != nil {
@@ -309,13 +312,13 @@ func DecodeResponse(b []byte) (*Response, error) {
 	return &rsp, nil
 }
 
-//JSON returns JSON data from Response instance
+// JSON returns JSON data from Response instance
 func (r *Response) JSON() ([]byte, error) {
 	b, err := json.Marshal(r)
 	return b, errs.Wrap(err)
 }
 
-//Stringer
+// Stringer
 func (r *Response) String() string {
 	b, err := r.JSON()
 	if err != nil {
