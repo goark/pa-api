@@ -205,6 +205,8 @@ type Item struct {
 			} `json:",omitempty"`
 			MerchantInfo *struct {
 				DefaultShippingCountry string
+				FeedbackCount          int
+				FeedbackRating         float64
 				ID                     string `json:"Id"`
 				Name                   string
 			} `json:",omitempty"`
