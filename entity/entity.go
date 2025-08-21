@@ -182,9 +182,9 @@ type Item struct {
 				Currency      string
 			}
 		} `json:",omitempty"`
-		VariationAttributes []VariationAttribute `json:",omitempty"`
 	}
-	Offers *struct {
+	VariationAttributes []VariationAttribute `json:",omitempty"`
+	Offers              *struct {
 		Listings *[]struct {
 			Availability *struct {
 				MaxOrderQuantity int
