@@ -3,7 +3,7 @@ version: '3'
 tasks:
   default:
     cmds:
-      - task: clean
+      - task: prepare
       - task: test
       - task: nancy
 
@@ -25,7 +25,12 @@ tasks:
       - ./go.mod
       - '**/*.go'
 
+  prepare:
+      - go mod tidy -v -go=1.25
+
   clean:
     desc: Initialize module and build cache, and remake go.sum file.
     cmds:
-      - go mod tidy -v -go=1.23
+      - rm -f ./go.sum
+      - go clean -cache
+      - go clean -modcache
