@@ -1,4 +1,4 @@
 github.com/goark/errs v1.3.2 h1:ifccNe1aK7Xezt4XVYwHUqalmnfhuphnEvh3FshCReQ=
 github.com/goark/errs v1.3.2/go.mod h1:ZsQucxaDFVfSB8I99j4bxkDRfNOrlKINwg72QMuRWKw=
-github.com/goark/fetch v0.4.1 h1:Y59g9sAdgqjPS7UADdLIoQGRxJE1WMo5ixlJi/ZcCfc=
-github.com/goark/fetch v0.4.1/go.mod h1:umZxLIJHa15J8EQSp5zft1dHDv0VGwmQL6pOfaJ60FY=
+github.com/goark/fetch v0.4.2 h1:PDIojCBiNL37o1vOw0KUWrSvAiYmxxqUwrwAwKXWb8M=
+github.com/goark/fetch v0.4.2/go.mod h1:f4O56aZ+L3eEEAxJOb6+F628nHoRPsPM5a/EXVgQpL4=
