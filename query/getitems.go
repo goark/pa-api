@@ -4,14 +4,14 @@ import (
 	paapi5 "github.com/goark/pa-api"
 )
 
-//GetItems type is embedded Query for GetItems operation in PA-API v5
+// GetItems type is embedded Query for GetItems operation in PA-API v5
 type GetItems struct {
 	Query
 }
 
 var _ paapi5.Query = (*GetItems)(nil) //GetItems is compatible with paapi5.Query interface
 
-//New creates new GetItems instance
+// New creates new GetItems instance
 func NewGetItems(marketplace, partnerTag, partnerType string) *GetItems {
 	q := &GetItems{*(New(paapi5.GetItems))}
 	q.Request(Marketplace, marketplace).Request(PartnerTag, partnerTag).Request(PartnerType, partnerType)
@@ -31,7 +31,7 @@ var requestsOfGetItems = []RequestFilter{
 	PartnerType,
 }
 
-//RequestFilters adds RequestFilter to Query instance
+// RequestFilters adds RequestFilter to Query instance
 func (q *GetItems) Request(request RequestFilter, value interface{}) *GetItems {
 	if request.findIn(requestsOfGetItems) {
 		q.With().RequestFilters(RequestMap{request: value})
@@ -39,42 +39,48 @@ func (q *GetItems) Request(request RequestFilter, value interface{}) *GetItems {
 	return q
 }
 
-//ASINs sets ItemIds in GetItems instance
+// ASINs sets ItemIds in GetItems instance
 func (q *GetItems) ASINs(itms []string) *GetItems {
 	return q.Request(ItemIds, itms).Request(ItemIdType, "ASIN")
 }
 
-//EnableBrowseNodeInfo sets the resource of BrowseNodeInfo
+// EnableBrowseNodeInfo sets the resource of BrowseNodeInfo
 func (q *GetItems) EnableBrowseNodeInfo() *GetItems {
 	q.With().BrowseNodeInfo()
 	return q
 }
 
-//EnableImages sets the resource of Images
+// EnableImages sets the resource of Images
 func (q *GetItems) EnableImages() *GetItems {
 	q.With().Images()
 	return q
 }
 
-//EnableItemInfo sets the resource of ItemInfo
+// EnableItemInfo sets the resource of ItemInfo
 func (q *GetItems) EnableItemInfo() *GetItems {
 	q.With().ItemInfo()
 	return q
 }
 
-//EnableOffers sets the resource of Offers
+// EnableOffers sets the resource of Offers
 func (q *GetItems) EnableOffers() *GetItems {
 	q.With().Offers()
 	return q
 }
 
-//EnableParentASIN sets the resource of ParentASIN
+// EnableOffersV2 sets the resource of OffersV2
+func (q *GetItems) EnableOffersV2() *GetItems {
+	q.With().OffersV2()
+	return q
+}
+
+// EnableParentASIN sets the resource of ParentASIN
 func (q *GetItems) EnableParentASIN() *GetItems {
 	q.With().ParentASIN()
 	return q
 }
 
-//EnableCustomerReviews sets the resource of CustomerReviews
+// EnableCustomerReviews sets the resource of CustomerReviews
 func (q *GetItems) EnableCustomerReviews() *GetItems {
 	q.With().CustomerReviews()
 	return q
