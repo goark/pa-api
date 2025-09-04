@@ -7,6 +7,7 @@ const (
 	resourceImages                                //Images resource
 	resourceItemInfo                              //ItemInfo resource
 	resourceOffers                                //Offers resource
+	resourceOffersV2                              //OffersV2 resource
 	resourceSearchRefinements                     //SearchRefinements resource
 	resourceParentASIN                            //ParentASIN resource
 	resourceCustomerReviews                       //CustomerReviews resource
@@ -69,6 +70,17 @@ var (
 		"Offers.Summaries.LowestPrice",
 		"Offers.Summaries.OfferCount",
 	}
+	//OffersV2 resource
+	resourcesOffersV2 = []string{
+		"OffersV2.Listings.Availability",
+		"OffersV2.Listings.Condition",
+		"OffersV2.Listings.DealDetails",
+		"OffersV2.Listings.IsBuyBoxWinner",
+		"OffersV2.Listings.LoyaltyPoints",
+		"OffersV2.Listings.MerchantInfo",
+		"OffersV2.Listings.Price",
+		"OffersV2.Listings.Type",
+	}
 	//SearchRefinements resource
 	resourcesSearchRefinements = []string{
 		"SearchRefinements",
@@ -100,6 +112,7 @@ var (
 		resourceImages:            resourcesImages,            //Images resource
 		resourceItemInfo:          resourcesItemInfo,          //ItemInfo resource
 		resourceOffers:            resourcesOffers,            //Offers resource
+		resourceOffersV2:          resourcesOffersV2,          //OffersV2 resource
 		resourceSearchRefinements: resourcesSearchRefinements, //SearchRefinements resource
 		resourceParentASIN:        resourcesParentASIN,        //ParentASIN resource
 		resourceCustomerReviews:   resourcesCustomerReviews,   //CustomerReviews resource
