@@ -102,6 +102,12 @@ func (q *Query) Offers() *Query {
 	return q
 }
 
+// OffersV2 sets the resource of OffersV2
+func (q *Query) OffersV2() *Query {
+	q.enableResources[resourceOffersV2] = true
+	return q
+}
+
 // SearchRefinements sets the resource of SearchRefinements
 func (q *Query) SearchRefinements() *Query {
 	q.enableResources[resourceSearchRefinements] = true

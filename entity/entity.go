@@ -59,11 +59,29 @@ type ConditionInfo struct {
 	SubCondition *ConditionInfo `json:",omitempty"`
 }
 
+type ConditionInfoV2 struct {
+	ConditionNote string `json:",omitempty"`
+	Value         string `json:",omitempty"`
+	SubCondition  string `json:",omitempty"`
+}
+
 type GenPriceInfo struct {
 	Amount        float64 `json:",omitempty"`
 	Currency      string  `json:",omitempty"`
 	DisplayAmount string  `json:",omitempty"`
 	PricePerUnit  float64 `json:",omitempty"`
+}
+
+type Money struct {
+	Amount        float64 `json:",omitempty"`
+	Currency      string  `json:",omitempty"`
+	DisplayAmount string  `json:",omitempty"`
+}
+
+type SavingBasis struct {
+	Money                *Money `json:",omitempty"`
+	SavingBasisType      string `json:",omitempty"`
+	SavingBasisTypeLabel string `json:",omitempty"`
 }
 
 type VariationAttribute struct {
@@ -240,6 +258,44 @@ type Item struct {
 			HighestPrice *GenPriceInfo  `json:",omitempty"`
 			LowestPrice  *GenPriceInfo  `json:",omitempty"`
 			OfferCount   int
+		} `json:",omitempty"`
+	} `json:",omitempty"`
+	OffersV2 *struct {
+		Listings *[]struct {
+			Availability *struct {
+				MaxOrderQuantity int
+				Message          string
+				MinOrderQuantity int
+				Type             string
+			} `json:",omitempty"`
+			Condition   *ConditionInfoV2 `json:",omitempty"`
+			DealDetails *struct {
+				AccessType                        string `json:",omitempty"`
+				Badge                             string `json:",omitempty"`
+				EarlyAccessDurationInMilliseconds int64  `json:",omitempty"`
+				EndTime                           string `json:",omitempty"`
+				PercentClaimed                    string `json:",omitempty"`
+				StartTime                         string `json:",omitempty"`
+			} `json:",omitempty"`
+			IsBuyboxWinner bool
+			LoyaltyPoints  *struct {
+				Points int
+			} `json:",omitempty"`
+			MerchantInfo *struct {
+				ID   string `json:"Id"`
+				Name string
+			} `json:",omitempty"`
+			Price *struct {
+				Money        *Money       `json:",omitempty"`
+				PricePerUnit *Money       `json:",omitempty"`
+				SavingBasis  *SavingBasis `json:",omitempty"`
+				Savings      *struct {
+					Money      *Money `json:",omitempty"`
+					Percentage int
+				} `json:",omitempty"`
+			} `json:",omitempty"`
+			Type       string `json:",omitempty"`
+			ViolateMAP bool
 		} `json:",omitempty"`
 	} `json:",omitempty"`
 }
