@@ -20,6 +20,7 @@ const (
 	LocaleFrance                                    //France
 	LocaleGermany                                   //Germany
 	LocaleIndia                                     //India
+	LocalIreland                                    //Ireland
 	LocaleItaly                                     //Italy
 	LocaleJapan                                     //Japan
 	LocaleMexico                                    //Mexico
@@ -44,6 +45,7 @@ var marketplaceMap = map[MarketplaceEnum]string{
 	LocaleFrance:             "www.amazon.fr",     //France
 	LocaleGermany:            "www.amazon.de",     //Germany
 	LocaleIndia:              "www.amazon.in",     //India
+	LocalIreland:             "www.amazon.ie",     //Ireland
 	LocaleItaly:              "www.amazon.it",     //Italy
 	LocaleJapan:              "www.amazon.co.jp",  //Japan
 	LocaleMexico:             "www.amazon.com.mx", //Mexico
@@ -67,6 +69,7 @@ var hostMap = map[MarketplaceEnum]string{
 	LocaleFrance:             "webservices.amazon.fr",     //France
 	LocaleGermany:            "webservices.amazon.de",     //Germany
 	LocaleIndia:              "webservices.amazon.in",     //India
+	LocalIreland:             "webservices.amazon.ie",     //Ireland
 	LocaleItaly:              "webservices.amazon.it",     //Italy
 	LocaleJapan:              "webservices.amazon.co.jp",  //Japan
 	LocaleMexico:             "webservices.amazon.com.mx", //Mexico
@@ -90,6 +93,7 @@ var regionMap = map[MarketplaceEnum]string{
 	LocaleFrance:             "eu-west-1", //France
 	LocaleGermany:            "eu-west-1", //Germany
 	LocaleIndia:              "eu-west-1", //India
+	LocalIreland:             "eu-west-1", //Ireland
 	LocaleItaly:              "eu-west-1", //Italy
 	LocaleJapan:              "us-west-2", //Japan
 	LocaleMexico:             "us-east-1", //Mexico
@@ -113,6 +117,7 @@ var languageMap = map[MarketplaceEnum]string{
 	LocaleFrance:             "fr_FR", //France
 	LocaleGermany:            "de_DE", //Germany
 	LocaleIndia:              "en_IN", //India
+	LocalIreland:             "en_IE", //Ireland
 	LocaleItaly:              "it_IT", //Italy
 	LocaleJapan:              "ja_JP", //Japan
 	LocaleMexico:             "es_MX", //Mexico

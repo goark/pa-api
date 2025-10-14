@@ -18,6 +18,7 @@ func TestMarketplace(t *testing.T) {
 		{name: "www.amazon.fr", marketplace: LocaleFrance, str: "www.amazon.fr", hostName: "webservices.amazon.fr", region: "eu-west-1", language: "fr_FR"},
 		{name: "www.amazon.de", marketplace: LocaleGermany, str: "www.amazon.de", hostName: "webservices.amazon.de", region: "eu-west-1", language: "de_DE"},
 		{name: "www.amazon.in", marketplace: LocaleIndia, str: "www.amazon.in", hostName: "webservices.amazon.in", region: "eu-west-1", language: "en_IN"},
+		{name: "www.amazon.ie", marketplace: LocalIreland, str: "www.amazon.ie", hostName: "webservices.amazon.ie", region: "eu-west-1", language: "en_IE"},
 		{name: "www.amazon.it", marketplace: LocaleItaly, str: "www.amazon.it", hostName: "webservices.amazon.it", region: "eu-west-1", language: "it_IT"},
 		{name: "www.amazon.co.jp", marketplace: LocaleJapan, str: "www.amazon.co.jp", hostName: "webservices.amazon.co.jp", region: "us-west-2", language: "ja_JP"},
 		{name: "www.amazon.com.mx", marketplace: LocaleMexico, str: "www.amazon.com.mx", hostName: "webservices.amazon.com.mx", region: "us-east-1", language: "es_MX"},
