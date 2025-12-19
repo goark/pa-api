@@ -4,14 +4,14 @@ import (
 	paapi5 "github.com/goark/pa-api"
 )
 
-//SearchItems type is embedded Query for SearchItems operation in PA-API v5
+// SearchItems type is embedded Query for SearchItems operation in PA-API v5
 type SearchItems struct {
 	Query
 }
 
 var _ paapi5.Query = (*SearchItems)(nil) //SearchItems is compatible with paapi5.Query interface
 
-//NewSearchItems creates a new SearchItems instance
+// NewSearchItems creates a new SearchItems instance
 func NewSearchItems(marketplace, partnerTag, partnerType string) *SearchItems {
 	q := &SearchItems{*(New(paapi5.SearchItems))}
 	q.Request(Marketplace, marketplace).Request(PartnerTag, partnerTag).Request(PartnerType, partnerType)
@@ -50,7 +50,7 @@ var (
 	searchTypes = []RequestFilter{Actor, Artist, Author, Brand, Keywords, Title}
 )
 
-//Request adds RequestFilter to Query instance
+// Request adds RequestFilter to Query instance
 func (q *SearchItems) Request(request RequestFilter, value interface{}) *SearchItems {
 	if request.findIn(requestsOfSearchItems) {
 		q.With().RequestFilters(RequestMap{request: value})
@@ -58,7 +58,7 @@ func (q *SearchItems) Request(request RequestFilter, value interface{}) *SearchI
 	return q
 }
 
-//Search is a generic search query funtion to obtain informations from the "SearchItems"-operation
+// Search is a generic search query funtion to obtain informations from the "SearchItems"-operation
 func (q *SearchItems) Search(searchType RequestFilter, searchParam string) *SearchItems {
 	if searchType.findIn(searchTypes) {
 		return q.Request(searchType, searchParam)
@@ -66,43 +66,49 @@ func (q *SearchItems) Search(searchType RequestFilter, searchParam string) *Sear
 	return q
 }
 
-//EnableBrowseNodeInfo sets the enableBrowseNodeInfo flag in SearchItems instance
+// EnableBrowseNodeInfo sets the enableBrowseNodeInfo flag in SearchItems instance
 func (q *SearchItems) EnableBrowseNodeInfo() *SearchItems {
 	q.With().BrowseNodeInfo()
 	return q
 }
 
-//EnableImages sets the enableImages flag in SearchItems instance
+// EnableImages sets the enableImages flag in SearchItems instance
 func (q *SearchItems) EnableImages() *SearchItems {
 	q.With().Images()
 	return q
 }
 
-//EnableItemInfo sets the enableItemInfo flag in SearchItems instance
+// EnableItemInfo sets the enableItemInfo flag in SearchItems instance
 func (q *SearchItems) EnableItemInfo() *SearchItems {
 	q.With().ItemInfo()
 	return q
 }
 
-//EnableOffers sets the enableOffers flag in SearchItems instance
+// EnableOffers sets the enableOffers flag in SearchItems instance
 func (q *SearchItems) EnableOffers() *SearchItems {
 	q.With().Offers()
 	return q
 }
 
-//EnableSearchRefinements sets the enableOffers flag in SearchItems instance
+// EnableOffersV2 sets the enableOffersV2 flag in SearchItems instance
+func (q *SearchItems) EnableOffersV2() *SearchItems {
+	q.With().OffersV2()
+	return q
+}
+
+// EnableSearchRefinements sets the enableOffers flag in SearchItems instance
 func (q *SearchItems) EnableSearchRefinements() *SearchItems {
 	q.With().SearchRefinements()
 	return q
 }
 
-//EnableParentASIN sets the enableParentASIN flag in SearchItems instance
+// EnableParentASIN sets the enableParentASIN flag in SearchItems instance
 func (q *SearchItems) EnableParentASIN() *SearchItems {
 	q.With().ParentASIN()
 	return q
 }
 
-//EnableCustomerReviews sets the enableCustomerReviews flag in SearchItems instance
+// EnableCustomerReviews sets the enableCustomerReviews flag in SearchItems instance
 func (q *SearchItems) EnableCustomerReviews() *SearchItems {
 	q.With().CustomerReviews()
 	return q
