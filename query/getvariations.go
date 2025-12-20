@@ -69,6 +69,12 @@ func (q *GetVariations) EnableOffers() *GetVariations {
 	return q
 }
 
+// EnableOffersV2 sets the resource of OffersV2
+func (q *GetVariations) EnableOffersV2() *GetVariations {
+	q.With().OffersV2()
+	return q
+}
+
 // EnableVariationSummary sets the resource of VariationSummary
 func (q *GetVariations) EnableVariationSummary() *GetVariations {
 	q.With().VariationSummary()
