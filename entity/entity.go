@@ -274,7 +274,7 @@ type Item struct {
 				Badge                             string `json:",omitempty"`
 				EarlyAccessDurationInMilliseconds int64  `json:",omitempty"`
 				EndTime                           string `json:",omitempty"`
-				PercentClaimed                    string `json:",omitempty"`
+				PercentClaimed                    int    `json:",omitempty"`
 				StartTime                         string `json:",omitempty"`
 			} `json:",omitempty"`
 			IsBuyboxWinner bool
