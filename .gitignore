@@ -15,3 +15,5 @@
 *.bak
 work/
 .task/
+
+.vscode/
