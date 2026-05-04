@@ -2,12 +2,10 @@ package paapi5
 
 import (
 	"encoding/json"
-	"path"
 	"strconv"
-	"strings"
 )
 
-//Operation is enumeration of PA-API operation
+// Operation is enumeration of Creators API operations.
 type Operation int
 
 var _ json.Marshaler = Operation(0)        //Operation type is compatible with json.Marshaler interface
@@ -28,7 +26,15 @@ var nameMap = map[Operation]string{
 	GetBrowseNodes: "GetBrowseNodes",
 }
 
-//String method is a implementation of fmt.Stringer interface.
+// pathMap holds the Creators API resource path for each operation.
+var pathMap = map[Operation]string{
+	GetItems:       "/catalog/v1/getItems",
+	SearchItems:    "/catalog/v1/searchItems",
+	GetVariations:  "/catalog/v1/getVariations",
+	GetBrowseNodes: "/catalog/v1/getBrowseNodes",
+}
+
+// String method is an implementation of fmt.Stringer interface.
 func (c Operation) String() string {
 	if s, ok := nameMap[c]; ok {
 		return s
@@ -36,25 +42,15 @@ func (c Operation) String() string {
 	return ""
 }
 
-//Path method returns URL path of PA-API operation
+// Path method returns the URL path of the Creators API operation.
 func (c Operation) Path() string {
-	cmd := c.String()
-	if len(cmd) == 0 {
-		return ""
+	if p, ok := pathMap[c]; ok {
+		return p
 	}
-	return path.Join("/paapi5", strings.ToLower(cmd))
+	return ""
 }
 
-//Target method returns taget name of PA-API operation
-func (c Operation) Target() string {
-	cmd := c.String()
-	if len(cmd) == 0 {
-		return ""
-	}
-	return strings.Join([]string{"com.amazon.paapi5.v1.ProductAdvertisingAPIv1", cmd}, ".")
-}
-
-//UnmarshalJSON method implements json.Unmarshaler interface.
+// UnmarshalJSON method implements json.Unmarshaler interface.
 func (c *Operation) UnmarshalJSON(b []byte) error {
 	s := string(b)
 	if ss, err := strconv.Unquote(s); err == nil {
@@ -68,7 +64,7 @@ func (c *Operation) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
-//MarshalJSON method implements the json.Marshaler interface.
+// MarshalJSON method implements the json.Marshaler interface.
 func (c Operation) MarshalJSON() ([]byte, error) {
 	return []byte(strconv.Quote(c.String())), nil
 }

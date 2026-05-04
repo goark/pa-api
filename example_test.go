@@ -13,12 +13,14 @@ func ExampleServer() {
 	fmt.Println("Marketplace:", sv.Marketplace())
 	fmt.Println("Region:", sv.Region())
 	fmt.Println("AcceptLanguage:", sv.AcceptLanguage())
+	fmt.Println("CredentialVersion:", sv.CredentialVersion())
 	fmt.Println("URL:", sv.URL(paapi5.GetItems.Path()))
 	// Output:
 	// Marketplace: www.amazon.com
 	// Region: us-east-1
 	// AcceptLanguage: en_US
-	// URL: https://webservices.amazon.com/paapi5/getitems
+	// CredentialVersion: 2.1
+	// URL: https://creatorsapi.amazon/catalog/v1/getItems
 }
 
 func ExampleNew() {
@@ -26,29 +28,31 @@ func ExampleNew() {
 	fmt.Println("Marketplace:", sv.Marketplace())
 	fmt.Println("Region:", sv.Region())
 	fmt.Println("AcceptLanguage:", sv.AcceptLanguage())
+	fmt.Println("CredentialVersion:", sv.CredentialVersion())
 	fmt.Println("URL:", sv.URL(paapi5.GetItems.Path()))
 	// Output:
 	// Marketplace: www.amazon.co.jp
 	// Region: us-west-2
 	// AcceptLanguage: ja_JP
-	// URL: https://webservices.amazon.co.jp/paapi5/getitems
+	// CredentialVersion: 2.3
+	// URL: https://creatorsapi.amazon/catalog/v1/getItems
 }
 
 func ExampleDefaultClient() {
-	client := paapi5.DefaultClient("mytag-20", "AKIAIOSFODNN7EXAMPLE", "1234567890") //Create default client
+	client := paapi5.DefaultClient("mytag-20", "CRED-ID", "CRED-SECRET") //Create default client
 	fmt.Println("Marketplace:", client.Marketplace())
 	// Output:
 	// Marketplace: www.amazon.com
 }
 
 func ExampleClient() {
-	//Create client for Janan region
+	//Create client for Japan marketplace
 	client := paapi5.New(
 		paapi5.WithMarketplace(paapi5.LocaleJapan),
 	).CreateClient(
 		"mytag-20",
-		"AKIAIOSFODNN7EXAMPLE",
-		"1234567890",
+		"CRED-ID",
+		"CRED-SECRET",
 		paapi5.WithContext(context.Background()),
 		paapi5.WithHttpClient(http.DefaultClient),
 	)

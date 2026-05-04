@@ -10,46 +10,67 @@ func TestMarketplace(t *testing.T) {
 		hostName    string
 		region      string
 		language    string
+		version     string
 	}{
-		{name: "www.amazon.com.au", marketplace: LocaleAustralia, str: "www.amazon.com.au", hostName: "webservices.amazon.com.au", region: "us-west-2", language: "en_AU"},
-		{name: "www.amazon.com.br", marketplace: LocaleBrazil, str: "www.amazon.com.br", hostName: "webservices.amazon.com.br", region: "us-east-1", language: "pt_BR"},
-		{name: "www.amazon.ca", marketplace: LocaleCanada, str: "www.amazon.ca", hostName: "webservices.amazon.ca", region: "us-east-1", language: "en_CA"},
-		{name: "www.amazon.eg", marketplace: LocaleEgypt, str: "www.amazon.eg", hostName: "webservices.amazon.eg", region: "us-west-1", language: "ar_EG"},
-		{name: "www.amazon.fr", marketplace: LocaleFrance, str: "www.amazon.fr", hostName: "webservices.amazon.fr", region: "eu-west-1", language: "fr_FR"},
-		{name: "www.amazon.de", marketplace: LocaleGermany, str: "www.amazon.de", hostName: "webservices.amazon.de", region: "eu-west-1", language: "de_DE"},
-		{name: "www.amazon.in", marketplace: LocaleIndia, str: "www.amazon.in", hostName: "webservices.amazon.in", region: "eu-west-1", language: "en_IN"},
-		{name: "www.amazon.ie", marketplace: LocaleIreland, str: "www.amazon.ie", hostName: "webservices.amazon.ie", region: "eu-west-1", language: "en_IE"},
-		{name: "www.amazon.it", marketplace: LocaleItaly, str: "www.amazon.it", hostName: "webservices.amazon.it", region: "eu-west-1", language: "it_IT"},
-		{name: "www.amazon.co.jp", marketplace: LocaleJapan, str: "www.amazon.co.jp", hostName: "webservices.amazon.co.jp", region: "us-west-2", language: "ja_JP"},
-		{name: "www.amazon.com.mx", marketplace: LocaleMexico, str: "www.amazon.com.mx", hostName: "webservices.amazon.com.mx", region: "us-east-1", language: "es_MX"},
-		{name: "www.amazon.nl", marketplace: LocaleNetherlands, str: "www.amazon.nl", hostName: "webservices.amazon.nl", region: "eu-west-1", language: "nl_NL"},
-		{name: "www.amazon.pl", marketplace: LocalePoland, str: "www.amazon.pl", hostName: "webservices.amazon.pl", region: "eu-west-1", language: "pl_PL"},
-		{name: "www.amazon.sg", marketplace: LocaleSingapore, str: "www.amazon.sg", hostName: "webservices.amazon.sg", region: "us-west-2", language: "en_SG"},
-		{name: "www.amazon.sa", marketplace: LocaleSaudiArabia, str: "www.amazon.sa", hostName: "webservices.amazon.sa", region: "eu-west-1", language: "en_AE"},
-		{name: "www.amazon.es", marketplace: LocaleSpain, str: "www.amazon.es", hostName: "webservices.amazon.es", region: "eu-west-1", language: "es_ES"},
-		{name: "www.amazon.se", marketplace: LocaleSweden, str: "www.amazon.se", hostName: "webservices.amazon.se", region: "eu-west-1", language: "sv_SE"},
-		{name: "www.amazon.com.tr", marketplace: LocaleTurkey, str: "www.amazon.com.tr", hostName: "webservices.amazon.com.tr", region: "eu-west-1", language: "tr_TR"},
-		{name: "www.amazon.ae", marketplace: LocaleUnitedArabEmirates, str: "www.amazon.ae", hostName: "webservices.amazon.ae", region: "eu-west-1", language: "en_AE"},
-		{name: "www.amazon.co.uk", marketplace: LocaleUnitedKingdom, str: "www.amazon.co.uk", hostName: "webservices.amazon.co.uk", region: "eu-west-1", language: "en_GB"},
-		{name: "www.amazon.com", marketplace: LocaleUnitedStates, str: "www.amazon.com", hostName: "webservices.amazon.com", region: "us-east-1", language: "en_US"},
-		{name: "foo.bar", marketplace: LocaleUnknown, str: "www.amazon.com", hostName: "webservices.amazon.com", region: "us-east-1", language: "en_US"},
+		{name: "www.amazon.com.au", marketplace: LocaleAustralia, str: "www.amazon.com.au", hostName: defaultHost, region: "us-west-2", language: "en_AU", version: CredentialVersionFE},
+		{name: "www.amazon.com.br", marketplace: LocaleBrazil, str: "www.amazon.com.br", hostName: defaultHost, region: "us-east-1", language: "pt_BR", version: CredentialVersionNA},
+		{name: "www.amazon.ca", marketplace: LocaleCanada, str: "www.amazon.ca", hostName: defaultHost, region: "us-east-1", language: "en_CA", version: CredentialVersionNA},
+		{name: "www.amazon.eg", marketplace: LocaleEgypt, str: "www.amazon.eg", hostName: defaultHost, region: "us-west-1", language: "ar_EG", version: CredentialVersionEU},
+		{name: "www.amazon.fr", marketplace: LocaleFrance, str: "www.amazon.fr", hostName: defaultHost, region: "eu-west-1", language: "fr_FR", version: CredentialVersionEU},
+		{name: "www.amazon.de", marketplace: LocaleGermany, str: "www.amazon.de", hostName: defaultHost, region: "eu-west-1", language: "de_DE", version: CredentialVersionEU},
+		{name: "www.amazon.in", marketplace: LocaleIndia, str: "www.amazon.in", hostName: defaultHost, region: "eu-west-1", language: "en_IN", version: CredentialVersionEU},
+		{name: "www.amazon.ie", marketplace: LocaleIreland, str: "www.amazon.ie", hostName: defaultHost, region: "eu-west-1", language: "en_IE", version: CredentialVersionEU},
+		{name: "www.amazon.it", marketplace: LocaleItaly, str: "www.amazon.it", hostName: defaultHost, region: "eu-west-1", language: "it_IT", version: CredentialVersionEU},
+		{name: "www.amazon.co.jp", marketplace: LocaleJapan, str: "www.amazon.co.jp", hostName: defaultHost, region: "us-west-2", language: "ja_JP", version: CredentialVersionFE},
+		{name: "www.amazon.com.mx", marketplace: LocaleMexico, str: "www.amazon.com.mx", hostName: defaultHost, region: "us-east-1", language: "es_MX", version: CredentialVersionNA},
+		{name: "www.amazon.nl", marketplace: LocaleNetherlands, str: "www.amazon.nl", hostName: defaultHost, region: "eu-west-1", language: "nl_NL", version: CredentialVersionEU},
+		{name: "www.amazon.pl", marketplace: LocalePoland, str: "www.amazon.pl", hostName: defaultHost, region: "eu-west-1", language: "pl_PL", version: CredentialVersionEU},
+		{name: "www.amazon.sg", marketplace: LocaleSingapore, str: "www.amazon.sg", hostName: defaultHost, region: "us-west-2", language: "en_SG", version: CredentialVersionFE},
+		{name: "www.amazon.sa", marketplace: LocaleSaudiArabia, str: "www.amazon.sa", hostName: defaultHost, region: "eu-west-1", language: "en_AE", version: CredentialVersionEU},
+		{name: "www.amazon.es", marketplace: LocaleSpain, str: "www.amazon.es", hostName: defaultHost, region: "eu-west-1", language: "es_ES", version: CredentialVersionEU},
+		{name: "www.amazon.se", marketplace: LocaleSweden, str: "www.amazon.se", hostName: defaultHost, region: "eu-west-1", language: "sv_SE", version: CredentialVersionEU},
+		{name: "www.amazon.com.tr", marketplace: LocaleTurkey, str: "www.amazon.com.tr", hostName: defaultHost, region: "eu-west-1", language: "tr_TR", version: CredentialVersionEU},
+		{name: "www.amazon.ae", marketplace: LocaleUnitedArabEmirates, str: "www.amazon.ae", hostName: defaultHost, region: "eu-west-1", language: "en_AE", version: CredentialVersionEU},
+		{name: "www.amazon.co.uk", marketplace: LocaleUnitedKingdom, str: "www.amazon.co.uk", hostName: defaultHost, region: "eu-west-1", language: "en_GB", version: CredentialVersionEU},
+		{name: "www.amazon.com", marketplace: LocaleUnitedStates, str: "www.amazon.com", hostName: defaultHost, region: "us-east-1", language: "en_US", version: CredentialVersionNA},
+		{name: "foo.bar", marketplace: LocaleUnknown, str: "www.amazon.com", hostName: defaultHost, region: "us-east-1", language: "en_US", version: CredentialVersionNA},
 	}
 	for _, tc := range testCases {
 		m := MarketplaceOf(tc.name)
 		if m != tc.marketplace {
-			t.Errorf("\"%v\" is \"%v\", want \"%v\"", tc.name, m, tc.marketplace)
+			t.Errorf("%q is %v, want %v", tc.name, m, tc.marketplace)
 		}
 		if m.String() != tc.str {
-			t.Errorf("Marketplace.String() is \"%v\", want \"%v\"", m.String(), tc.str)
+			t.Errorf("Marketplace.String() is %q, want %q", m.String(), tc.str)
 		}
 		if m.HostName() != tc.hostName {
-			t.Errorf("Marketplace.HostName() is \"%v\", want \"%v\"", m.HostName(), tc.hostName)
+			t.Errorf("Marketplace.HostName() is %q, want %q", m.HostName(), tc.hostName)
 		}
 		if m.Region() != tc.region {
-			t.Errorf("Marketplace.Region() is \"%v\", want \"%v\"", m.Region(), tc.region)
+			t.Errorf("Marketplace.Region() is %q, want %q", m.Region(), tc.region)
 		}
 		if m.Language() != tc.language {
-			t.Errorf("Marketplace.Language() is \"%v\", want \"%v\"", m.Language(), tc.language)
+			t.Errorf("Marketplace.Language() is %q, want %q", m.Language(), tc.language)
+		}
+		if m.CredentialVersion() != tc.version {
+			t.Errorf("Marketplace.CredentialVersion() is %q, want %q", m.CredentialVersion(), tc.version)
+		}
+	}
+}
+
+func TestAuthEndpointFor(t *testing.T) {
+	testCases := []struct {
+		version  string
+		endpoint string
+	}{
+		{version: CredentialVersionNA, endpoint: "https://creatorsapi.auth.us-east-1.amazoncognito.com/oauth2/token"},
+		{version: CredentialVersionEU, endpoint: "https://creatorsapi.auth.eu-south-2.amazoncognito.com/oauth2/token"},
+		{version: CredentialVersionFE, endpoint: "https://creatorsapi.auth.us-west-2.amazoncognito.com/oauth2/token"},
+		{version: "9.9", endpoint: ""},
+	}
+	for _, tc := range testCases {
+		if got := AuthEndpointFor(tc.version); got != tc.endpoint {
+			t.Errorf("AuthEndpointFor(%q) is %q, want %q", tc.version, got, tc.endpoint)
 		}
 	}
 }

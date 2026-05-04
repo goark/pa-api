@@ -24,15 +24,15 @@ const (
 	Keywords
 	BrowseNodeIds
 	LanguagesOfPreference
-	Marketplace
+	Marketplace // Deprecated: forwarded as the `x-marketplace` request header by the client; not transmitted in the body.
 	MaxPrice
-	Merchant
+	Merchant // Deprecated: removed in the Creators API; values are silently ignored.
 	MinPrice
 	MinReviewsRating
 	MinSavingPercent
-	OfferCount
+	OfferCount // Deprecated: removed in the Creators API; values are silently ignored.
 	PartnerTag
-	PartnerType
+	PartnerType // Deprecated: not transmitted by the Creators API.
 	Properties
 	SearchIndex
 	SortBy
@@ -57,7 +57,6 @@ var (
 		Condition:     {"Any", "New", "Used", "Collectible", "Refurbished"},
 		DeliveryFlags: {"AmazonGlobal", "FreeShipping", "FulfilledByAmazon", "Prime"},
 		ItemIdType:    {"ASIN"},
-		Merchant:      {"All", "Amazon"},
 		PartnerType:   {"Associates"},
 		SearchIndex:   {"All", "AmazonVideo", "Apparel", "Appliances", "ArtsAndCrafts", "Automotive", "Baby", "Beauty", "Books", "Classical", "Collectibles", "Computers", "DigitalMusic", "Electronics", "EverythingElse", "Fashion", "FashionBaby", "FashionBoys", "FashionGirls", "FashionMen", "FashionWomen", "GardenAndOutdoor", "GiftCards", "GroceryAndGourmetFood", "Handmade", "HealthPersonalCare", "HomeAndKitchen", "Industrial", "Jewelry", "KindleStore", "LocalServices", "Luggage", "LuxuryBeauty", "Magazines", "MobileAndAccessories", "MobileApps", "MoviesAndTV", "Music", "MusicalInstruments", "OfficeProducts", "PetSupplies", "Photo", "Shoes", "Software", "SportsAndOutdoors", "ToolsAndHomeImprovement", "ToysAndGames", "VHS", "VideoGames", "Watches"},
 		SortBy:        {"AvgCustomerReviews", "Featured", "NewestArrivals", "Price:HighToLow", "Price:LowToHigh", "Relevance"},
@@ -71,7 +70,7 @@ func (f RequestFilter) isVlidString(value string) bool {
 		if _, err := strconv.ParseInt(value, 10, 64); err == nil {
 			return true
 		}
-	case Availability, Condition, DeliveryFlags, ItemIdType, Merchant, PartnerType, SearchIndex, SortBy:
+	case Availability, Condition, DeliveryFlags, ItemIdType, PartnerType, SearchIndex, SortBy:
 		for _, param := range validationMap[f] {
 			if value == param {
 				return true
@@ -85,45 +84,42 @@ func (f RequestFilter) isVlidString(value string) bool {
 	return false
 }
 
-// request is the private and anonymously imported struct, which selects the filters to be used
+// request is the private and anonymously imported struct, which selects the
+// filters to be used. Field names use lowerCamelCase JSON tags to match the
+// Amazon Creators API request body shape.
 type request struct {
-	Actor                 string            `json:",omitempty"`
-	Artist                string            `json:",omitempty"`
-	ASIN                  string            `json:",omitempty"`
-	Availability          string            `json:",omitempty"`
-	Author                string            `json:",omitempty"`
-	Brand                 string            `json:",omitempty"`
-	BrowseNodeID          string            `json:"BrowseNodeId,omitempty"`
-	Condition             string            `json:",omitempty"`
-	CurrencyOfPreference  string            `json:",omitempty"`
-	DeliveryFlags         []string          `json:",omitempty"`
-	ItemIds               []string          `json:",omitempty"`
-	ItemIdType            string            `json:",omitempty"`
-	ItemCount             int               `json:",omitempty"`
-	ItemPage              int               `json:",omitempty"`
-	Keywords              string            `json:",omitempty"`
-	BrowseNodeIds         []string          `json:",omitempty"`
-	LanguagesOfPreference []string          `json:",omitempty"`
-	Marketplace           string            `json:",omitempty"`
-	MaxPrice              int               `json:",omitempty"`
-	Merchant              string            `json:",omitempty"`
-	MinPrice              int               `json:",omitempty"`
-	MinReviewsRating      int               `json:",omitempty"`
-	MinSavingPercent      int               `json:",omitempty"`
-	OfferCount            int               `json:",omitempty"`
-	PartnerTag            string            `json:",omitempty"`
-	PartnerType           string            `json:",omitempty"`
-	Properties            map[string]string `json:",omitempty"`
-	SearchIndex           string            `json:",omitempty"`
-	SortBy                string            `json:",omitempty"`
-	Title                 string            `json:",omitempty"`
-	VariationCount        int               `json:",omitempty"`
-	VariationPage         int               `json:",omitempty"`
+	Actor                 string            `json:"actor,omitempty"`
+	Artist                string            `json:"artist,omitempty"`
+	ASIN                  string            `json:"asin,omitempty"`
+	Availability          string            `json:"availability,omitempty"`
+	Author                string            `json:"author,omitempty"`
+	Brand                 string            `json:"brand,omitempty"`
+	BrowseNodeID          string            `json:"browseNodeId,omitempty"`
+	Condition             string            `json:"condition,omitempty"`
+	CurrencyOfPreference  string            `json:"currencyOfPreference,omitempty"`
+	DeliveryFlags         []string          `json:"deliveryFlags,omitempty"`
+	ItemIds               []string          `json:"itemIds,omitempty"`
+	ItemIdType            string            `json:"itemIdType,omitempty"`
+	ItemCount             int               `json:"itemCount,omitempty"`
+	ItemPage              int               `json:"itemPage,omitempty"`
+	Keywords              string            `json:"keywords,omitempty"`
+	BrowseNodeIds         []string          `json:"browseNodeIds,omitempty"`
+	LanguagesOfPreference []string          `json:"languagesOfPreference,omitempty"`
+	MaxPrice              int               `json:"maxPrice,omitempty"`
+	MinPrice              int               `json:"minPrice,omitempty"`
+	MinReviewsRating      int               `json:"minReviewsRating,omitempty"`
+	MinSavingPercent      int               `json:"minSavingPercent,omitempty"`
+	PartnerTag            string            `json:"partnerTag,omitempty"`
+	Properties            map[string]string `json:"properties,omitempty"`
+	SearchIndex           string            `json:"searchIndex,omitempty"`
+	SortBy                string            `json:"sortBy,omitempty"`
+	Title                 string            `json:"title,omitempty"`
+	VariationCount        int               `json:"variationCount,omitempty"`
+	VariationPage         int               `json:"variationPage,omitempty"`
 }
 
 // mapFilter is a helper function for (*filters).WithFilters
 // This function does not check, if the filters to be used match the chosen searchParam/searchType (Actor, Artist etc.pp.)
-// TODO: 	- reduce nesting
 func (r *request) mapFilter(filter RequestFilter, filterValue interface{}) {
 	switch filter {
 	case Actor:
@@ -234,19 +230,15 @@ func (r *request) mapFilter(filter RequestFilter, filterValue interface{}) {
 				r.LanguagesOfPreference = []string{v}
 			}
 		}
-	case Marketplace:
-		if param, ok := filterValue.(string); ok && filter.isVlidString(param) {
-			r.Marketplace = param
-		}
-	case MaxPrice: // Yet, here is not further check if the given price is meaningful (it is assumed to already be the lowest currency denomination, e.g 3241 => 31.41)
+	case Marketplace, Merchant, OfferCount, PartnerType:
+		// Removed in the Creators API: Marketplace travels in the
+		// `x-marketplace` header, PartnerType is implicit, and Merchant /
+		// OfferCount are no longer accepted.
+	case MaxPrice:
 		if price, ok := filterValue.(int); ok && price > 0 {
 			r.MaxPrice = price
 		}
-	case Merchant:
-		if param, ok := filterValue.(string); ok && filter.isVlidString(param) {
-			r.Merchant = param
-		}
-	case MinPrice: // Yet, here is not further check if the given price is meaningful (it is assumed to already be the lowest currency denomination, e.g 3241 => 31.41)
+	case MinPrice:
 		if price, ok := filterValue.(int); ok && price > 0 {
 			r.MinPrice = price
 		}
@@ -258,17 +250,9 @@ func (r *request) mapFilter(filter RequestFilter, filterValue interface{}) {
 		if minSaving, ok := filterValue.(int); ok && 0 < minSaving && minSaving < 100 {
 			r.MinSavingPercent = minSaving
 		}
-	case OfferCount:
-		if oCount, ok := filterValue.(int); ok && oCount > 0 {
-			r.OfferCount = oCount
-		}
 	case PartnerTag:
 		if param, ok := filterValue.(string); ok && filter.isVlidString(param) {
 			r.PartnerTag = param
-		}
-	case PartnerType:
-		if param, ok := filterValue.(string); ok && filter.isVlidString(param) {
-			r.PartnerType = param
 		}
 	case Properties:
 		if params, ok := filterValue.(map[string]string); ok && len(params) > 0 {
