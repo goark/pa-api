@@ -3,6 +3,7 @@ package paapi5
 import (
 	"bytes"
 	"context"
+	"net/http"
 
 	"github.com/goark/errs"
 	"github.com/goark/fetch"
@@ -34,6 +35,7 @@ type Client interface {
 type client struct {
 	server           *Server
 	httpClient       fetch.Client
+	tokenHTTPClient  *http.Client
 	partnerTag       string
 	credentialID     string
 	credentialSecret string

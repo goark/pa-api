@@ -168,13 +168,53 @@ func (s *Server) ContentType() string {
 	return defaultContentType
 }
 
+// HMACAlgorithm returns the HMAC algorithm string used by PA-API v5's
+// SigV4 signing.
+//
+// Deprecated: the Creators API does not use AWS SigV4 signing. This method
+// returns the historical PA-API v5 value for back-compat callers only and
+// will be removed in a future major version.
+func (s *Server) HMACAlgorithm() string {
+	return "AWS4-HMAC-SHA256"
+}
+
+// ServiceName returns the AWS service name used by PA-API v5's SigV4 signing.
+//
+// Deprecated: the Creators API does not use AWS SigV4 signing. This method
+// returns the historical PA-API v5 value for back-compat callers only and
+// will be removed in a future major version.
+func (s *Server) ServiceName() string {
+	return "ProductAdvertisingAPI"
+}
+
+// AWS4Request returns the AWS4 request token used by PA-API v5's SigV4
+// signing.
+//
+// Deprecated: the Creators API does not use AWS SigV4 signing. This method
+// returns the historical PA-API v5 value for back-compat callers only and
+// will be removed in a future major version.
+func (s *Server) AWS4Request() string {
+	return "aws4_request"
+}
+
+// ContentEncoding returns the Content-Encoding header value used by PA-API v5.
+//
+// Deprecated: the Creators API does not use a Content-Encoding header. This
+// method returns the historical PA-API v5 value for back-compat callers only
+// and will be removed in a future major version.
+func (s *Server) ContentEncoding() string {
+	return "amz-1.0"
+}
+
 // CredentialVersion returns the Creators API credential version that
-// matches the configured marketplace's region group.
+// matches the configured marketplace's region group. When the configured
+// Marketplace implementation does not expose CredentialVersion(), the
+// default North America version is returned.
 func (s *Server) CredentialVersion() string {
 	if s == nil {
 		s = New()
 	}
-	return s.marketplace.CredentialVersion()
+	return credentialVersionOf(s.marketplace)
 }
 
 // AuthEndpoint returns the configured (or version-derived) OAuth2 token
@@ -208,7 +248,10 @@ func (s *Server) CreateClient(associateTag, credentialID, credentialSecret strin
 		credentialID:     credentialID,
 		credentialSecret: credentialSecret,
 		version:          s.CredentialVersion(),
-		authEndpoint:     s.AuthEndpoint(),
+		// Carry only an explicit server-level override; leaving the
+		// auto-derived endpoint out lets WithCredentialVersion (applied
+		// below) re-resolve through AuthEndpointFor with the new version.
+		authEndpoint: s.authEndpoint,
 	}
 	for _, opt := range opts {
 		opt(cli)
@@ -216,10 +259,13 @@ func (s *Server) CreateClient(associateTag, credentialID, credentialSecret strin
 	if cli.httpClient == nil {
 		cli.httpClient = fetch.New()
 	}
+	if cli.tokenHTTPClient == nil {
+		cli.tokenHTTPClient = http.DefaultClient
+	}
 	if len(cli.authEndpoint) == 0 {
 		cli.authEndpoint = AuthEndpointFor(cli.version)
 	}
-	cli.auth = newTokenManager(cli.httpClient, cli.authEndpoint, cli.credentialID, cli.credentialSecret)
+	cli.auth = newTokenManager(cli.tokenHTTPClient, cli.authEndpoint, cli.credentialID, cli.credentialSecret)
 	return cli
 }
 
@@ -235,8 +281,9 @@ func WithContext(ctx context.Context) ClientOptFunc {
 // underlying http.Client used for both API and OAuth2 token requests.
 func WithHttpClient(hc *http.Client) ClientOptFunc {
 	return func(c *client) {
-		if c != nil {
+		if c != nil && hc != nil {
 			c.httpClient = fetch.New(fetch.WithHTTPClient(hc))
+			c.tokenHTTPClient = hc
 		}
 	}
 }

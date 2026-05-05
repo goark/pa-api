@@ -3,13 +3,15 @@ package paapi5
 import (
 	"context"
 	"encoding/json"
+	"fmt"
+	"io"
+	"net/http"
 	"net/url"
 	"strings"
 	"sync"
 	"time"
 
 	"github.com/goark/errs"
-	"github.com/goark/fetch"
 )
 
 const (
@@ -20,13 +22,19 @@ const (
 	// oauthTokenLeewaySeconds keeps a small buffer before the announced expiration
 	// to avoid handing out a token that expires mid-request.
 	oauthTokenLeewaySeconds = 30
+	// maxTokenBodyReadBytes caps how much of the token endpoint response body
+	// we read into memory, regardless of Content-Length.
+	maxTokenBodyReadBytes = 8 * 1024
+	// maxTokenBodyContextBytes caps how much of the body we attach to error
+	// contexts so we don't propagate arbitrary endpoint output into logs.
+	maxTokenBodyContextBytes = 256
 )
 
 // tokenManager handles the OAuth2 client_credentials flow against a Cognito
 // token endpoint. Tokens are cached in memory and reused across requests until
 // they are within oauthTokenLeewaySeconds of expiring.
 type tokenManager struct {
-	httpClient   fetch.Client
+	httpClient   *http.Client
 	endpoint     string
 	clientID     string
 	clientSecret string
@@ -37,10 +45,10 @@ type tokenManager struct {
 }
 
 // newTokenManager constructs a tokenManager. httpClient may be nil, in which
-// case fetch.New() is used.
-func newTokenManager(httpClient fetch.Client, endpoint, clientID, clientSecret string) *tokenManager {
+// case http.DefaultClient is used.
+func newTokenManager(httpClient *http.Client, endpoint, clientID, clientSecret string) *tokenManager {
 	if httpClient == nil {
-		httpClient = fetch.New()
+		httpClient = http.DefaultClient
 	}
 	return &tokenManager{
 		httpClient:   httpClient,
@@ -78,39 +86,59 @@ type tokenResponse struct {
 
 // refreshLocked POSTs the client_credentials grant to the configured token
 // endpoint and stores the resulting access token under the existing lock.
+//
+// The token POST is issued via *http.Client directly (not the fetch wrapper)
+// so that we can inspect the HTTP status code and capture a bounded slice of
+// the response body for error diagnostics on non-2xx responses.
 func (t *tokenManager) refreshLocked(ctx context.Context) error {
 	if len(strings.TrimSpace(t.endpoint)) == 0 {
 		return errs.Wrap(ErrNullPointer, errs.WithContext("reason", "empty OAuth2 token endpoint"))
-	}
-	u, err := url.Parse(t.endpoint)
-	if err != nil {
-		return errs.Wrap(err, errs.WithContext("endpoint", t.endpoint))
 	}
 	form := url.Values{}
 	form.Set("grant_type", oauthGrantType)
 	form.Set("client_id", t.clientID)
 	form.Set("client_secret", t.clientSecret)
 	form.Set("scope", oauthScope)
-	resp, err := t.httpClient.PostWithContext(
-		ctx,
-		u,
-		strings.NewReader(form.Encode()),
-		fetch.WithRequestHeaderSet("Content-Type", "application/x-www-form-urlencoded"),
-		fetch.WithRequestHeaderSet("Accept", "application/json"),
-	)
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, t.endpoint, strings.NewReader(form.Encode()))
 	if err != nil {
 		return errs.Wrap(err, errs.WithContext("endpoint", t.endpoint))
 	}
-	body, err := resp.DumpBodyAndClose()
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	req.Header.Set("Accept", "application/json")
+	resp, err := t.httpClient.Do(req)
 	if err != nil {
 		return errs.Wrap(err, errs.WithContext("endpoint", t.endpoint))
+	}
+	defer func() { _ = resp.Body.Close() }()
+	body, readErr := io.ReadAll(io.LimitReader(resp.Body, maxTokenBodyReadBytes))
+	if readErr != nil {
+		return errs.Wrap(readErr,
+			errs.WithContext("endpoint", t.endpoint),
+			errs.WithContext("status", resp.StatusCode),
+		)
+	}
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		return errs.Wrap(
+			fmt.Errorf("%w: HTTP %d", ErrHTTPStatus, resp.StatusCode),
+			errs.WithContext("endpoint", t.endpoint),
+			errs.WithContext("status", resp.StatusCode),
+			errs.WithContext("body", truncateForLog(body, maxTokenBodyContextBytes)),
+		)
 	}
 	tr := tokenResponse{}
 	if err := json.Unmarshal(body, &tr); err != nil {
-		return errs.Wrap(err, errs.WithContext("endpoint", t.endpoint), errs.WithContext("body", string(body)))
+		return errs.Wrap(err,
+			errs.WithContext("endpoint", t.endpoint),
+			errs.WithContext("status", resp.StatusCode),
+			errs.WithContext("body", truncateForLog(body, maxTokenBodyContextBytes)),
+		)
 	}
 	if tr.AccessToken == "" {
-		return errs.Wrap(ErrNoData, errs.WithContext("endpoint", t.endpoint), errs.WithContext("body", string(body)))
+		return errs.Wrap(ErrNoData,
+			errs.WithContext("endpoint", t.endpoint),
+			errs.WithContext("status", resp.StatusCode),
+			errs.WithContext("body", truncateForLog(body, maxTokenBodyContextBytes)),
+		)
 	}
 	expiresIn := tr.ExpiresIn
 	if expiresIn <= 0 {
@@ -123,6 +151,16 @@ func (t *tokenManager) refreshLocked(ctx context.Context) error {
 	t.accessToken = tr.AccessToken
 	t.expiresAt = time.Now().Add(time.Duration(expiresIn-leeway) * time.Second)
 	return nil
+}
+
+// truncateForLog returns a string copy of b clipped to max bytes, with a
+// trailing marker if truncation occurred. Used to keep arbitrary token
+// endpoint output out of logs at full length.
+func truncateForLog(b []byte, max int) string {
+	if len(b) <= max {
+		return string(b)
+	}
+	return string(b[:max]) + "...(truncated)"
 }
 
 // authorizationHeader returns the value of the Authorization header expected

@@ -3,6 +3,7 @@ package paapi5
 import (
 	"encoding/json"
 	"strconv"
+	"strings"
 )
 
 // Operation is enumeration of Creators API operations.
@@ -48,6 +49,21 @@ func (c Operation) Path() string {
 		return p
 	}
 	return ""
+}
+
+// Target returns the value historically used for the X-Amz-Target header
+// under PA-API v5 SigV4 signing.
+//
+// Deprecated: the Creators API does not use the X-Amz-Target header (the
+// operation is selected via URL path; see Path). This method returns the
+// historical PA-API v5 value for back-compat callers only and will be
+// removed in a future major version.
+func (c Operation) Target() string {
+	cmd := c.String()
+	if len(cmd) == 0 {
+		return ""
+	}
+	return strings.Join([]string{"com.amazon.paapi5.v1.ProductAdvertisingAPIv1", cmd}, ".")
 }
 
 // UnmarshalJSON method implements json.Unmarshaler interface.

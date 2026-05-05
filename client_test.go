@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -195,6 +196,82 @@ func TestClientTokenError(t *testing.T) {
 	_, err := c.RequestContext(context.Background(), q)
 	if err == nil {
 		t.Fatal("expected token error, got nil")
+	}
+	if !errors.Is(err, ErrHTTPStatus) {
+		t.Errorf("error chain missing ErrHTTPStatus: %v", err)
+	}
+	if msg := err.Error(); !strings.Contains(msg, "401") {
+		t.Errorf("error %q should mention HTTP status 401", msg)
+	}
+	// The token endpoint body and status code travel via errs context;
+	// the JSON encoding via %+v exposes them.
+	encoded := fmt.Sprintf("%+v", err)
+	if !strings.Contains(encoded, "invalid_client") {
+		t.Errorf("encoded error %q should include token endpoint body", encoded)
+	}
+}
+
+func TestClientTokenErrorBodyTruncated(t *testing.T) {
+	huge := strings.Repeat("X", maxTokenBodyContextBytes*4)
+	tokenHandler := func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+		_, _ = w.Write([]byte(huge))
+	}
+	apiHandler := func(w http.ResponseWriter, r *http.Request) {
+		t.Errorf("api endpoint should not be called when token fails")
+	}
+	_, _, sv := newServers(t, tokenHandler, apiHandler)
+	c := sv.CreateClient("tag", "id", "secret")
+
+	q := stubQuery{op: GetItems, payload: []byte("{}")}
+	_, err := c.RequestContext(context.Background(), q)
+	if err == nil {
+		t.Fatal("expected token error, got nil")
+	}
+	encoded := fmt.Sprintf("%+v", err)
+	if !strings.Contains(encoded, "...(truncated)") {
+		t.Errorf("encoded error should contain truncation marker for oversized body, got %q", encoded)
+	}
+	if strings.Count(encoded, "X") > maxTokenBodyContextBytes+16 {
+		t.Errorf("encoded error contains more X bytes than the body cap (%d): %d", maxTokenBodyContextBytes, strings.Count(encoded, "X"))
+	}
+}
+
+// TestClientWithCredentialVersionPicksMatchingAuthEndpoint is a regression
+// test for the bug where CreateClient eagerly cached the marketplace-derived
+// auth endpoint before applying client options, so WithCredentialVersion
+// silently authenticated against the wrong Cognito endpoint.
+func TestClientWithCredentialVersionPicksMatchingAuthEndpoint(t *testing.T) {
+	// Server defaults to NA (US marketplace), but the caller explicitly
+	// switches to EU credential version via WithCredentialVersion. The
+	// resolved authEndpoint must follow the version override.
+	c := New().CreateClient("tag", "id", "secret",
+		WithCredentialVersion(CredentialVersionEU),
+	)
+	cc, ok := c.(*client)
+	if !ok {
+		t.Fatalf("Client is not *client: %T", c)
+	}
+	if got, want := cc.version, CredentialVersionEU; got != want {
+		t.Errorf("client.version = %q, want %q", got, want)
+	}
+	if got, want := cc.authEndpoint, AuthEndpointFor(CredentialVersionEU); got != want {
+		t.Errorf("client.authEndpoint = %q, want %q (must follow WithCredentialVersion)", got, want)
+	}
+}
+
+// TestClientWithAuthEndpointBeatsCredentialVersion verifies that an explicit
+// WithAuthEndpoint override survives even when a credential version would
+// otherwise resolve a different default endpoint.
+func TestClientWithAuthEndpointBeatsCredentialVersion(t *testing.T) {
+	const explicit = "http://staging.example.test/oauth2/token"
+	c := New().CreateClient("tag", "id", "secret",
+		WithCredentialVersion(CredentialVersionFE),
+		WithAuthEndpoint(explicit),
+	)
+	cc := c.(*client)
+	if got := cc.authEndpoint; got != explicit {
+		t.Errorf("client.authEndpoint = %q, want %q (explicit override)", got, explicit)
 	}
 }
 

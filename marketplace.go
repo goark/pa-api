@@ -9,13 +9,36 @@ const (
 	CredentialVersionFE = "2.3" // Far East (JP, SG, AU)
 )
 
-// Marketplace is interface class of locale information.
+// Marketplace is the interface implemented by locale providers.
+//
+// Note: this interface is deliberately kept compatible with the pre-Creators
+// API contract. The Creators API credential version is reported via the
+// optional credentialVersioner type-assertion (satisfied by MarketplaceEnum)
+// rather than added to this interface, so external implementations of
+// Marketplace continue to compile unchanged.
 type Marketplace interface {
 	String() string
 	HostName() string
 	Region() string
 	Language() string
+}
+
+// credentialVersioner is an optional, internal interface satisfied by
+// Marketplace implementations that can report their Creators API credential
+// version (the region group code: 2.1, 2.2, or 2.3). MarketplaceEnum
+// satisfies it; external implementations may opt in.
+type credentialVersioner interface {
 	CredentialVersion() string
+}
+
+// credentialVersionOf returns the Creators API credential version associated
+// with the supplied Marketplace, falling back to the default region (NA)
+// when the implementation does not satisfy credentialVersioner.
+func credentialVersionOf(m Marketplace) string {
+	if cv, ok := m.(credentialVersioner); ok {
+		return cv.CredentialVersion()
+	}
+	return CredentialVersionNA
 }
 
 // MarketplaceEnum is enumeration of locale information.

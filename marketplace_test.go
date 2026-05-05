@@ -52,9 +52,28 @@ func TestMarketplace(t *testing.T) {
 		if m.Language() != tc.language {
 			t.Errorf("Marketplace.Language() is %q, want %q", m.Language(), tc.language)
 		}
-		if m.CredentialVersion() != tc.version {
-			t.Errorf("Marketplace.CredentialVersion() is %q, want %q", m.CredentialVersion(), tc.version)
+		// CredentialVersion is reported via the optional credentialVersioner
+		// interface (satisfied by MarketplaceEnum), not the Marketplace
+		// interface itself, so it must be type-asserted or fetched via the
+		// package-level credentialVersionOf helper.
+		if got := credentialVersionOf(m); got != tc.version {
+			t.Errorf("credentialVersionOf(%q) is %q, want %q", tc.name, got, tc.version)
 		}
+	}
+}
+
+// fakeMarketplace omits CredentialVersion entirely; credentialVersionOf must
+// fall back to the default NA version for these implementations.
+type fakeMarketplace struct{}
+
+func (fakeMarketplace) String() string   { return "fake.amazon" }
+func (fakeMarketplace) HostName() string { return "fake.amazon" }
+func (fakeMarketplace) Region() string   { return "us-east-1" }
+func (fakeMarketplace) Language() string { return "en_US" }
+
+func TestCredentialVersionOfFallsBackForExternalMarketplaces(t *testing.T) {
+	if got, want := credentialVersionOf(fakeMarketplace{}), CredentialVersionNA; got != want {
+		t.Errorf("credentialVersionOf(fakeMarketplace) = %q, want %q (default NA fallback)", got, want)
 	}
 }
 
