@@ -47,7 +47,6 @@ The library keeps several legacy knobs for source compatibility, but the Creator
 | `PartnerType` (`Associates`) | Explicit body parameter | Ignored. Partner type is implicit |
 | `Merchant` | Offer filtering selector | Ignored |
 | `OfferCount` | Offer summary limiter | Ignored |
-| `EnableVariationSummary()` | Requested variation summary resource | No-op (resource is not exposed) |
 
 ### Marketplace routing precedence
 
