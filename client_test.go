@@ -288,6 +288,17 @@ func TestClientPayloadError(t *testing.T) {
 	}
 }
 
+func TestClientNilQueryError(t *testing.T) {
+	c := New().CreateClient("tag", "id", "secret")
+	_, err := c.RequestContext(context.Background(), nil)
+	if err == nil {
+		t.Fatal("expected nil query error, got nil")
+	}
+	if !errors.Is(err, ErrNullPointer) {
+		t.Errorf("error chain missing ErrNullPointer: %v", err)
+	}
+}
+
 func TestAuthorizationHeader(t *testing.T) {
 	if got, want := authorizationHeader("abc", "2.1"), "Bearer abc, Version 2.1"; got != want {
 		t.Errorf("authorizationHeader = %q, want %q", got, want)

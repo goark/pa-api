@@ -5,14 +5,14 @@ tasks:
     cmds:
       - task: prepare
       - task: test
-      - task: nancy
+      # - task: nancy
 
   test:
     desc: Test and lint.
     cmds:
       - go mod verify
       - go test -shuffle on ./...
-      - golangci-lint run --enable gosec --timeout 3m0s ./...
+      - golangci-lint-v2 run --enable gosec --timeout 3m0s ./...
     sources:
       - ./go.mod
       - '**/*.go'

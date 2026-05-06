@@ -36,6 +36,11 @@ func AuthEndpointFor(version string) string {
 	return authEndpointMap[version]
 }
 
+func isSupportedCredentialVersion(version string) bool {
+	_, ok := authEndpointMap[version]
+	return ok
+}
+
 // Server type is a configuration of the Amazon Creators API service.
 type Server struct {
 	scheme       string
@@ -293,7 +298,7 @@ func WithHttpClient(hc *http.Client) ClientOptFunc {
 // for a different region than the configured marketplace would imply.
 func WithCredentialVersion(version string) ClientOptFunc {
 	return func(c *client) {
-		if c != nil && len(version) > 0 {
+		if c != nil && isSupportedCredentialVersion(version) {
 			c.version = version
 		}
 	}

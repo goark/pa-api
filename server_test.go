@@ -105,6 +105,20 @@ func TestServerHostOverride(t *testing.T) {
 	}
 }
 
+func TestWithCredentialVersionIgnoresUnsupportedValue(t *testing.T) {
+	c := New().CreateClient("tag", "id", "secret", WithCredentialVersion("9.9"))
+	cc, ok := c.(*client)
+	if !ok {
+		t.Fatalf("Client is not *client: %T", c)
+	}
+	if got, want := cc.version, CredentialVersionNA; got != want {
+		t.Errorf("client.version = %q, want %q", got, want)
+	}
+	if got, want := cc.authEndpoint, AuthEndpointFor(CredentialVersionNA); got != want {
+		t.Errorf("client.authEndpoint = %q, want %q", got, want)
+	}
+}
+
 /* Copyright 2019 Spiegel and contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
