@@ -6,7 +6,7 @@ import (
 
 // TestDecodeGetVariationsResponse exercises the lowerCamelCase Creators API
 // response shape for GetVariations, including the variationSummary block
-// (pageCount, variationCount, price, variationDimensions) and Image.HiRes.
+// (pageCount, variationCount, price, variationDimensions).
 func TestDecodeGetVariationsResponse(t *testing.T) {
 	body := []byte(`{
   "variationsResult": {
@@ -20,8 +20,7 @@ func TestDecodeGetVariationsResponse(t *testing.T) {
           "primary": {
             "small":  {"url": "https://example.test/s.jpg", "height": 75,  "width": 75},
             "medium": {"url": "https://example.test/m.jpg", "height": 160, "width": 160},
-            "large":  {"url": "https://example.test/l.jpg", "height": 500, "width": 500},
-            "hiRes":  {"url": "https://example.test/h.jpg", "height": 2000,"width": 2000}
+            "large":  {"url": "https://example.test/l.jpg", "height": 500, "width": 500}
           }
         },
         "offersV2": {
@@ -84,16 +83,16 @@ func TestDecodeGetVariationsResponse(t *testing.T) {
 	if got, want := vs.VariationDimensions[0].Name, "size_name"; got != want {
 		t.Errorf("VariationDimensions[0].Name = %q, want %q", got, want)
 	}
-	// Items: hiRes image and isBuyBoxWinner / violatesMAP on V2 listing.
+	// Items: primary image and isBuyBoxWinner / violatesMAP on V2 listing.
 	if got, want := len(resp.VariationsResult.Items), 1; got != want {
 		t.Fatalf("len(Items) = %d, want %d", got, want)
 	}
 	item := resp.VariationsResult.Items[0]
-	if item.Images == nil || item.Images.Primary == nil || item.Images.Primary.HiRes == nil {
-		t.Fatal("Images.Primary.HiRes is nil")
+	if item.Images == nil || item.Images.Primary == nil || item.Images.Primary.Large == nil {
+		t.Fatal("Images.Primary.Large is nil")
 	}
-	if got, want := item.Images.Primary.HiRes.URL, "https://example.test/h.jpg"; got != want {
-		t.Errorf("HiRes.URL = %q, want %q", got, want)
+	if got, want := item.Images.Primary.Large.URL, "https://example.test/l.jpg"; got != want {
+		t.Errorf("Images.Primary.Large.URL = %q, want %q", got, want)
 	}
 	if item.OffersV2 == nil || item.OffersV2.Listings == nil || len(*item.OffersV2.Listings) != 1 {
 		t.Fatal("OffersV2.Listings missing/empty")

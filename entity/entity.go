@@ -121,13 +121,11 @@ type Item struct {
 			Large  *Image `json:",omitempty"`
 			Medium *Image `json:",omitempty"`
 			Small  *Image `json:",omitempty"`
-			HiRes  *Image `json:"hiRes,omitempty"`
 		} `json:",omitempty"`
 		Variants []*struct {
 			Large  *Image `json:",omitempty"`
 			Medium *Image `json:",omitempty"`
 			Small  *Image `json:",omitempty"`
-			HiRes  *Image `json:"hiRes,omitempty"`
 		} `json:",omitempty"`
 	} `json:",omitempty"`
 	ItemInfo *struct {

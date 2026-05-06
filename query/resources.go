@@ -29,11 +29,9 @@ var (
 		"images.primary.small",
 		"images.primary.medium",
 		"images.primary.large",
-		"images.primary.highRes",
 		"images.variants.small",
 		"images.variants.medium",
 		"images.variants.large",
-		"images.variants.highRes",
 	}
 	//ItemInfo resource
 	resourcesItemInfo = []string{

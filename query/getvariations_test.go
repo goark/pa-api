@@ -88,7 +88,7 @@ func TestResourcesInGetVariations(t *testing.T) {
 		str string
 	}{
 		{q: NewGetVariations("", "", "").EnableBrowseNodeInfo(), str: `{"resources":["browseNodeInfo.browseNodes","browseNodeInfo.browseNodes.ancestor","browseNodeInfo.browseNodes.salesRank","browseNodeInfo.websiteSalesRank"]}`},
-		{q: NewGetVariations("", "", "").EnableImages(), str: `{"resources":["images.primary.small","images.primary.medium","images.primary.large","images.primary.highRes","images.variants.small","images.variants.medium","images.variants.large","images.variants.highRes"]}`},
+		{q: NewGetVariations("", "", "").EnableImages(), str: `{"resources":["images.primary.small","images.primary.medium","images.primary.large","images.variants.small","images.variants.medium","images.variants.large"]}`},
 		{q: NewGetVariations("", "", "").EnableItemInfo(), str: `{"resources":["itemInfo.byLineInfo","itemInfo.contentInfo","itemInfo.contentRating","itemInfo.classifications","itemInfo.externalIds","itemInfo.features","itemInfo.manufactureInfo","itemInfo.productInfo","itemInfo.technicalInfo","itemInfo.title","itemInfo.tradeInInfo"]}`},
 		{q: NewGetVariations("", "", "").EnableOffers(), str: `{"resources":["offersV2.listings.availability","offersV2.listings.condition","offersV2.listings.dealDetails","offersV2.listings.isBuyBoxWinner","offersV2.listings.loyaltyPoints","offersV2.listings.merchantInfo","offersV2.listings.price","offersV2.listings.type"]}`},
 		{q: NewGetVariations("", "", "").EnableOffersV2(), str: `{"resources":["offersV2.listings.availability","offersV2.listings.condition","offersV2.listings.dealDetails","offersV2.listings.isBuyBoxWinner","offersV2.listings.loyaltyPoints","offersV2.listings.merchantInfo","offersV2.listings.price","offersV2.listings.type"]}`},
