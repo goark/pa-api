@@ -1,79 +1,94 @@
-# [pa-api] -- APIs for Amazon Product Advertising API v5 by Golang
+# [pa-api] -- Go client for the Amazon Creators API
 
 [![check vulns](https://github.com/goark/pa-api/workflows/vulns/badge.svg)](https://github.com/goark/pa-api/actions)
 [![lint status](https://github.com/goark/pa-api/workflows/lint/badge.svg)](https://github.com/goark/pa-api/actions)
 [![GitHub license](https://img.shields.io/badge/license-Apache%202-blue.svg)](https://raw.githubusercontent.com/goark/pa-api/master/LICENSE)
 [![GitHub release](https://img.shields.io/github/release/goark/pa-api.svg)](https://github.com/goark/pa-api/releases/latest)
 
-This package is required Go 1.16 or later.
+A Go client for [Amazon's Creators API][creatorsapi-docs], the OAuth2-based replacement for the now-retired Product Advertising API v5 (PA-API). The package keeps the import path `github.com/goark/pa-api` and the package name `paapi5` so existing call sites need only minor changes; under the hood the wire protocol, authentication and host all change.
 
-**Migrated repository to [github.com/goark/pa-api][pa-api]**
+This package requires Go 1.21 or later.
+
+## Migrating from PA-API v5
+
+Amazon retired PA-API v5 on 2026-05-15 and replaced it with the Creators API. The two big differences:
+
+| | PA-API v5 (old) | Creators API (new) |
+|---|---|---|
+| Host | `webservices.amazon.<tld>` per locale | Single `creatorsapi.amazon` for every marketplace |
+| Marketplace selection | `Marketplace` body field | `x-marketplace` request header |
+| Auth | AWS SigV4 (Access Key + Secret Key) | OAuth2 client_credentials (Credential ID + Credential Secret + Version) |
+| Body keys | `PascalCase` | `lowerCamelCase` |
+| Resource enums | `Images.Primary.Medium` | `images.primary.medium` |
+| `Offers` (V1) | Available | Removed; use `OffersV2` |
+
+Code-level changes you should expect when upgrading:
+
+- **`CreateClient` / `DefaultClient` arguments**: the second/third positional arguments are now `credentialID` and `credentialSecret` (Creators API credentials issued via Associates Central) instead of AWS access/secret keys.
+- **`q.EnableOffers()`** is now an alias for `q.EnableOffersV2()` with a deprecation comment; the V1 Offers resource is gone.
+- **`Server.Region()` is deprecated** and is no longer used by the client; it remains for back-compat callers that record it as metadata.
+- **Response JSON keys** returned by the Creators API are lowerCamelCase. The existing Go field names in `entity.Response` decode case-insensitively from these new keys, but if your code re-serialises a `Response` value you'll see PascalCase output for some fields and lowerCamelCase for the explicitly tagged ones (notably `id`).
+- **`SearchItems` filters** `Marketplace`, `PartnerType`, `Merchant`, and `OfferCount` are silently ignored — those fields are not accepted by the Creators API. Existing code using those filters compiles but the values are dropped.
+
+### Getting Creators API credentials
+
+Only the primary Amazon Associates account owner can mint credentials. From [Associates Central][creatorsapi-portal] go to **Tools** → **Creators API** → **Create Application**, then **Add New Credential**. Copy the Credential Secret immediately — it is only shown once. Note the **Credential Version** (`2.1` for North America, `2.2` for Europe, `2.3` for Far East) — you'll need it if you call multiple regions from the same process.
 
 ## Usage
 
-### Create PA-API Information
-
-Default PA-API information.
+### Create a server configuration
 
 ```go
-sv := paapi5.New() //Create default server
+sv := paapi5.New() // default: US marketplace, NA credential version 2.1
 fmt.Println("Marketplace:", sv.Marketplace())
-fmt.Println("Region:", sv.Region())
-fmt.Println("AcceptLanguage:", sv.AcceptLanguage())
+fmt.Println("CredentialVersion:", sv.CredentialVersion())
 fmt.Println("URL:", sv.URL(paapi5.GetItems.Path()))
 // Output:
 // Marketplace: www.amazon.com
-// Region: us-east-1
-// AcceptLanguage: en_US
-// URL: https://webservices.amazon.com/paapi5/getitems
+// CredentialVersion: 2.1
+// URL: https://creatorsapi.amazon/catalog/v1/getItems
 ```
 
-PA-API information for Japan region.
+For another marketplace:
 
 ```go
-sv := paapi5.New(paapi5.WithMarketplace(paapi5.LocaleJapan)) //Create server in Japan region
+sv := paapi5.New(paapi5.WithMarketplace(paapi5.LocaleJapan)) // Japan -> credential version 2.3
 fmt.Println("Marketplace:", sv.Marketplace())
-fmt.Println("Region:", sv.Region())
-fmt.Println("AcceptLanguage:", sv.AcceptLanguage())
-fmt.Println("URL:", sv.URL(paapi5.GetItems.Path()))
+fmt.Println("CredentialVersion:", sv.CredentialVersion())
 // Output:
 // Marketplace: www.amazon.co.jp
-// Region: us-west-2
-// AcceptLanguage: ja_JP
-// URL: https://webservices.amazon.co.jp/paapi5/getitems
+// CredentialVersion: 2.3
 ```
 
-### Create Client Instance
+The credential version is auto-derived from the configured marketplace's region group. Override it explicitly with `paapi5.WithCredentialVersion("2.2")` when needed.
 
-Create default client instance.
+### Create a client
 
 ```go
-client := paapi5.DefaultClient("mytag-20", "AKIAIOSFODNN7EXAMPLE", "1234567890") //Create default client
+client := paapi5.DefaultClient("mytag-20", "YOUR_CREDENTIAL_ID", "YOUR_CREDENTIAL_SECRET")
 fmt.Println("Marketplace:", client.Marketplace())
 // Output:
 // Marketplace: www.amazon.com
 ```
 
-Create client instance for Japan region.
+For a different marketplace plus a custom `*http.Client`:
 
 ```go
-//Create client for Janan region
 client := paapi5.New(
     paapi5.WithMarketplace(paapi5.LocaleJapan),
 ).CreateClient(
     "mytag-20",
-    "AKIAIOSFODNN7EXAMPLE",
-    "1234567890",
+    "YOUR_CREDENTIAL_ID",
+    "YOUR_CREDENTIAL_SECRET",
     paapi5.WithHttpClient(http.DefaultClient),
 )
-fmt.Println("Marketplace:", client.Marketplace())
-// Output:
-// Marketplace: www.amazon.co.jp
 ```
+
+The client transparently obtains and caches an OAuth2 access token from the appropriate Cognito endpoint (`expires_in` minus a 30-second leeway) and forwards it to the API as `Authorization: Bearer <token>, Version <2.x>`.
 
 ## Sample code
 
-### Operation GetItems
+### GetItems
 
 ```go
 package main
@@ -88,79 +103,26 @@ import (
 )
 
 func main() {
-    //Create client
     client := paapi5.New(
         paapi5.WithMarketplace(paapi5.LocaleJapan),
     ).CreateClient(
         "mytag-20",
-        "AKIAIOSFODNN7EXAMPLE",
-        "1234567890",
+        "YOUR_CREDENTIAL_ID",
+        "YOUR_CREDENTIAL_SECRET",
     )
 
-    //Make query
     q := query.NewGetItems(
         client.Marketplace(),
         client.PartnerTag(),
         client.PartnerType(),
     ).ASINs([]string{"B07YCM5K55"}).EnableImages().EnableItemInfo().EnableParentASIN()
 
-    //Requet and response
     body, err := client.RequestContext(context.Background(), q)
     if err != nil {
         fmt.Printf("%+v\n", err)
         return
     }
-    //io.Copy(os.Stdout, bytes.NewReader(body))
 
-    //Decode JSON
-    res, err := entity.DecodeResponse(body)
-    if err != nil {
-        fmt.Printf("%+v\n", err)
-        return
-    }
-    fmt.Println(res.String())
-}
-```
-### Operation GetVariations
-
-```go
-package main
-
-import (
-    "context"
-    "fmt"
-
-    paapi5 "github.com/goark/pa-api"
-    "github.com/goark/pa-api/entity"
-    "github.com/goark/pa-api/query"
-)
-
-func main() {
-    //Create client
-    client := paapi5.New(
-        paapi5.WithMarketplace(paapi5.LocaleJapan),
-    ).CreateClient(
-        "mytag-20",
-        "AKIAIOSFODNN7EXAMPLE",
-        "1234567890",
-    )
-
-    //Make query
-    q := query.NewGetVariations(
-        client.Marketplace(),
-        client.PartnerTag(),
-        client.PartnerType(),
-    ).ASIN("B07YCM5K55").EnableImages().EnableItemInfo().EnableParentASIN()
-
-    //Request and response
-    body, err := client.RequestContext(context.Background(), q)
-    if err != nil {
-        fmt.Printf("%+v\n", err)
-        return
-    }
-    //io.Copy(os.Stdout, bytes.NewReader(body))
-
-    //Decode JSON
     res, err := entity.DecodeResponse(body)
     if err != nil {
         fmt.Printf("%+v\n", err)
@@ -170,101 +132,40 @@ func main() {
 }
 ```
 
-### Operation SearchItems
+### GetVariations
 
 ```go
-package main
+q := query.NewGetVariations(
+    client.Marketplace(),
+    client.PartnerTag(),
+    client.PartnerType(),
+).ASIN("B07YCM5K55").EnableImages().EnableItemInfo().EnableParentASIN()
 
-import (
-    "context"
-    "fmt"
-
-    paapi5 "github.com/goark/pa-api"
-    "github.com/goark/pa-api/entity"
-    "github.com/goark/pa-api/query"
-)
-
-func main() {
-    //Create client
-    client := paapi5.New(
-        paapi5.WithMarketplace(paapi5.LocaleJapan),
-    ).CreateClient(
-        "mytag-20",
-        "AKIAIOSFODNN7EXAMPLE",
-        "1234567890",
-    )
-
-    //Make query
-    q := query.NewSearchItems(
-        client.Marketplace(),
-        client.PartnerTag(),
-        client.PartnerType(),
-    ).Search(query.Keywords, "数学ガール").EnableImages().EnableItemInfo().EnableParentASIN()
-
-    //Request and response
-    body, err := client.RequestContext(context.Background(), q)
-    if err != nil {
-        fmt.Printf("%+v\n", err)
-        return
-    }
-    //io.Copy(os.Stdout, bytes.NewReader(body))
-
-    //Decode JSON
-    res, err := entity.DecodeResponse(body)
-    if err != nil {
-        fmt.Printf("%+v\n", err)
-        return
-    }
-    fmt.Println(res.String())
-}
+body, err := client.RequestContext(context.Background(), q)
 ```
 
-### Operation GetBrowseNodes
+### SearchItems
 
 ```go
-package main
+q := query.NewSearchItems(
+    client.Marketplace(),
+    client.PartnerTag(),
+    client.PartnerType(),
+).Search(query.Keywords, "数学ガール").EnableImages().EnableItemInfo().EnableParentASIN()
 
-import (
-    "context"
-    "fmt"
+body, err := client.RequestContext(context.Background(), q)
+```
 
-    paapi5 "github.com/goark/pa-api"
-    "github.com/goark/pa-api/entity"
-    "github.com/goark/pa-api/query"
-)
+### GetBrowseNodes
 
-func main() {
-    //Create client
-    client := paapi5.New(
-        paapi5.WithMarketplace(paapi5.LocaleJapan),
-    ).CreateClient(
-        "mytag-20",
-        "AKIAIOSFODNN7EXAMPLE",
-        "1234567890",
-    )
+```go
+q := query.NewGetBrowseNodes(
+    client.Marketplace(),
+    client.PartnerTag(),
+    client.PartnerType(),
+).BrowseNodeIds([]string{"3040", "3045"}).EnableBrowseNodes()
 
-    //Make query
-    q := query.NewGetBrowseNodes(
-        client.Marketplace(),
-        client.PartnerTag(),
-        client.PartnerType(),
-    ).BrowseNodeIds([]string{"3040", "3045"}).EnableBrowseNodes()
-
-    //Request and response
-    body, err := client.RequestContext(context.Background(), q)
-    if err != nil {
-        fmt.Printf("%+v\n", err)
-        return
-    }
-
-    //Decode JSON
-    res, err := entity.DecodeResponse(body)
-    if err != nil {
-        fmt.Printf("%+v\n", err)
-        return
-    }
-    fmt.Println(res.String())
-}
+body, err := client.RequestContext(context.Background(), q)
 ```
 
 ## Contributors
@@ -273,6 +174,9 @@ Many thanks for [contributors](https://github.com/goark/pa-api/graphs/contributo
 
 ## Links
 
-- [Go 言語用 PA-API v5 クライアント・パッケージ — リリース情報 | text.Baldanders.info](https://text.baldanders.info/release/pa-api-v5/)
+- [Amazon Creators API documentation][creatorsapi-docs]
+- [Associates Central — Creators API portal][creatorsapi-portal]
 
-[pa-api]: https://github.com/goark/pa-api "goark/pa-api: APIs for Amazon Product Advertising API v5 by Golang"
+[pa-api]: https://github.com/goark/pa-api "goark/pa-api: Go client for the Amazon Creators API"
+[creatorsapi-docs]: https://affiliate-program.amazon.com/creatorsapi/docs/en-us/introduction
+[creatorsapi-portal]: https://affiliate-program.amazon.com/creatorsapi

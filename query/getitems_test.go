@@ -9,12 +9,15 @@ func TestGetItems(t *testing.T) {
 		q   *GetItems
 		str string
 	}{
-		{q: NewGetItems("foo.bar", "mytag-20", "Associates"), str: `{"Operation":"GetItems","Marketplace":"foo.bar","PartnerTag":"mytag-20","PartnerType":"Associates"}`},
-		{q: NewGetItems("foo.bar", "mytag-20", "Associates").ASINs([]string{"4900900028"}), str: `{"Operation":"GetItems","ItemIds":["4900900028"],"ItemIdType":"ASIN","Marketplace":"foo.bar","PartnerTag":"mytag-20","PartnerType":"Associates"}`},
+		// Marketplace and PartnerType are no longer transmitted in the body
+		// (the marketplace travels in the `x-marketplace` header and
+		// PartnerType is implicit). Only PartnerTag stays in the payload.
+		{q: NewGetItems("foo.bar", "mytag-20", "Associates"), str: `{"partnerTag":"mytag-20"}`},
+		{q: NewGetItems("foo.bar", "mytag-20", "Associates").ASINs([]string{"4900900028"}), str: `{"itemIds":["4900900028"],"itemIdType":"ASIN","partnerTag":"mytag-20"}`},
 	}
 	for _, tc := range testCases {
 		if str := tc.q.String(); str != tc.str {
-			t.Errorf("GetItems.String() is \"%v\", want \"%v\"", str, tc.str)
+			t.Errorf("GetItems.String() is %q, want %q", str, tc.str)
 		}
 	}
 }
@@ -24,55 +27,55 @@ func TestRequestFiltersInGetItems(t *testing.T) {
 		q   *GetItems
 		str string
 	}{
-		{q: NewGetItems("", "", ""), str: `{"Operation":"GetItems"}`},
-		{q: NewGetItems("", "", "").Request(Actor, "foo"), str: `{"Operation":"GetItems"}`},
-		{q: NewGetItems("", "", "").Request(Artist, "foo"), str: `{"Operation":"GetItems"}`},
-		{q: NewGetItems("", "", "").Request(Availability, "Available"), str: `{"Operation":"GetItems"}`},
-		{q: NewGetItems("", "", "").Request(Author, "foo"), str: `{"Operation":"GetItems"}`},
-		{q: NewGetItems("", "", "").Request(Brand, "foo"), str: `{"Operation":"GetItems"}`},
-		{q: NewGetItems("", "", "").Request(BrowseNodeID, "123"), str: `{"Operation":"GetItems"}`},
-		{q: NewGetItems("", "", "").Request(Condition, "foo"), str: `{"Operation":"GetItems"}`},
-		{q: NewGetItems("", "", "").Request(Condition, "Any"), str: `{"Operation":"GetItems","Condition":"Any"}`},
-		{q: NewGetItems("", "", "").Request(Condition, "New"), str: `{"Operation":"GetItems","Condition":"New"}`},
-		{q: NewGetItems("", "", "").Request(Condition, "Used"), str: `{"Operation":"GetItems","Condition":"Used"}`},
-		{q: NewGetItems("", "", "").Request(Condition, "Collectible"), str: `{"Operation":"GetItems","Condition":"Collectible"}`},
-		{q: NewGetItems("", "", "").Request(Condition, "Refurbished"), str: `{"Operation":"GetItems","Condition":"Refurbished"}`},
-		{q: NewGetItems("", "", "").Request(CurrencyOfPreference, "foo"), str: `{"Operation":"GetItems","CurrencyOfPreference":"foo"}`},
-		{q: NewGetItems("", "", "").Request(DeliveryFlags, "AmazonGlobal"), str: `{"Operation":"GetItems"}`},
-		{q: NewGetItems("", "", "").Request(ItemIds, "4900900028"), str: `{"Operation":"GetItems","ItemIds":["4900900028"]}`},
-		{q: NewGetItems("", "", "").Request(ItemIdType, "ASIN"), str: `{"Operation":"GetItems","ItemIdType":"ASIN"}`},
-		{q: NewGetItems("", "", "").Request(ItemCount, 1), str: `{"Operation":"GetItems"}`},
-		{q: NewGetItems("", "", "").Request(ItemPage, 1), str: `{"Operation":"GetItems"}`},
-		{q: NewGetItems("", "", "").Request(ItemPage, 1), str: `{"Operation":"GetItems"}`},
-		{q: NewGetItems("", "", "").Request(Keywords, "foo"), str: `{"Operation":"GetItems"}`},
-		{q: NewGetItems("", "", "").Request(BrowseNodeIds, "123"), str: `{"Operation":"GetItems"}`},
-		{q: NewGetItems("", "", "").Request(BrowseNodeIds, []string{"123", "456"}), str: `{"Operation":"GetItems"}`},
-		{q: NewGetItems("", "", "").Request(LanguagesOfPreference, "foo"), str: `{"Operation":"GetItems","LanguagesOfPreference":["foo"]}`},
-		{q: NewGetItems("", "", "").Request(LanguagesOfPreference, []string{"foo", "bar"}), str: `{"Operation":"GetItems","LanguagesOfPreference":["foo","bar"]}`},
-		{q: NewGetItems("", "", "").Request(Marketplace, "foo.bar"), str: `{"Operation":"GetItems","Marketplace":"foo.bar"}`},
-		{q: NewGetItems("", "", "").Request(MaxPrice, 1), str: `{"Operation":"GetItems"}`},
-		{q: NewGetItems("", "", "").Request(Merchant, "foo"), str: `{"Operation":"GetItems"}`},
-		{q: NewGetItems("", "", "").Request(Merchant, "All"), str: `{"Operation":"GetItems","Merchant":"All"}`},
-		{q: NewGetItems("", "", "").Request(Merchant, "Amazon"), str: `{"Operation":"GetItems","Merchant":"Amazon"}`},
-		{q: NewGetItems("", "", "").Request(MinPrice, 1), str: `{"Operation":"GetItems"}`},
-		{q: NewGetItems("", "", "").Request(MinReviewsRating, 1), str: `{"Operation":"GetItems"}`},
-		{q: NewGetItems("", "", "").Request(MinSavingPercent, 1), str: `{"Operation":"GetItems"}`},
-		{q: NewGetItems("", "", "").Request(OfferCount, -1), str: `{"Operation":"GetItems"}`},
-		{q: NewGetItems("", "", "").Request(OfferCount, 0), str: `{"Operation":"GetItems"}`},
-		{q: NewGetItems("", "", "").Request(OfferCount, 1), str: `{"Operation":"GetItems","OfferCount":1}`},
-		{q: NewGetItems("", "", "").Request(OfferCount, 123), str: `{"Operation":"GetItems","OfferCount":123}`},
-		{q: NewGetItems("", "", "").Request(PartnerTag, "foo"), str: `{"Operation":"GetItems","PartnerTag":"foo"}`},
-		{q: NewGetItems("", "", "").Request(PartnerType, "foo"), str: `{"Operation":"GetItems"}`},
-		{q: NewGetItems("", "", "").Request(PartnerType, "Associates"), str: `{"Operation":"GetItems","PartnerType":"Associates"}`},
-		{q: NewGetItems("", "", "").Request(Properties, map[string]string{"foo": "bar"}), str: `{"Operation":"GetItems"}`},
-		{q: NewGetItems("", "", "").Request(SearchIndex, "All"), str: `{"Operation":"GetItems"}`},
-		{q: NewGetItems("", "", "").Request(SortBy, "AvgCustomerReviews"), str: `{"Operation":"GetItems"}`},
-		{q: NewGetItems("", "", "").Request(Title, "foo"), str: `{"Operation":"GetItems"}`},
+		{q: NewGetItems("", "", ""), str: `{}`},
+		{q: NewGetItems("", "", "").Request(Actor, "foo"), str: `{}`},
+		{q: NewGetItems("", "", "").Request(Artist, "foo"), str: `{}`},
+		{q: NewGetItems("", "", "").Request(Availability, "Available"), str: `{}`},
+		{q: NewGetItems("", "", "").Request(Author, "foo"), str: `{}`},
+		{q: NewGetItems("", "", "").Request(Brand, "foo"), str: `{}`},
+		{q: NewGetItems("", "", "").Request(BrowseNodeID, "123"), str: `{}`},
+		{q: NewGetItems("", "", "").Request(Condition, "foo"), str: `{}`},
+		{q: NewGetItems("", "", "").Request(Condition, "Any"), str: `{"condition":"Any"}`},
+		{q: NewGetItems("", "", "").Request(Condition, "New"), str: `{"condition":"New"}`},
+		{q: NewGetItems("", "", "").Request(Condition, "Used"), str: `{"condition":"Used"}`},
+		{q: NewGetItems("", "", "").Request(Condition, "Collectible"), str: `{"condition":"Collectible"}`},
+		{q: NewGetItems("", "", "").Request(Condition, "Refurbished"), str: `{"condition":"Refurbished"}`},
+		{q: NewGetItems("", "", "").Request(CurrencyOfPreference, "foo"), str: `{"currencyOfPreference":"foo"}`},
+		{q: NewGetItems("", "", "").Request(DeliveryFlags, "AmazonGlobal"), str: `{}`},
+		{q: NewGetItems("", "", "").Request(ItemIds, "4900900028"), str: `{"itemIds":["4900900028"]}`},
+		{q: NewGetItems("", "", "").Request(ItemIdType, "ASIN"), str: `{"itemIdType":"ASIN"}`},
+		{q: NewGetItems("", "", "").Request(ItemCount, 1), str: `{}`},
+		{q: NewGetItems("", "", "").Request(ItemPage, 1), str: `{}`},
+		{q: NewGetItems("", "", "").Request(Keywords, "foo"), str: `{}`},
+		{q: NewGetItems("", "", "").Request(BrowseNodeIds, "123"), str: `{}`},
+		{q: NewGetItems("", "", "").Request(BrowseNodeIds, []string{"123", "456"}), str: `{}`},
+		{q: NewGetItems("", "", "").Request(LanguagesOfPreference, "foo"), str: `{"languagesOfPreference":["foo"]}`},
+		{q: NewGetItems("", "", "").Request(LanguagesOfPreference, []string{"foo", "bar"}), str: `{"languagesOfPreference":["foo","bar"]}`},
+		// Marketplace, Merchant, OfferCount, PartnerType are no-ops in the
+		// Creators API, so they should never appear in the body.
+		{q: NewGetItems("", "", "").Request(Marketplace, "foo.bar"), str: `{}`},
+		{q: NewGetItems("", "", "").Request(MaxPrice, 1), str: `{}`},
+		{q: NewGetItems("", "", "").Request(Merchant, "All"), str: `{}`},
+		{q: NewGetItems("", "", "").Request(Merchant, "Amazon"), str: `{}`},
+		{q: NewGetItems("", "", "").Request(MinPrice, 1), str: `{}`},
+		{q: NewGetItems("", "", "").Request(MinReviewsRating, 1), str: `{}`},
+		{q: NewGetItems("", "", "").Request(MinSavingPercent, 1), str: `{}`},
+		{q: NewGetItems("", "", "").Request(OfferCount, -1), str: `{}`},
+		{q: NewGetItems("", "", "").Request(OfferCount, 0), str: `{}`},
+		{q: NewGetItems("", "", "").Request(OfferCount, 1), str: `{}`},
+		{q: NewGetItems("", "", "").Request(OfferCount, 123), str: `{}`},
+		{q: NewGetItems("", "", "").Request(PartnerTag, "foo"), str: `{"partnerTag":"foo"}`},
+		{q: NewGetItems("", "", "").Request(PartnerType, "foo"), str: `{}`},
+		{q: NewGetItems("", "", "").Request(PartnerType, "Associates"), str: `{}`},
+		{q: NewGetItems("", "", "").Request(Properties, map[string]string{"foo": "bar"}), str: `{}`},
+		{q: NewGetItems("", "", "").Request(SearchIndex, "All"), str: `{}`},
+		{q: NewGetItems("", "", "").Request(SortBy, "AvgCustomerReviews"), str: `{}`},
+		{q: NewGetItems("", "", "").Request(Title, "foo"), str: `{}`},
 	}
 
 	for _, tc := range testCases {
 		if str := tc.q.String(); str != tc.str {
-			t.Errorf("GetItems.String() is \"%v\", want \"%v\"", str, tc.str)
+			t.Errorf("GetItems.String() is %q, want %q", str, tc.str)
 		}
 	}
 }
@@ -82,18 +85,19 @@ func TestResourcesInGetItems(t *testing.T) {
 		q   *GetItems
 		str string
 	}{
-		{q: NewGetItems("", "", "").EnableBrowseNodeInfo(), str: `{"Operation":"GetItems","Resources":["BrowseNodeInfo.BrowseNodes","BrowseNodeInfo.BrowseNodes.Ancestor","BrowseNodeInfo.BrowseNodes.SalesRank","BrowseNodeInfo.WebsiteSalesRank"]}`},
-		{q: NewGetItems("", "", "").EnableImages(), str: `{"Operation":"GetItems","Resources":["Images.Primary.Small","Images.Primary.Medium","Images.Primary.Large","Images.Variants.Small","Images.Variants.Medium","Images.Variants.Large"]}`},
-		{q: NewGetItems("", "", "").EnableItemInfo(), str: `{"Operation":"GetItems","Resources":["ItemInfo.ByLineInfo","ItemInfo.ContentInfo","ItemInfo.ContentRating","ItemInfo.Classifications","ItemInfo.ExternalIds","ItemInfo.Features","ItemInfo.ManufactureInfo","ItemInfo.ProductInfo","ItemInfo.TechnicalInfo","ItemInfo.Title","ItemInfo.TradeInInfo"]}`},
-		{q: NewGetItems("", "", "").EnableOffers(), str: `{"Operation":"GetItems","Resources":["Offers.Listings.Availability.MaxOrderQuantity","Offers.Listings.Availability.Message","Offers.Listings.Availability.MinOrderQuantity","Offers.Listings.Availability.Type","Offers.Listings.Condition","Offers.Listings.Condition.SubCondition","Offers.Listings.DeliveryInfo.IsAmazonFulfilled","Offers.Listings.DeliveryInfo.IsFreeShippingEligible","Offers.Listings.DeliveryInfo.IsPrimeEligible","Offers.Listings.DeliveryInfo.ShippingCharges","Offers.Listings.IsBuyBoxWinner","Offers.Listings.LoyaltyPoints.Points","Offers.Listings.MerchantInfo","Offers.Listings.Price","Offers.Listings.ProgramEligibility.IsPrimeExclusive","Offers.Listings.ProgramEligibility.IsPrimePantry","Offers.Listings.Promotions","Offers.Listings.SavingBasis","Offers.Summaries.HighestPrice","Offers.Summaries.LowestPrice","Offers.Summaries.OfferCount"]}`},
-		{q: NewGetItems("", "", "").EnableOffersV2(), str: `{"Operation":"GetItems","Resources":["OffersV2.Listings.Availability","OffersV2.Listings.Condition","OffersV2.Listings.DealDetails","OffersV2.Listings.IsBuyBoxWinner","OffersV2.Listings.LoyaltyPoints","OffersV2.Listings.MerchantInfo","OffersV2.Listings.Price","OffersV2.Listings.Type"]}`},
-		{q: NewGetItems("", "", "").EnableParentASIN(), str: `{"Operation":"GetItems","Resources":["ParentASIN"]}`},
-		{q: NewGetItems("", "", "").EnableCustomerReviews(), str: `{"Operation":"GetItems","Resources":["CustomerReviews.Count","CustomerReviews.StarRating"]}`},
+		{q: NewGetItems("", "", "").EnableBrowseNodeInfo(), str: `{"resources":["browseNodeInfo.browseNodes","browseNodeInfo.browseNodes.ancestor","browseNodeInfo.browseNodes.salesRank","browseNodeInfo.websiteSalesRank"]}`},
+		{q: NewGetItems("", "", "").EnableImages(), str: `{"resources":["images.primary.small","images.primary.medium","images.primary.large","images.primary.highRes","images.variants.small","images.variants.medium","images.variants.large","images.variants.highRes"]}`},
+		{q: NewGetItems("", "", "").EnableItemInfo(), str: `{"resources":["itemInfo.byLineInfo","itemInfo.contentInfo","itemInfo.contentRating","itemInfo.classifications","itemInfo.externalIds","itemInfo.features","itemInfo.manufactureInfo","itemInfo.productInfo","itemInfo.technicalInfo","itemInfo.title","itemInfo.tradeInInfo"]}`},
+		// EnableOffers (V1) is now an alias for EnableOffersV2.
+		{q: NewGetItems("", "", "").EnableOffers(), str: `{"resources":["offersV2.listings.availability","offersV2.listings.condition","offersV2.listings.dealDetails","offersV2.listings.isBuyBoxWinner","offersV2.listings.loyaltyPoints","offersV2.listings.merchantInfo","offersV2.listings.price","offersV2.listings.type"]}`},
+		{q: NewGetItems("", "", "").EnableOffersV2(), str: `{"resources":["offersV2.listings.availability","offersV2.listings.condition","offersV2.listings.dealDetails","offersV2.listings.isBuyBoxWinner","offersV2.listings.loyaltyPoints","offersV2.listings.merchantInfo","offersV2.listings.price","offersV2.listings.type"]}`},
+		{q: NewGetItems("", "", "").EnableParentASIN(), str: `{"resources":["parentASIN"]}`},
+		{q: NewGetItems("", "", "").EnableCustomerReviews(), str: `{"resources":["customerReviews.count","customerReviews.starRating"]}`},
 	}
 
 	for _, tc := range testCases {
 		if str := tc.q.String(); str != tc.str {
-			t.Errorf("Query.String() is \"%v\", want \"%v\"", str, tc.str)
+			t.Errorf("Query.String() is %q, want %q", str, tc.str)
 		}
 	}
 }

@@ -6,118 +6,87 @@ const (
 	resourceBrowseNodeInfo    resource = 1 + iota //BrowseNodeInfo resource
 	resourceImages                                //Images resource
 	resourceItemInfo                              //ItemInfo resource
-	resourceOffers                                //Offers resource
 	resourceOffersV2                              //OffersV2 resource
 	resourceSearchRefinements                     //SearchRefinements resource
 	resourceParentASIN                            //ParentASIN resource
 	resourceCustomerReviews                       //CustomerReviews resource
 	resourceBrowseNodes                           //BrowseNodes resource
-	resourceVariationSummary                      //VariationSummary resource
 )
 
+// Resource string values match the Amazon Creators API enum values
+// (lowerCamelCase). Sourced from the official Amazon Creators API SDK.
 var (
 	//BrowseNodeInfo resource
 	resourcesBrowseNodeInfo = []string{
-		"BrowseNodeInfo.BrowseNodes",
-		"BrowseNodeInfo.BrowseNodes.Ancestor",
-		"BrowseNodeInfo.BrowseNodes.SalesRank",
-		"BrowseNodeInfo.WebsiteSalesRank",
+		"browseNodeInfo.browseNodes",
+		"browseNodeInfo.browseNodes.ancestor",
+		"browseNodeInfo.browseNodes.salesRank",
+		"browseNodeInfo.websiteSalesRank",
 	}
 	//Images resource
 	resourcesImages = []string{
-		"Images.Primary.Small",
-		"Images.Primary.Medium",
-		"Images.Primary.Large",
-		"Images.Variants.Small",
-		"Images.Variants.Medium",
-		"Images.Variants.Large",
+		"images.primary.small",
+		"images.primary.medium",
+		"images.primary.large",
+		"images.primary.highRes",
+		"images.variants.small",
+		"images.variants.medium",
+		"images.variants.large",
+		"images.variants.highRes",
 	}
 	//ItemInfo resource
 	resourcesItemInfo = []string{
-		"ItemInfo.ByLineInfo",
-		"ItemInfo.ContentInfo",
-		"ItemInfo.ContentRating",
-		"ItemInfo.Classifications",
-		"ItemInfo.ExternalIds",
-		"ItemInfo.Features",
-		"ItemInfo.ManufactureInfo",
-		"ItemInfo.ProductInfo",
-		"ItemInfo.TechnicalInfo",
-		"ItemInfo.Title",
-		"ItemInfo.TradeInInfo",
-	}
-	//Offers resource
-	resourcesOffers = []string{
-		"Offers.Listings.Availability.MaxOrderQuantity",
-		"Offers.Listings.Availability.Message",
-		"Offers.Listings.Availability.MinOrderQuantity",
-		"Offers.Listings.Availability.Type",
-		"Offers.Listings.Condition",
-		"Offers.Listings.Condition.SubCondition",
-		"Offers.Listings.DeliveryInfo.IsAmazonFulfilled",
-		"Offers.Listings.DeliveryInfo.IsFreeShippingEligible",
-		"Offers.Listings.DeliveryInfo.IsPrimeEligible",
-		"Offers.Listings.DeliveryInfo.ShippingCharges",
-		"Offers.Listings.IsBuyBoxWinner",
-		"Offers.Listings.LoyaltyPoints.Points",
-		"Offers.Listings.MerchantInfo",
-		"Offers.Listings.Price",
-		"Offers.Listings.ProgramEligibility.IsPrimeExclusive",
-		"Offers.Listings.ProgramEligibility.IsPrimePantry",
-		"Offers.Listings.Promotions",
-		"Offers.Listings.SavingBasis",
-		"Offers.Summaries.HighestPrice",
-		"Offers.Summaries.LowestPrice",
-		"Offers.Summaries.OfferCount",
+		"itemInfo.byLineInfo",
+		"itemInfo.contentInfo",
+		"itemInfo.contentRating",
+		"itemInfo.classifications",
+		"itemInfo.externalIds",
+		"itemInfo.features",
+		"itemInfo.manufactureInfo",
+		"itemInfo.productInfo",
+		"itemInfo.technicalInfo",
+		"itemInfo.title",
+		"itemInfo.tradeInInfo",
 	}
 	//OffersV2 resource
 	resourcesOffersV2 = []string{
-		"OffersV2.Listings.Availability",
-		"OffersV2.Listings.Condition",
-		"OffersV2.Listings.DealDetails",
-		"OffersV2.Listings.IsBuyBoxWinner",
-		"OffersV2.Listings.LoyaltyPoints",
-		"OffersV2.Listings.MerchantInfo",
-		"OffersV2.Listings.Price",
-		"OffersV2.Listings.Type",
+		"offersV2.listings.availability",
+		"offersV2.listings.condition",
+		"offersV2.listings.dealDetails",
+		"offersV2.listings.isBuyBoxWinner",
+		"offersV2.listings.loyaltyPoints",
+		"offersV2.listings.merchantInfo",
+		"offersV2.listings.price",
+		"offersV2.listings.type",
 	}
 	//SearchRefinements resource
 	resourcesSearchRefinements = []string{
-		"SearchRefinements",
+		"searchRefinements",
 	}
 	//ParentASIN resource
 	resourcesParentASIN = []string{
-		"ParentASIN",
+		"parentASIN",
 	}
 	//CustomerReviews resource
 	resourcesCustomerReviews = []string{
-		"CustomerReviews.Count",
-		"CustomerReviews.StarRating",
+		"customerReviews.count",
+		"customerReviews.starRating",
 	}
 	//BrowseNodes resource
 	resourcesBrowseNodes = []string{
-		"BrowseNodes.Ancestor",
-		"BrowseNodes.Children",
-	}
-
-	//VariationSummary resource
-	resourcesVariationSummary = []string{
-		"VariationSummary.Price.HighestPrice",
-		"VariationSummary.Price.LowestPrice",
-		"VariationSummary.VariationDimension",
+		"browseNodes.ancestor",
+		"browseNodes.children",
 	}
 
 	resourcesMap = map[resource][]string{
-		resourceBrowseNodeInfo:    resourcesBrowseNodeInfo,    //BrowseNodeInfo resource
-		resourceImages:            resourcesImages,            //Images resource
-		resourceItemInfo:          resourcesItemInfo,          //ItemInfo resource
-		resourceOffers:            resourcesOffers,            //Offers resource
-		resourceOffersV2:          resourcesOffersV2,          //OffersV2 resource
-		resourceSearchRefinements: resourcesSearchRefinements, //SearchRefinements resource
-		resourceParentASIN:        resourcesParentASIN,        //ParentASIN resource
-		resourceCustomerReviews:   resourcesCustomerReviews,   //CustomerReviews resource
-		resourceBrowseNodes:       resourcesBrowseNodes,       //BrowseNodes resource
-		resourceVariationSummary:  resourcesVariationSummary,  //VariationSummary resource
+		resourceBrowseNodeInfo:    resourcesBrowseNodeInfo,
+		resourceImages:            resourcesImages,
+		resourceItemInfo:          resourcesItemInfo,
+		resourceOffersV2:          resourcesOffersV2,
+		resourceSearchRefinements: resourcesSearchRefinements,
+		resourceParentASIN:        resourcesParentASIN,
+		resourceCustomerReviews:   resourcesCustomerReviews,
+		resourceBrowseNodes:       resourcesBrowseNodes,
 	}
 )
 

@@ -1,80 +1,299 @@
 package paapi5
 
 import (
+	"context"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"io"
+	"net/http"
+	"net/http/httptest"
+	"strings"
+	"sync/atomic"
 	"testing"
 	"time"
 )
 
-func TestClient(t *testing.T) {
-	testCases := []struct {
-		partnerTag      string
-		accessKey       string
-		secretKey       string
-		marketplace     string
-		partnerType     string
-		date            TimeStamp
-		contentEncoding string
-		hostName        string
-		xAmzDate        string
-		xAmzTarget      string
-		payload         []byte
-		sigedText       string
-		sig             string
-		authorization   string
-	}{
-		{
-			partnerTag:      "mytag-20",
-			accessKey:       "AKIAIOSFODNN7EXAMPLE",
-			secretKey:       "1234567890",
-			marketplace:     DefaultMarketplace.String(),
-			partnerType:     defaultPartnerType,
-			date:            NewTimeStamp(time.Date(2019, time.September, 30, 8, 31, 54, 0, time.UTC)),
-			contentEncoding: "amz-1.0",
-			hostName:        "webservices.amazon.com",
-			xAmzDate:        "20190930T083154Z",
-			xAmzTarget:      "com.amazon.paapi5.v1.ProductAdvertisingAPIv1.GetItems",
-			payload:         []byte(`{"ItemIds": ["B07YCM5K55"],"Resources": ["Images.Primary.Small","Images.Primary.Medium","Images.Primary.Large","ItemInfo.ByLineInfo","ItemInfo.ContentInfo","ItemInfo.Classifications","ItemInfo.ExternalIds","ItemInfo.ProductInfo","ItemInfo.Title"],"PartnerTag": "mytag-20","PartnerType": "Associates","Marketplace": "www.amazon.com","Operation": "GetItems"}`),
-			sigedText:       "AWS4-HMAC-SHA256\n20190930T083154Z\n20190930/us-east-1/ProductAdvertisingAPI/aws4_request\n00edab8e9f221dd80f01241b85f4526f204ebf49818d678f041e21404a44b8cb",
-			sig:             "717e266b28f02523fc39894f565532bd53fe80b37a9ed1b631b77c50483f8c08",
-			authorization:   "AWS4-HMAC-SHA256 Credential=AKIAIOSFODNN7EXAMPLE/20190930/us-east-1/ProductAdvertisingAPI/aws4_request,SignedHeaders=content-encoding;host;x-amz-date;x-amz-target,Signature=717e266b28f02523fc39894f565532bd53fe80b37a9ed1b631b77c50483f8c08",
-		},
+// stubQuery is a minimal Query implementation for client tests.
+type stubQuery struct {
+	op      Operation
+	payload []byte
+	err     error
+}
+
+func (s stubQuery) Operation() Operation     { return s.op }
+func (s stubQuery) Payload() ([]byte, error) { return s.payload, s.err }
+
+// newServers stands up two httptest.Servers: one acting as the Cognito
+// token endpoint, the other as the Creators API. Returns both plus a
+// configured Server pointing at them.
+func newServers(t *testing.T, tokenHandler, apiHandler http.HandlerFunc) (*httptest.Server, *httptest.Server, *Server) {
+	t.Helper()
+	tokenSrv := httptest.NewServer(tokenHandler)
+	apiSrv := httptest.NewServer(apiHandler)
+	t.Cleanup(tokenSrv.Close)
+	t.Cleanup(apiSrv.Close)
+	apiURL := strings.TrimPrefix(apiSrv.URL, "http://")
+	sv := New(
+		WithMarketplace(LocaleUnitedStates),
+		WithServerScheme("http"),
+		WithServerHost(apiURL),
+		WithServerAuthEndpoint(tokenSrv.URL),
+	)
+	return tokenSrv, apiSrv, sv
+}
+
+func TestClientBasics(t *testing.T) {
+	c := New().CreateClient("mytag-20", "credID", "credSecret")
+	if got, want := c.Marketplace(), DefaultMarketplace.String(); got != want {
+		t.Errorf("Client.Marketplace() = %q, want %q", got, want)
 	}
-	for _, tc := range testCases {
-		c := New().CreateClient(tc.partnerTag, tc.accessKey, tc.secretKey)
-		if c.Marketplace() != tc.marketplace {
-			t.Errorf("Client.Marketplace() is \"%v\", want \"%v\"", c.Marketplace(), tc.marketplace)
+	if got, want := c.PartnerTag(), "mytag-20"; got != want {
+		t.Errorf("Client.PartnerTag() = %q, want %q", got, want)
+	}
+	if got, want := c.PartnerType(), defaultPartnerType; got != want {
+		t.Errorf("Client.PartnerType() = %q, want %q", got, want)
+	}
+	cc, ok := c.(*client)
+	if !ok {
+		t.Fatalf("Client is not *client: %T", c)
+	}
+	if got, want := cc.version, CredentialVersionNA; got != want {
+		t.Errorf("client.version = %q, want %q", got, want)
+	}
+}
+
+func TestClientRequestSendsExpectedHeadersAndBody(t *testing.T) {
+	var tokenCalls int32
+	tokenHandler := func(w http.ResponseWriter, r *http.Request) {
+		atomic.AddInt32(&tokenCalls, 1)
+		if got, want := r.Method, http.MethodPost; got != want {
+			t.Errorf("token request method = %q, want %q", got, want)
 		}
-		if c.PartnerTag() != tc.partnerTag {
-			t.Errorf("Client.PartnerTag() is \"%v\", want \"%v\"", c.PartnerTag(), tc.partnerTag)
+		if got, want := r.Header.Get("Content-Type"), "application/x-www-form-urlencoded"; got != want {
+			t.Errorf("token Content-Type = %q, want %q", got, want)
 		}
-		if c.PartnerType() != tc.partnerType {
-			t.Errorf("Client.PartnerType() is \"%v\", want \"%v\"", c.PartnerType(), tc.partnerType)
+		body, _ := io.ReadAll(r.Body)
+		form := string(body)
+		for _, want := range []string{
+			"grant_type=client_credentials",
+			"client_id=credID",
+			"client_secret=credSecret",
+			"scope=creatorsapi%2Fdefault",
+		} {
+			if !strings.Contains(form, want) {
+				t.Errorf("token request body %q missing %q", form, want)
+			}
 		}
-		hds := newHeaders(c.(*client).server, GetItems, tc.date)
-		if hds.get("Content-Encoding") != tc.contentEncoding {
-			t.Errorf("headers.get(\"Content-Encoding\") is \"%v\", want \"%v\"", hds.get("Content-Encoding"), tc.contentEncoding)
+		_ = json.NewEncoder(w).Encode(map[string]any{
+			"access_token": "tok-abc",
+			"expires_in":   3600,
+			"token_type":   "Bearer",
+		})
+	}
+
+	var apiCalls int32
+	apiHandler := func(w http.ResponseWriter, r *http.Request) {
+		atomic.AddInt32(&apiCalls, 1)
+		if got, want := r.Method, http.MethodPost; got != want {
+			t.Errorf("api request method = %q, want %q", got, want)
 		}
-		if hds.get("Host") != tc.hostName {
-			t.Errorf("headers.get(\"Host\") is \"%v\", want \"%v\"", hds.get("Host"), tc.hostName)
+		if got, want := r.URL.Path, "/catalog/v1/getItems"; got != want {
+			t.Errorf("api path = %q, want %q", got, want)
 		}
-		if hds.get("X-Amz-Date") != tc.xAmzDate {
-			t.Errorf("headers.get(\"X-Amz-Date\") is \"%v\", want \"%v\"", hds.get("X-Amz-Date"), tc.xAmzDate)
+		if got, want := r.Header.Get("Authorization"), "Bearer tok-abc, Version 2.1"; got != want {
+			t.Errorf("Authorization header = %q, want %q", got, want)
 		}
-		if hds.get("X-Amz-Target") != tc.xAmzTarget {
-			t.Errorf("headers.get(\"X-Amz-Target\") is \"%v\", want \"%v\"", hds.get("X-Amz-Target"), tc.xAmzTarget)
+		if got, want := r.Header.Get(marketplaceHeader), "www.amazon.com"; got != want {
+			t.Errorf("x-marketplace header = %q, want %q", got, want)
 		}
-		str := c.(*client).signedString(hds, tc.payload)
-		if str != tc.sigedText {
-			t.Errorf("Client.signedString() is \"%v\", want \"%v\"", str, tc.sigedText)
+		if got, want := r.Header.Get("Content-Type"), defaultContentType; got != want {
+			t.Errorf("Content-Type header = %q, want %q", got, want)
 		}
-		sig := c.(*client).signiture(str, hds)
-		if sig != tc.sig {
-			t.Errorf("Client.signiture() is \"%v\", want \"%v\"", sig, tc.sig)
+		if got, want := r.Header.Get("Accept"), defaultAccept; got != want {
+			t.Errorf("Accept header = %q, want %q", got, want)
 		}
-		auth := c.(*client).authorization(sig, hds)
-		if auth != tc.authorization {
-			t.Errorf("Client.authorization() is \"%v\", want \"%v\"", auth, tc.authorization)
+		body, _ := io.ReadAll(r.Body)
+		if got, want := string(body), `{"hello":"world"}`; got != want {
+			t.Errorf("api body = %q, want %q", got, want)
 		}
+		_, _ = w.Write([]byte(`{"itemsResult":{}}`))
+	}
+
+	_, _, sv := newServers(t, tokenHandler, apiHandler)
+	c := sv.CreateClient("mytag-20", "credID", "credSecret")
+
+	q := stubQuery{op: GetItems, payload: []byte(`{"hello":"world"}`)}
+	body, err := c.RequestContext(context.Background(), q)
+	if err != nil {
+		t.Fatalf("RequestContext: %v", err)
+	}
+	if got, want := string(body), `{"itemsResult":{}}`; got != want {
+		t.Errorf("response body = %q, want %q", got, want)
+	}
+
+	if got, want := atomic.LoadInt32(&tokenCalls), int32(1); got != want {
+		t.Errorf("token endpoint hit %d times, want %d", got, want)
+	}
+	if got, want := atomic.LoadInt32(&apiCalls), int32(1); got != want {
+		t.Errorf("api endpoint hit %d times, want %d", got, want)
+	}
+
+	// Second call should reuse the cached token (no second token POST).
+	if _, err := c.RequestContext(context.Background(), q); err != nil {
+		t.Fatalf("second RequestContext: %v", err)
+	}
+	if got, want := atomic.LoadInt32(&tokenCalls), int32(1); got != want {
+		t.Errorf("token cached miss: hit %d times, want %d", got, want)
+	}
+	if got, want := atomic.LoadInt32(&apiCalls), int32(2); got != want {
+		t.Errorf("api endpoint hit %d times, want %d", got, want)
+	}
+}
+
+func TestClientTokenRefreshAfterExpiry(t *testing.T) {
+	var tokenCalls int32
+	tokenHandler := func(w http.ResponseWriter, r *http.Request) {
+		atomic.AddInt32(&tokenCalls, 1)
+		_ = json.NewEncoder(w).Encode(map[string]any{
+			// expires_in <= leeway forces leeway = 0, so the cached
+			// token expires effectively immediately.
+			"access_token": "tok-short",
+			"expires_in":   1,
+		})
+	}
+	apiHandler := func(w http.ResponseWriter, r *http.Request) {
+		_, _ = w.Write([]byte("{}"))
+	}
+	_, _, sv := newServers(t, tokenHandler, apiHandler)
+	c := sv.CreateClient("tag", "id", "secret")
+
+	q := stubQuery{op: GetItems, payload: []byte("{}")}
+	if _, err := c.RequestContext(context.Background(), q); err != nil {
+		t.Fatalf("first call: %v", err)
+	}
+	// Sleep past the (leeway-adjusted) expiry to force a refresh.
+	time.Sleep(1100 * time.Millisecond)
+	if _, err := c.RequestContext(context.Background(), q); err != nil {
+		t.Fatalf("second call: %v", err)
+	}
+	if got, want := atomic.LoadInt32(&tokenCalls), int32(2); got != want {
+		t.Errorf("expected 2 token refreshes, got %d", got)
+	}
+}
+
+func TestClientTokenError(t *testing.T) {
+	tokenHandler := func(w http.ResponseWriter, r *http.Request) {
+		http.Error(w, `{"error":"invalid_client"}`, http.StatusUnauthorized)
+	}
+	apiHandler := func(w http.ResponseWriter, r *http.Request) {
+		t.Errorf("api endpoint should not be called when token fails")
+	}
+	_, _, sv := newServers(t, tokenHandler, apiHandler)
+	c := sv.CreateClient("tag", "id", "secret")
+
+	q := stubQuery{op: GetItems, payload: []byte("{}")}
+	_, err := c.RequestContext(context.Background(), q)
+	if err == nil {
+		t.Fatal("expected token error, got nil")
+	}
+	if !errors.Is(err, ErrHTTPStatus) {
+		t.Errorf("error chain missing ErrHTTPStatus: %v", err)
+	}
+	if msg := err.Error(); !strings.Contains(msg, "401") {
+		t.Errorf("error %q should mention HTTP status 401", msg)
+	}
+	// The token endpoint body and status code travel via errs context;
+	// the JSON encoding via %+v exposes them.
+	encoded := fmt.Sprintf("%+v", err)
+	if !strings.Contains(encoded, "invalid_client") {
+		t.Errorf("encoded error %q should include token endpoint body", encoded)
+	}
+}
+
+func TestClientTokenErrorBodyTruncated(t *testing.T) {
+	huge := strings.Repeat("X", maxTokenBodyContextBytes*4)
+	tokenHandler := func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+		_, _ = w.Write([]byte(huge))
+	}
+	apiHandler := func(w http.ResponseWriter, r *http.Request) {
+		t.Errorf("api endpoint should not be called when token fails")
+	}
+	_, _, sv := newServers(t, tokenHandler, apiHandler)
+	c := sv.CreateClient("tag", "id", "secret")
+
+	q := stubQuery{op: GetItems, payload: []byte("{}")}
+	_, err := c.RequestContext(context.Background(), q)
+	if err == nil {
+		t.Fatal("expected token error, got nil")
+	}
+	encoded := fmt.Sprintf("%+v", err)
+	if !strings.Contains(encoded, "...(truncated)") {
+		t.Errorf("encoded error should contain truncation marker for oversized body, got %q", encoded)
+	}
+	if strings.Count(encoded, "X") > maxTokenBodyContextBytes+16 {
+		t.Errorf("encoded error contains more X bytes than the body cap (%d): %d", maxTokenBodyContextBytes, strings.Count(encoded, "X"))
+	}
+}
+
+// TestClientWithCredentialVersionPicksMatchingAuthEndpoint is a regression
+// test for the bug where CreateClient eagerly cached the marketplace-derived
+// auth endpoint before applying client options, so WithCredentialVersion
+// silently authenticated against the wrong Cognito endpoint.
+func TestClientWithCredentialVersionPicksMatchingAuthEndpoint(t *testing.T) {
+	// Server defaults to NA (US marketplace), but the caller explicitly
+	// switches to EU credential version via WithCredentialVersion. The
+	// resolved authEndpoint must follow the version override.
+	c := New().CreateClient("tag", "id", "secret",
+		WithCredentialVersion(CredentialVersionEU),
+	)
+	cc, ok := c.(*client)
+	if !ok {
+		t.Fatalf("Client is not *client: %T", c)
+	}
+	if got, want := cc.version, CredentialVersionEU; got != want {
+		t.Errorf("client.version = %q, want %q", got, want)
+	}
+	if got, want := cc.authEndpoint, AuthEndpointFor(CredentialVersionEU); got != want {
+		t.Errorf("client.authEndpoint = %q, want %q (must follow WithCredentialVersion)", got, want)
+	}
+}
+
+// TestClientWithAuthEndpointBeatsCredentialVersion verifies that an explicit
+// WithAuthEndpoint override survives even when a credential version would
+// otherwise resolve a different default endpoint.
+func TestClientWithAuthEndpointBeatsCredentialVersion(t *testing.T) {
+	const explicit = "http://staging.example.test/oauth2/token"
+	c := New().CreateClient("tag", "id", "secret",
+		WithCredentialVersion(CredentialVersionFE),
+		WithAuthEndpoint(explicit),
+	)
+	cc := c.(*client)
+	if got := cc.authEndpoint; got != explicit {
+		t.Errorf("client.authEndpoint = %q, want %q (explicit override)", got, explicit)
+	}
+}
+
+func TestClientPayloadError(t *testing.T) {
+	c := New().CreateClient("tag", "id", "secret")
+	wantErr := errors.New("payload boom")
+	q := stubQuery{op: GetItems, err: wantErr}
+	_, err := c.RequestContext(context.Background(), q)
+	if err == nil {
+		t.Fatal("expected payload error, got nil")
+	}
+	if !errors.Is(err, wantErr) {
+		t.Errorf("error chain missing payload error: %v", err)
+	}
+}
+
+func TestAuthorizationHeader(t *testing.T) {
+	if got, want := authorizationHeader("abc", "2.1"), "Bearer abc, Version 2.1"; got != want {
+		t.Errorf("authorizationHeader = %q, want %q", got, want)
+	}
+	if got, want := authorizationHeader("abc", ""), "Bearer abc"; got != want {
+		t.Errorf("authorizationHeader (no version) = %q, want %q", got, want)
 	}
 }
 

@@ -3,11 +3,7 @@ package paapi5
 import (
 	"bytes"
 	"context"
-	"crypto/hmac"
-	"crypto/sha256"
-	"encoding/hex"
-	"strings"
-	"time"
+	"net/http"
 
 	"github.com/goark/errs"
 	"github.com/goark/fetch"
@@ -15,6 +11,9 @@ import (
 
 const (
 	defaultPartnerType = "Associates"
+	// marketplaceHeader is the request header used by the Creators API to
+	// select the target Amazon marketplace (e.g. www.amazon.co.jp).
+	marketplaceHeader = "x-marketplace"
 )
 
 // Query interface for Client type
@@ -32,36 +31,44 @@ type Client interface {
 	RequestContext(context.Context, Query) ([]byte, error)
 }
 
-// client is http.Client for Aozora API Server
+// client is the HTTP client used to call the Amazon Creators API.
 type client struct {
-	server     *Server
-	client     fetch.Client
-	partnerTag string
-	accessKey  string
-	secretKey  string
+	server           *Server
+	httpClient       fetch.Client
+	tokenHTTPClient  *http.Client
+	partnerTag       string
+	credentialID     string
+	credentialSecret string
+	version          string
+	authEndpoint     string
+	auth             *tokenManager
 }
 
-// Marketplace returns name of Marketplace parameter for PA-API v5
+// Marketplace returns the marketplace name (e.g. www.amazon.com).
 func (c *client) Marketplace() string {
 	return c.server.Marketplace()
 }
 
-// PartnerTag returns PartnerTag parameter for PA-API v5
+// PartnerTag returns the configured partner (associate) tag.
 func (c *client) PartnerTag() string {
 	return c.partnerTag
 }
 
-// PartnerType returns PartnerType parameter for PA-API v5
+// PartnerType returns the partner type. The Creators API does not
+// transmit this value over the wire; it is retained for backward
+// compatibility with code that inspects the client.
 func (c *client) PartnerType() string {
 	return defaultPartnerType
 }
 
-// Request method returns response data (JSON format) by PA-APIv5.
+// Request issues the supplied query against the Creators API using a
+// background context.
 func (c *client) Request(q Query) ([]byte, error) {
 	return c.RequestContext(context.Background(), q)
 }
 
-// RequestContext method returns response data (JSON format) by PA-APIv5. (with context.Context)
+// RequestContext issues the supplied query against the Creators API,
+// honouring cancellation on the supplied context.
 func (c *client) RequestContext(ctx context.Context, q Query) ([]byte, error) {
 	payload, err := q.Payload()
 	if err != nil {
@@ -75,22 +82,19 @@ func (c *client) RequestContext(ctx context.Context, q Query) ([]byte, error) {
 }
 
 func (c *client) post(ctx context.Context, cmd Operation, payload []byte) ([]byte, error) {
-	dt := NewTimeStamp(time.Now())
 	u := c.server.URL(cmd.Path())
-	hds := newHeaders(c.server, cmd, dt)
-	sig := c.signiture(c.signedString(hds, payload), hds)
-	resp, err := c.client.PostWithContext(
+	token, err := c.auth.Token(ctx)
+	if err != nil {
+		return nil, errs.Wrap(err, errs.WithContext("url", u.String()))
+	}
+	resp, err := c.httpClient.PostWithContext(
 		ctx,
 		u,
 		bytes.NewReader(payload),
 		fetch.WithRequestHeaderSet("Accept", c.server.Accept()),
-		fetch.WithRequestHeaderSet("Accept-Language", c.server.AcceptLanguage()),
 		fetch.WithRequestHeaderSet("Content-Type", c.server.ContentType()),
-		fetch.WithRequestHeaderSet("Content-Encoding", hds.get("Content-Encoding")),
-		fetch.WithRequestHeaderSet("Host", hds.get("Host")),
-		fetch.WithRequestHeaderSet("X-Amz-Date", hds.get("X-Amz-Date")),
-		fetch.WithRequestHeaderSet("X-Amz-Target", hds.get("X-Amz-Target")),
-		fetch.WithRequestHeaderSet("Authorization", c.authorization(sig, hds)),
+		fetch.WithRequestHeaderSet(marketplaceHeader, c.server.Marketplace()),
+		fetch.WithRequestHeaderSet("Authorization", authorizationHeader(token, c.version)),
 	)
 	if err != nil {
 		return nil, errs.Wrap(err, errs.WithContext("url", u.String()), errs.WithContext("payload", string(payload)))
@@ -100,92 +104,6 @@ func (c *client) post(ctx context.Context, cmd Operation, payload []byte) ([]byt
 		return nil, errs.Wrap(err, errs.WithContext("url", u.String()), errs.WithContext("payload", string(payload)))
 	}
 	return body, nil
-}
-
-func (c *client) authorization(sig string, hds *headers) string {
-	buf := bytes.Buffer{}
-	buf.WriteString(c.server.HMACAlgorithm())
-	buf.WriteString(" Credential=")
-	buf.WriteString(strings.Join([]string{c.accessKey, hds.dt.StringDate(), c.server.Region(), c.server.ServiceName(), c.server.AWS4Request()}, "/"))
-	buf.WriteString(",SignedHeaders=")
-	buf.WriteString(hds.list())
-	buf.WriteString(",Signature=")
-	buf.WriteString(sig)
-	return buf.String()
-}
-
-func (c *client) signiture(signed string, hds *headers) string {
-	dateKey := hmacSHA256([]byte("AWS4"+c.secretKey), []byte(hds.dt.StringDate()))
-	regionKey := hmacSHA256(dateKey, []byte(c.server.Region()))
-	serviceKey := hmacSHA256(regionKey, []byte(c.server.ServiceName()))
-	requestKey := hmacSHA256(serviceKey, []byte(c.server.AWS4Request()))
-	return hex.EncodeToString(hmacSHA256(requestKey, []byte(signed)))
-}
-
-func (c *client) signedString(hds *headers, payload []byte) string {
-	return strings.Join(
-		[]string{
-			c.server.HMACAlgorithm(),
-			hds.dt.String(),
-			strings.Join([]string{hds.dt.StringDate(), c.server.Region(), c.server.ServiceName(), c.server.AWS4Request()}, "/"),
-			hashedString([]byte(c.canonicalRequest(hds, payload))),
-		},
-		"\n",
-	)
-}
-
-func (c *client) canonicalRequest(hds *headers, payload []byte) string {
-	request := []string{"POST", hds.cmd.Path(), "", hds.values(), "", hds.list(), hashedString(payload)}
-	return strings.Join(request, "\n")
-}
-
-func hmacSHA256(key, data []byte) []byte {
-	hasher := hmac.New(sha256.New, key)
-	_, err := hasher.Write(data)
-	if err != nil {
-		return []byte{}
-	}
-	return hasher.Sum(nil)
-}
-
-func hashedString(data []byte) string {
-	sum := sha256.Sum256(data)
-	return hex.EncodeToString(sum[:])
-}
-
-type headers struct {
-	cmd       Operation
-	dt        TimeStamp
-	headers   []string
-	valueList map[string]string
-}
-
-func newHeaders(svr *Server, cmd Operation, dt TimeStamp) *headers {
-	hds := &headers{cmd: cmd, dt: dt, headers: []string{"content-encoding", "host", "x-amz-date", "x-amz-target"}, valueList: map[string]string{}}
-	hds.valueList["content-encoding"] = svr.ContentEncoding()
-	hds.valueList["host"] = svr.HostName()
-	hds.valueList["x-amz-date"] = dt.String()
-	hds.valueList["x-amz-target"] = cmd.Target()
-	return hds
-}
-
-func (h *headers) get(name string) string {
-	if s, ok := h.valueList[strings.ToLower(name)]; ok {
-		return s
-	}
-	return ""
-}
-
-func (h *headers) list() string {
-	return strings.Join(h.headers, ";")
-}
-
-func (h *headers) values() string {
-	list := []string{}
-	for _, name := range h.headers {
-		list = append(list, name+":"+h.get(name))
-	}
-	return strings.Join(list, "\n")
 }
 
 /* Copyright 2019-2021 Spiegel
