@@ -326,11 +326,6 @@ type Response struct {
 		Code    string
 		Message string
 	} `json:",omitempty"`
-	// The Creators API serialises this container as `itemResults`
-	// (item singular, results plural), not `itemsResult`. The Go field
-	// keeps the historical PA-API v5 name for source compatibility, but
-	// the explicit JSON tag is required: Go's case-insensitive json
-	// matching does not bridge the singular/plural difference.
 	ItemsResult *struct {
 		Items []Item `json:",omitempty"`
 	} `json:"itemResults,omitempty"`
