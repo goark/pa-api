@@ -1,11 +1,44 @@
 package paapi5
 
-// Marketplace is interface class of locale information.
+// Credential version codes for the Amazon Creators API. The version selects
+// which regional Cognito token endpoint a credential pair authenticates
+// against, and is also echoed back to the API in the Authorization header.
+const (
+	CredentialVersionNA = "2.1" // North America (US, CA, MX, BR)
+	CredentialVersionEU = "2.2" // Europe / Middle East / India
+	CredentialVersionFE = "2.3" // Far East (JP, SG, AU)
+)
+
+// Marketplace is the interface implemented by locale providers.
+//
+// Note: this interface is deliberately kept compatible with the pre-Creators
+// API contract. The Creators API credential version is reported via the
+// optional credentialVersioner type-assertion (satisfied by MarketplaceEnum)
+// rather than added to this interface, so external implementations of
+// Marketplace continue to compile unchanged.
 type Marketplace interface {
 	String() string
 	HostName() string
 	Region() string
 	Language() string
+}
+
+// credentialVersioner is an optional, internal interface satisfied by
+// Marketplace implementations that can report their Creators API credential
+// version (the region group code: 2.1, 2.2, or 2.3). MarketplaceEnum
+// satisfies it; external implementations may opt in.
+type credentialVersioner interface {
+	CredentialVersion() string
+}
+
+// credentialVersionOf returns the Creators API credential version associated
+// with the supplied Marketplace, falling back to the default region (NA)
+// when the implementation does not satisfy credentialVersioner.
+func credentialVersionOf(m Marketplace) string {
+	if cv, ok := m.(credentialVersioner); ok {
+		return cv.CredentialVersion()
+	}
+	return CredentialVersionNA
 }
 
 // MarketplaceEnum is enumeration of locale information.
@@ -61,30 +94,9 @@ var marketplaceMap = map[MarketplaceEnum]string{
 	LocaleUnitedStates:       "www.amazon.com",    //United States
 }
 
-var hostMap = map[MarketplaceEnum]string{
-	LocaleAustralia:          "webservices.amazon.com.au", //Australia
-	LocaleBrazil:             "webservices.amazon.com.br", //Brazil
-	LocaleCanada:             "webservices.amazon.ca",     //Canada
-	LocaleEgypt:              "webservices.amazon.eg",     //Egypt
-	LocaleFrance:             "webservices.amazon.fr",     //France
-	LocaleGermany:            "webservices.amazon.de",     //Germany
-	LocaleIndia:              "webservices.amazon.in",     //India
-	LocaleItaly:              "webservices.amazon.it",     //Italy
-	LocaleJapan:              "webservices.amazon.co.jp",  //Japan
-	LocaleMexico:             "webservices.amazon.com.mx", //Mexico
-	LocaleNetherlands:        "webservices.amazon.nl",     //Netherlands
-	LocalePoland:             "webservices.amazon.pl",     //Poland
-	LocaleSingapore:          "webservices.amazon.sg",     //Singapore
-	LocaleSaudiArabia:        "webservices.amazon.sa",     //SaudiArabia
-	LocaleSpain:              "webservices.amazon.es",     //Spain
-	LocaleSweden:             "webservices.amazon.se",     //Sweden
-	LocaleTurkey:             "webservices.amazon.com.tr", //Turkey
-	LocaleUnitedArabEmirates: "webservices.amazon.ae",     //United Arab Emirates
-	LocaleUnitedKingdom:      "webservices.amazon.co.uk",  //United Kingdom
-	LocaleUnitedStates:       "webservices.amazon.com",    //United States
-	LocaleIreland:            "webservices.amazon.ie",     //Ireland
-}
-
+// regionMap retains the historical AWS region per marketplace. It is no
+// longer used for request signing (the Creators API does not use SigV4),
+// but is exposed via Region() for callers that recorded it as metadata.
 var regionMap = map[MarketplaceEnum]string{
 	LocaleAustralia:          "us-west-2", //Australia
 	LocaleBrazil:             "us-east-1", //Brazil
@@ -133,6 +145,34 @@ var languageMap = map[MarketplaceEnum]string{
 	LocaleUnitedStates:       "en_US", //United States
 }
 
+// versionMap maps each marketplace to the Creators API credential version
+// (i.e. region group) that issues credentials valid for it. Credentials are
+// region-scoped, not marketplace-scoped, so several marketplaces share a
+// single version code.
+var versionMap = map[MarketplaceEnum]string{
+	LocaleUnitedStates:       CredentialVersionNA,
+	LocaleCanada:             CredentialVersionNA,
+	LocaleMexico:             CredentialVersionNA,
+	LocaleBrazil:             CredentialVersionNA,
+	LocaleUnitedKingdom:      CredentialVersionEU,
+	LocaleGermany:            CredentialVersionEU,
+	LocaleFrance:             CredentialVersionEU,
+	LocaleItaly:              CredentialVersionEU,
+	LocaleSpain:              CredentialVersionEU,
+	LocaleNetherlands:        CredentialVersionEU,
+	LocaleEgypt:              CredentialVersionEU,
+	LocaleIndia:              CredentialVersionEU,
+	LocaleIreland:            CredentialVersionEU,
+	LocalePoland:             CredentialVersionEU,
+	LocaleSaudiArabia:        CredentialVersionEU,
+	LocaleSweden:             CredentialVersionEU,
+	LocaleTurkey:             CredentialVersionEU,
+	LocaleUnitedArabEmirates: CredentialVersionEU,
+	LocaleJapan:              CredentialVersionFE,
+	LocaleSingapore:          CredentialVersionFE,
+	LocaleAustralia:          CredentialVersionFE,
+}
+
 // MarketplaceOf function returns Marketplace instance from service domain.
 func MarketplaceOf(s string) Marketplace {
 	for k, v := range marketplaceMap {
@@ -151,15 +191,18 @@ func (m MarketplaceEnum) String() string {
 	return marketplaceMap[DefaultMarketplace]
 }
 
-// HostName returns hostname of Marketplace.
+// HostName returns the Creators API service host. The host is the same for
+// every marketplace; the marketplace itself is communicated via the
+// `x-marketplace` request header.
 func (m MarketplaceEnum) HostName() string {
-	if s, ok := hostMap[m]; ok {
-		return s
-	}
-	return hostMap[LocaleUnitedStates]
+	return defaultHost
 }
 
-// Region returns region name of Marketplace.
+// Region returns the historical AWS region associated with this marketplace.
+//
+// Deprecated: the Creators API does not use AWS SigV4 signing; this value is
+// no longer used for request construction. Use CredentialVersion() to choose
+// the right Creators API credential set instead.
 func (m MarketplaceEnum) Region() string {
 	if s, ok := regionMap[m]; ok {
 		return s
@@ -173,6 +216,15 @@ func (m MarketplaceEnum) Language() string {
 		return s
 	}
 	return languageMap[DefaultMarketplace]
+}
+
+// CredentialVersion returns the Creators API credential version code that
+// must be paired with credentials used to call this marketplace.
+func (m MarketplaceEnum) CredentialVersion() string {
+	if s, ok := versionMap[m]; ok {
+		return s
+	}
+	return versionMap[DefaultMarketplace]
 }
 
 /* Copyright 2019-2021 Spiegel

@@ -93,6 +93,7 @@ type Item struct {
 	ASIN            string
 	ParentASIN      string
 	DetailPageURL   string
+	Score           *float64 `json:",omitempty"`
 	CustomerReviews *struct {
 		Count      *int `json:",omitempty"`
 		StarRating *struct {
@@ -216,7 +217,7 @@ type Item struct {
 				IsFreeShippingEligible bool `json:",omitempty"`
 				IsPrimeEligible        bool `json:",omitempty"`
 			} `json:",omitempty"`
-			ID             string `json:"Id"`
+			ID             string `json:"id"`
 			IsBuyboxWinner bool
 			LoyaltyPoints  *struct {
 				Points int
@@ -225,7 +226,7 @@ type Item struct {
 				DefaultShippingCountry string
 				FeedbackCount          int
 				FeedbackRating         float64
-				ID                     string `json:"Id"`
+				ID                     string `json:"id"`
 				Name                   string
 			} `json:",omitempty"`
 			Price *struct {
@@ -274,7 +275,7 @@ type Item struct {
 				Badge                             string `json:",omitempty"`
 				EarlyAccessDurationInMilliseconds int64  `json:",omitempty"`
 				EndTime                           string `json:",omitempty"`
-				PercentClaimed                    string `json:",omitempty"`
+				PercentClaimed                    int    `json:",omitempty"`
 				StartTime                         string `json:",omitempty"`
 			} `json:",omitempty"`
 			IsBuyboxWinner bool
@@ -282,7 +283,7 @@ type Item struct {
 				Points int
 			} `json:",omitempty"`
 			MerchantInfo *struct {
-				ID   string `json:"Id"`
+				ID   string `json:"id"`
 				Name string
 			} `json:",omitempty"`
 			Price *struct {

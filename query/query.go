@@ -7,11 +7,16 @@ import (
 	paapi5 "github.com/goark/pa-api"
 )
 
-// Query is a query data class for PA-API v5
+// Query is a query data class for the Amazon Creators API.
+//
+// The operation type is no longer transmitted in the body (the Creators
+// API routes operations by URL path), so OpeCode is excluded from the
+// JSON payload. It is retained as a Go field so the client can resolve
+// the correct path to POST against.
 type Query struct {
-	OpeCode paapi5.Operation `json:"Operation"`
+	OpeCode paapi5.Operation `json:"-"`
 	request
-	Resources       []string `json:",omitempty"`
+	Resources       []string `json:"resources,omitempty"`
 	enableResources map[resource]bool
 }
 
@@ -22,7 +27,7 @@ func New(opeCode paapi5.Operation) *Query {
 	return &Query{OpeCode: opeCode, enableResources: map[resource]bool{}}
 }
 
-// Operation returns the type of the PA-API operation
+// Operation returns the type of the Creators API operation.
 func (q *Query) Operation() paapi5.Operation {
 	if q == nil {
 		return paapi5.NullOperation
@@ -30,7 +35,8 @@ func (q *Query) Operation() paapi5.Operation {
 	return q.OpeCode
 }
 
-// Payload defines the resources to be returned
+// Payload defines the resources to be returned and renders the request
+// body that will be POSTed to the Creators API.
 func (q *Query) Payload() ([]byte, error) {
 	if q == nil {
 		return nil, errs.Wrap(paapi5.ErrNullPointer)
@@ -40,6 +46,9 @@ func (q *Query) Payload() ([]byte, error) {
 		if flag {
 			q.Resources = append(q.Resources, r.Strings()...)
 		}
+	}
+	if len(q.Resources) == 0 {
+		q.Resources = nil
 	}
 	b, err := json.Marshal(q)
 	if err != nil {
@@ -96,9 +105,13 @@ func (q *Query) ItemInfo() *Query {
 	return q
 }
 
-// Offers sets the resource of Offers
+// Offers selects the V1 Offers resource.
+//
+// Deprecated: the Creators API does not expose V1 Offers (PA-API V1 Offers
+// retired on 2026-01-31). Calling this method now selects OffersV2 to keep
+// existing call sites working; migrate to OffersV2 explicitly.
 func (q *Query) Offers() *Query {
-	q.enableResources[resourceOffers] = true
+	q.enableResources[resourceOffersV2] = true
 	return q
 }
 
@@ -132,9 +145,12 @@ func (q *Query) BrowseNodes() *Query {
 	return q
 }
 
-// VariationSummary sets the resource of VariationSummary resource
+// VariationSummary selects the VariationSummary resource.
+//
+// Deprecated: the Creators API does not expose a VariationSummary resource.
+// Calls to this method are now no-ops and the response will not contain a
+// VariationSummary block. Retained so existing call sites compile.
 func (q *Query) VariationSummary() *Query {
-	q.enableResources[resourceVariationSummary] = true
 	return q
 }
 
