@@ -140,8 +140,7 @@ func TestResources(t *testing.T) {
 		{q: empty.With().ParentASIN(), str: `{"resources":["parentASIN"]}`},
 		{q: empty.With().CustomerReviews(), str: `{"resources":["customerReviews.count","customerReviews.starRating"]}`},
 		{q: empty.With().BrowseNodes(), str: `{"resources":["browseNodes.ancestor","browseNodes.children"]}`},
-		// VariationSummary is no longer exposed by the Creators API.
-		{q: empty.With().VariationSummary(), str: `{}`},
+		{q: empty.With().VariationSummary(), str: `{"resources":["variationSummary.price.highestPrice","variationSummary.price.lowestPrice","variationSummary.variationDimension"]}`},
 	}
 
 	for _, tc := range testCases {

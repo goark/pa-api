@@ -145,12 +145,12 @@ func (q *Query) BrowseNodes() *Query {
 	return q
 }
 
-// VariationSummary selects the VariationSummary resource.
-//
-// Deprecated: the Creators API does not expose a VariationSummary resource.
-// Calls to this method are now no-ops and the response will not contain a
-// VariationSummary block. Retained so existing call sites compile.
+// VariationSummary sets the resource of VariationSummary. The Creators API
+// returns the variation summary (page count, total variation count, price
+// range and variation dimensions) under the VariationsResult.VariationSummary
+// container of the response.
 func (q *Query) VariationSummary() *Query {
+	q.enableResources[resourceVariationSummary] = true
 	return q
 }
 

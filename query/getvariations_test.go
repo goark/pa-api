@@ -92,7 +92,7 @@ func TestResourcesInGetVariations(t *testing.T) {
 		{q: NewGetVariations("", "", "").EnableItemInfo(), str: `{"resources":["itemInfo.byLineInfo","itemInfo.contentInfo","itemInfo.contentRating","itemInfo.classifications","itemInfo.externalIds","itemInfo.features","itemInfo.manufactureInfo","itemInfo.productInfo","itemInfo.technicalInfo","itemInfo.title","itemInfo.tradeInInfo"]}`},
 		{q: NewGetVariations("", "", "").EnableOffers(), str: `{"resources":["offersV2.listings.availability","offersV2.listings.condition","offersV2.listings.dealDetails","offersV2.listings.isBuyBoxWinner","offersV2.listings.loyaltyPoints","offersV2.listings.merchantInfo","offersV2.listings.price","offersV2.listings.type"]}`},
 		{q: NewGetVariations("", "", "").EnableOffersV2(), str: `{"resources":["offersV2.listings.availability","offersV2.listings.condition","offersV2.listings.dealDetails","offersV2.listings.isBuyBoxWinner","offersV2.listings.loyaltyPoints","offersV2.listings.merchantInfo","offersV2.listings.price","offersV2.listings.type"]}`},
-		{q: NewGetVariations("", "", "").EnableVariationSummary(), str: `{}`},
+		{q: NewGetVariations("", "", "").EnableVariationSummary(), str: `{"resources":["variationSummary.price.highestPrice","variationSummary.price.lowestPrice","variationSummary.variationDimension"]}`},
 	}
 
 	for _, tc := range testCases {

@@ -11,6 +11,7 @@ const (
 	resourceParentASIN                            //ParentASIN resource
 	resourceCustomerReviews                       //CustomerReviews resource
 	resourceBrowseNodes                           //BrowseNodes resource
+	resourceVariationSummary                      //VariationSummary resource
 )
 
 // Resource string values match the Amazon Creators API enum values
@@ -77,6 +78,12 @@ var (
 		"browseNodes.ancestor",
 		"browseNodes.children",
 	}
+	//VariationSummary resource
+	resourcesVariationSummary = []string{
+		"variationSummary.price.highestPrice",
+		"variationSummary.price.lowestPrice",
+		"variationSummary.variationDimension",
+	}
 
 	resourcesMap = map[resource][]string{
 		resourceBrowseNodeInfo:    resourcesBrowseNodeInfo,
@@ -87,6 +94,7 @@ var (
 		resourceParentASIN:        resourcesParentASIN,
 		resourceCustomerReviews:   resourcesCustomerReviews,
 		resourceBrowseNodes:       resourcesBrowseNodes,
+		resourceVariationSummary:  resourcesVariationSummary,
 	}
 )
 
