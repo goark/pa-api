@@ -93,7 +93,6 @@ type Item struct {
 	ASIN            string
 	ParentASIN      string
 	DetailPageURL   string
-	Score           *float64 `json:",omitempty"`
 	CustomerReviews *struct {
 		Count      *int `json:",omitempty"`
 		StarRating *struct {
@@ -109,7 +108,6 @@ type Item struct {
 			SalesRank        *int      `json:",omitempty"`
 			Ancestor         *Ancestor `json:",omitempty"`
 			WebsiteSalesRank *struct {
-				Id              string `json:"id,omitempty"`
 				DisplayName     string
 				ContextFreeName string
 				SalesRank       int
@@ -296,8 +294,8 @@ type Item struct {
 					Percentage int
 				} `json:",omitempty"`
 			} `json:",omitempty"`
-			Type        string `json:",omitempty"`
-			ViolatesMAP bool   `json:"violatesMAP,omitempty"`
+			Type       string `json:",omitempty"`
+			ViolateMAP bool
 		} `json:",omitempty"`
 	} `json:",omitempty"`
 }
@@ -319,7 +317,6 @@ type Price struct {
 
 type VariationDimension struct {
 	DisplayName string
-	Locale      string `json:",omitempty"`
 	Name        string
 	Values      []string
 }
@@ -329,9 +326,14 @@ type Response struct {
 		Code    string
 		Message string
 	} `json:",omitempty"`
+	// The Creators API serialises this container as `itemResults`
+	// (item singular, results plural), not `itemsResult`. The Go field
+	// keeps the historical PA-API v5 name for source compatibility, but
+	// the explicit JSON tag is required: Go's case-insensitive json
+	// matching does not bridge the singular/plural difference.
 	ItemsResult *struct {
 		Items []Item `json:",omitempty"`
-	} `json:",omitempty"`
+	} `json:"itemResults,omitempty"`
 	SearchResult *struct {
 		Items             []Item `json:",omitempty"`
 		SearchRefinements *struct {
@@ -366,7 +368,6 @@ type Response struct {
 			DisplayName     string
 			ContextFreeName string
 			IsRoot          bool
-			SalesRank       *int `json:",omitempty"`
 		} `json:",omitempty"`
 	} `json:",omitempty"`
 }

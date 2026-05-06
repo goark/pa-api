@@ -117,7 +117,7 @@ func TestClientRequestSendsExpectedHeadersAndBody(t *testing.T) {
 		if got, want := string(body), `{"hello":"world"}`; got != want {
 			t.Errorf("api body = %q, want %q", got, want)
 		}
-		_, _ = w.Write([]byte(`{"itemsResult":{}}`))
+		_, _ = w.Write([]byte(`{"itemResults":{}}`))
 	}
 
 	_, _, sv := newServers(t, tokenHandler, apiHandler)
@@ -128,7 +128,7 @@ func TestClientRequestSendsExpectedHeadersAndBody(t *testing.T) {
 	if err != nil {
 		t.Fatalf("RequestContext: %v", err)
 	}
-	if got, want := string(body), `{"itemsResult":{}}`; got != want {
+	if got, want := string(body), `{"itemResults":{}}`; got != want {
 		t.Errorf("response body = %q, want %q", got, want)
 	}
 
