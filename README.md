@@ -7,7 +7,13 @@
 
 A Go client for [Amazon's Creators API][creatorsapi-docs], the OAuth2-based replacement for the now-retired Product Advertising API v5 (PA-API). The package keeps the import path `github.com/goark/pa-api` and the package name `paapi5` so existing call sites need only minor changes; under the hood the wire protocol, authentication and host all change.
 
-This package requires Go 1.21 or later.
+This package requires Go 1.25 or later.
+
+### Go version policy
+
+- The source of truth for the minimum supported Go version is `go.mod`.
+- README and CI are kept aligned with `go.mod`.
+- If the `go` directive changes, update this README line in the same change.
 
 ## Migrating from PA-API v5
 
@@ -29,21 +35,79 @@ Code-level changes you should expect when upgrading:
 - **`Server.Region()` is deprecated** and is no longer used by the client; it remains for back-compat callers that record it as metadata.
 - **Response JSON keys** returned by the Creators API are lowerCamelCase. The existing Go field names in `entity.Response` decode case-insensitively from these new keys, but if your code re-serialises a `Response` value you'll see PascalCase output for some fields and lowerCamelCase for the explicitly tagged ones (notably `id`).
 - **`SearchItems` filters** `Marketplace`, `PartnerType`, `Merchant`, and `OfferCount` are silently ignored — those fields are not accepted by the Creators API. Existing code using those filters compiles but the values are dropped.
-- **Query constructor `marketplace` arguments are compatibility-only** (`NewGetItems`, `NewSearchItems`, `NewGetVariations`, `NewGetBrowseNodes`). Actual routing always uses the client's configured marketplace via the `x-marketplace` header, so set marketplace on `Server`/`Client` (`paapi5.WithMarketplace(...)`) rather than per-query.
+- **Query constructor `marketplace` arguments are compatibility-only** (`NewGetItems`, `NewSearchItems`, `NewGetVariations`, `NewGetBrowseNodes`). Actual routing always uses the client's configured marketplace via the `x-marketplace` header, so set marketplace on `Server`/`Client` (`creatorsapi.WithMarketplace(...)`) rather than per-query.
+
+### Ignored legacy request fields
+
+The library keeps several legacy knobs for source compatibility, but the Creators API does not accept them in request bodies. They are currently treated as no-ops.
+
+| Legacy field / option | Previous behavior (PA-API v5) | Current behavior (Creators API) |
+|---|---|---|
+| `Marketplace` request body field | Selected target marketplace in-body | Ignored in-body. Routing is done by `x-marketplace` header |
+| `PartnerType` (`Associates`) | Explicit body parameter | Ignored. Partner type is implicit |
+| `Merchant` | Offer filtering selector | Ignored |
+| `OfferCount` | Offer summary limiter | Ignored |
+| `EnableVariationSummary()` | Requested variation summary resource | No-op (resource is not exposed) |
+
+### Marketplace routing precedence
+
+Marketplace selection is evaluated in this order:
+
+1. `Server`/`Client` marketplace (for example `creatorsapi.WithMarketplace(...)`)
+2. Request header `x-marketplace` sent by the client
+
+Query constructor marketplace arguments are retained only for compatibility and are not used to route requests.
+
+### Credential Version map
+
+Creators API credentials are region-group scoped. Use credentials that match the marketplace group you call.
+
+| Credential Version | Region group | Example marketplaces |
+|---|---|---|
+| `2.1` | North America | `www.amazon.com`, `www.amazon.ca`, `www.amazon.com.mx`, `www.amazon.com.br` |
+| `2.2` | Europe / Middle East / India | `www.amazon.co.uk`, `www.amazon.de`, `www.amazon.fr`, `www.amazon.in`, `www.amazon.sa`, `www.amazon.ae` |
+| `2.3` | Far East | `www.amazon.co.jp`, `www.amazon.sg`, `www.amazon.com.au` |
+
+If token acquisition fails with an auth error, verify that your credential version and marketplace group match.
+
+### Rate limits and retry guidance
+
+Amazon starts new credential sets with low throughput (commonly around 1 TPS; check your Associates Central quota for authoritative limits). Build callers with backpressure and retry control.
+
+Recommended client behavior:
+
+- Treat `429` and transient `5xx` as retryable.
+- Use exponential backoff with jitter.
+- Cap retry attempts and total request timeout.
+- Avoid synchronized retries across workers.
+- Consider per-credential rate limiting in your application.
 
 ### Getting Creators API credentials
 
 Only the primary Amazon Associates account owner can mint credentials. From [Associates Central][creatorsapi-portal] go to **Tools** → **Creators API** → **Create Application**, then **Add New Credential**. Copy the Credential Secret immediately — it is only shown once. Note the **Credential Version** (`2.1` for North America, `2.2` for Europe, `2.3` for Far East) — you'll need it if you call multiple regions from the same process.
+
+### Quick migration checklist
+
+Use this path when migrating existing PA-API v5 call sites:
+
+1. Keep the import path as `github.com/goark/pa-api` (alias as `creatorsapi` in examples if preferred).
+2. Replace client credential inputs: AWS Access Key / Secret Key -> Creators API Credential ID / Credential Secret.
+3. Configure marketplace on `Server`/`Client` (`WithMarketplace`) and do not rely on per-query marketplace arguments.
+4. Replace V1 offers usage with OffersV2 (`EnableOffersV2`; `EnableOffers` remains as a compatibility alias).
+5. Remove expectations around `Merchant`, `OfferCount`, and `PartnerType` request effects; these are ignored.
+6. Confirm Credential Version (`2.1`/`2.2`/`2.3`) matches the marketplace group you call.
+7. Add retry and rate-limit control for `429` and transient `5xx` responses.
+8. Run local verification with your project's standard test/lint workflow before opening a PR.
 
 ## Usage
 
 ### Create a server configuration
 
 ```go
-sv := paapi5.New() // default: US marketplace, NA credential version 2.1
+sv := creatorsapi.New() // default: US marketplace, NA credential version 2.1
 fmt.Println("Marketplace:", sv.Marketplace())
 fmt.Println("CredentialVersion:", sv.CredentialVersion())
-fmt.Println("URL:", sv.URL(paapi5.GetItems.Path()))
+fmt.Println("URL:", sv.URL(creatorsapi.GetItems.Path()))
 // Output:
 // Marketplace: www.amazon.com
 // CredentialVersion: 2.1
@@ -53,7 +117,7 @@ fmt.Println("URL:", sv.URL(paapi5.GetItems.Path()))
 For another marketplace:
 
 ```go
-sv := paapi5.New(paapi5.WithMarketplace(paapi5.LocaleJapan)) // Japan -> credential version 2.3
+sv := creatorsapi.New(creatorsapi.WithMarketplace(creatorsapi.LocaleJapan)) // Japan -> credential version 2.3
 fmt.Println("Marketplace:", sv.Marketplace())
 fmt.Println("CredentialVersion:", sv.CredentialVersion())
 // Output:
@@ -61,12 +125,12 @@ fmt.Println("CredentialVersion:", sv.CredentialVersion())
 // CredentialVersion: 2.3
 ```
 
-The credential version is auto-derived from the configured marketplace's region group. Override it explicitly with `paapi5.WithCredentialVersion("2.2")` when needed.
+The credential version is auto-derived from the configured marketplace's region group. Override it explicitly with `creatorsapi.WithCredentialVersion("2.2")` when needed.
 
 ### Create a client
 
 ```go
-client := paapi5.DefaultClient("mytag-20", "YOUR_CREDENTIAL_ID", "YOUR_CREDENTIAL_SECRET")
+client := creatorsapi.DefaultClient("mytag-20", "YOUR_CREDENTIAL_ID", "YOUR_CREDENTIAL_SECRET")
 fmt.Println("Marketplace:", client.Marketplace())
 // Output:
 // Marketplace: www.amazon.com
@@ -75,13 +139,13 @@ fmt.Println("Marketplace:", client.Marketplace())
 For a different marketplace plus a custom `*http.Client`:
 
 ```go
-client := paapi5.New(
-    paapi5.WithMarketplace(paapi5.LocaleJapan),
+client := creatorsapi.New(
+    creatorsapi.WithMarketplace(creatorsapi.LocaleJapan),
 ).CreateClient(
     "mytag-20",
     "YOUR_CREDENTIAL_ID",
     "YOUR_CREDENTIAL_SECRET",
-    paapi5.WithHttpClient(http.DefaultClient),
+    creatorsapi.WithHttpClient(http.DefaultClient),
 )
 ```
 
@@ -98,14 +162,14 @@ import (
     "context"
     "fmt"
 
-    paapi5 "github.com/goark/pa-api"
+    creatorsapi "github.com/goark/pa-api"
     "github.com/goark/pa-api/entity"
     "github.com/goark/pa-api/query"
 )
 
 func main() {
-    client := paapi5.New(
-        paapi5.WithMarketplace(paapi5.LocaleJapan),
+    client := creatorsapi.New(
+        creatorsapi.WithMarketplace(creatorsapi.LocaleJapan),
     ).CreateClient(
         "mytag-20",
         "YOUR_CREDENTIAL_ID",
