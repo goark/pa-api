@@ -29,6 +29,7 @@ Code-level changes you should expect when upgrading:
 - **`Server.Region()` is deprecated** and is no longer used by the client; it remains for back-compat callers that record it as metadata.
 - **Response JSON keys** returned by the Creators API are lowerCamelCase. The existing Go field names in `entity.Response` decode case-insensitively from these new keys, but if your code re-serialises a `Response` value you'll see PascalCase output for some fields and lowerCamelCase for the explicitly tagged ones (notably `id`).
 - **`SearchItems` filters** `Marketplace`, `PartnerType`, `Merchant`, and `OfferCount` are silently ignored — those fields are not accepted by the Creators API. Existing code using those filters compiles but the values are dropped.
+- **Query constructor `marketplace` arguments are compatibility-only** (`NewGetItems`, `NewSearchItems`, `NewGetVariations`, `NewGetBrowseNodes`). Actual routing always uses the client's configured marketplace via the `x-marketplace` header, so set marketplace on `Server`/`Client` (`paapi5.WithMarketplace(...)`) rather than per-query.
 
 ### Getting Creators API credentials
 

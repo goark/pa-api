@@ -70,13 +70,17 @@ func (c *client) Request(q Query) ([]byte, error) {
 // RequestContext issues the supplied query against the Creators API,
 // honouring cancellation on the supplied context.
 func (c *client) RequestContext(ctx context.Context, q Query) ([]byte, error) {
+	if q == nil {
+		return nil, errs.Wrap(ErrNullPointer, errs.WithContext("reason", "nil query"))
+	}
+	op := q.Operation()
 	payload, err := q.Payload()
 	if err != nil {
-		return nil, errs.Wrap(err, errs.WithContext("Operation", q.Operation().String()))
+		return nil, errs.Wrap(err, errs.WithContext("Operation", op.String()))
 	}
-	b, err := c.post(ctx, q.Operation(), payload)
+	b, err := c.post(ctx, op, payload)
 	if err != nil {
-		return nil, errs.Wrap(err, errs.WithContext("Operation", q.Operation().String()), errs.WithContext("payload", string(payload)))
+		return nil, errs.Wrap(err, errs.WithContext("Operation", op.String()), errs.WithContext("payload", string(payload)))
 	}
 	return b, nil
 }

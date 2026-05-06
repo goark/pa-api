@@ -9,7 +9,7 @@ type GetBrowseNodes struct {
 	Query
 }
 
-var _ paapi5.Query = (*GetItems)(nil) //GetItems is compatible with paapi5.Query interface
+var _ paapi5.Query = (*GetBrowseNodes)(nil) //GetBrowseNodes is compatible with paapi5.Query interface
 
 //New creates new GetBrowseNodes instance
 func NewGetBrowseNodes(marketplace, partnerTag, partnerType string) *GetBrowseNodes {
