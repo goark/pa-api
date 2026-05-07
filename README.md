@@ -61,11 +61,18 @@ Query constructor marketplace arguments are retained only for compatibility and 
 
 Creators API credentials are region-group scoped. Use credentials that match the marketplace group you call.
 
-| Credential Version | Region group | Example marketplaces |
-|---|---|---|
-| `2.1` | North America | `www.amazon.com`, `www.amazon.ca`, `www.amazon.com.mx`, `www.amazon.com.br` |
-| `2.2` | Europe / Middle East / India | `www.amazon.co.uk`, `www.amazon.de`, `www.amazon.fr`, `www.amazon.in`, `www.amazon.sa`, `www.amazon.ae` |
-| `2.3` | Far East | `www.amazon.co.jp`, `www.amazon.sg`, `www.amazon.com.au` |
+New applications typically receive **v3.x** credentials (Login with Amazon token endpoints). **v2.x** credentials use regional Cognito endpoints and a different OAuth scope and catalog `Authorization` header shape; if Associates Central still shows `2.1`/`2.2`/`2.3`, pass `creatorsapi.WithCredentialVersion("2.1")` (etc.) on `CreateClient`.
+
+| Credential Version | Region group | Token endpoint (default) | Catalog `Authorization` |
+|---|---|---|---|
+| `3.1` | North America | `https://api.amazon.com/auth/o2/token` | `Bearer <token>` |
+| `3.2` | Europe / Middle East / India | `https://api.amazon.co.uk/auth/o2/token` | `Bearer <token>` |
+| `3.3` | Far East | `https://api.amazon.co.jp/auth/o2/token` | `Bearer <token>` |
+| `2.1` | North America | `https://creatorsapi.auth.us-east-1.amazoncognito.com/oauth2/token` | `Bearer <token>, Version 2.1` |
+| `2.2` | Europe / Middle East / India | `https://creatorsapi.auth.eu-south-2.amazoncognito.com/oauth2/token` | `Bearer <token>, Version 2.2` |
+| `2.3` | Far East | `https://creatorsapi.auth.us-west-2.amazoncognito.com/oauth2/token` | `Bearer <token>, Version 2.3` |
+
+Example marketplace groups (same as before): NA — `www.amazon.com`, `www.amazon.ca`, `www.amazon.com.mx`, `www.amazon.com.br`; EU — `www.amazon.co.uk`, `www.amazon.de`, `www.amazon.fr`, `www.amazon.in`, `www.amazon.sa`, `www.amazon.ae`; FE — `www.amazon.co.jp`, `www.amazon.sg`, `www.amazon.com.au`.
 
 If token acquisition fails with an auth error, verify that your credential version and marketplace group match.
 
@@ -83,7 +90,7 @@ Recommended client behavior:
 
 ### Getting Creators API credentials
 
-Only the primary Amazon Associates account owner can mint credentials. From [Associates Central][creatorsapi-portal] go to **Tools** → **Creators API** → **Create Application**, then **Add New Credential**. Copy the Credential Secret immediately — it is only shown once. Note the **Credential Version** (`2.1` for North America, `2.2` for Europe, `2.3` for Far East) — you'll need it if you call multiple regions from the same process.
+Only the primary Amazon Associates account owner can mint credentials. From [Associates Central][creatorsapi-portal] go to **Tools** → **Creators API** → **Create Application**, then **Add New Credential**. Copy the Credential Secret immediately — it is only shown once. Note the **Credential Version** shown for your credential (`3.1`/`3.2`/`3.3` for Login with Amazon, or legacy `2.1`/`2.2`/`2.3` for Cognito). You'll need it if you call multiple regions from the same process or if your credential region group does not match the configured marketplace.
 
 ### Quick migration checklist
 
@@ -94,7 +101,7 @@ Use this path when migrating existing PA-API v5 call sites:
 3. Configure marketplace on `Server`/`Client` (`WithMarketplace`) and do not rely on per-query marketplace arguments.
 4. Replace V1 offers usage with OffersV2 (`EnableOffersV2`; `EnableOffers` remains as a compatibility alias).
 5. Remove expectations around `Merchant`, `OfferCount`, and `PartnerType` request effects; these are ignored.
-6. Confirm Credential Version (`2.1`/`2.2`/`2.3`) matches the marketplace group you call.
+6. Confirm Credential Version matches the marketplace group you call (`3.1`/`3.2`/`3.3` by default per marketplace, or `2.1`/`2.2`/`2.3` for legacy Cognito credentials via `WithCredentialVersion`).
 7. Add retry and rate-limit control for `429` and transient `5xx` responses.
 8. Run local verification with your project's standard test/lint workflow before opening a PR.
 
@@ -103,28 +110,28 @@ Use this path when migrating existing PA-API v5 call sites:
 ### Create a server configuration
 
 ```go
-sv := creatorsapi.New() // default: US marketplace, NA credential version 2.1
+sv := creatorsapi.New() // default: US marketplace, NA credential version 3.1 (Login with Amazon)
 fmt.Println("Marketplace:", sv.Marketplace())
 fmt.Println("CredentialVersion:", sv.CredentialVersion())
 fmt.Println("URL:", sv.URL(creatorsapi.GetItems.Path()))
 // Output:
 // Marketplace: www.amazon.com
-// CredentialVersion: 2.1
+// CredentialVersion: 3.1
 // URL: https://creatorsapi.amazon/catalog/v1/getItems
 ```
 
 For another marketplace:
 
 ```go
-sv := creatorsapi.New(creatorsapi.WithMarketplace(creatorsapi.LocaleJapan)) // Japan -> credential version 2.3
+sv := creatorsapi.New(creatorsapi.WithMarketplace(creatorsapi.LocaleJapan)) // Japan -> credential version 3.3
 fmt.Println("Marketplace:", sv.Marketplace())
 fmt.Println("CredentialVersion:", sv.CredentialVersion())
 // Output:
 // Marketplace: www.amazon.co.jp
-// CredentialVersion: 2.3
+// CredentialVersion: 3.3
 ```
 
-The credential version is auto-derived from the configured marketplace's region group. Override it explicitly with `creatorsapi.WithCredentialVersion("2.2")` when needed.
+The credential version is auto-derived from the configured marketplace's region group (`3.1`/`3.2`/`3.3`). Override with `creatorsapi.WithCredentialVersion("2.2")` when using legacy Cognito credentials (`2.1`/`2.2`/`2.3`), or when your credential group differs from the marketplace default.
 
 ### Create a client
 

@@ -41,6 +41,7 @@ type client struct {
 	credentialSecret string
 	version          string
 	authEndpoint     string
+	lwaFlow          bool
 	auth             *tokenManager
 }
 
@@ -98,7 +99,7 @@ func (c *client) post(ctx context.Context, cmd Operation, payload []byte) ([]byt
 		fetch.WithRequestHeaderSet("Accept", c.server.Accept()),
 		fetch.WithRequestHeaderSet("Content-Type", c.server.ContentType()),
 		fetch.WithRequestHeaderSet(marketplaceHeader, c.server.Marketplace()),
-		fetch.WithRequestHeaderSet("Authorization", authorizationHeader(token, c.version)),
+		fetch.WithRequestHeaderSet("Authorization", authorizationHeader(token, c.version, c.lwaFlow)),
 	)
 	if err != nil {
 		return nil, errs.Wrap(err, errs.WithContext("url", u.String()), errs.WithContext("payload", string(payload)))

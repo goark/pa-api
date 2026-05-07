@@ -18,8 +18,8 @@ const (
 	defaultHost = "creatorsapi.amazon"
 )
 
-// authEndpointMap maps a Creators API credential version to the OAuth2
-// (Cognito) token endpoint URL that issues tokens for that version. These
+// authEndpointMap maps a Creators API credential version to the OAuth2 token
+// endpoint URL (regional Cognito for v2.x, Login with Amazon for v3.x). These
 // are public Amazon endpoint URLs, not credentials — the gosec G101
 // hardcoded-credentials check fires on the `oauth2/token` substring.
 //
@@ -28,6 +28,10 @@ var authEndpointMap = map[string]string{
 	CredentialVersionNA: "https://creatorsapi.auth.us-east-1.amazoncognito.com/oauth2/token",
 	CredentialVersionEU: "https://creatorsapi.auth.eu-south-2.amazoncognito.com/oauth2/token",
 	CredentialVersionFE: "https://creatorsapi.auth.us-west-2.amazoncognito.com/oauth2/token",
+
+	CredentialVersionNAv3: "https://api.amazon.com/auth/o2/token",
+	CredentialVersionEUv3: "https://api.amazon.co.uk/auth/o2/token",
+	CredentialVersionFEv3: "https://api.amazon.co.jp/auth/o2/token",
 }
 
 // AuthEndpointFor returns the default OAuth2 token endpoint URL for the
@@ -39,6 +43,15 @@ func AuthEndpointFor(version string) string {
 func isSupportedCredentialVersion(version string) bool {
 	_, ok := authEndpointMap[version]
 	return ok
+}
+
+func isLWACredentialVersion(version string) bool {
+	switch version {
+	case CredentialVersionNAv3, CredentialVersionEUv3, CredentialVersionFEv3:
+		return true
+	default:
+		return false
+	}
 }
 
 // Server type is a configuration of the Amazon Creators API service.
@@ -253,6 +266,7 @@ func (s *Server) CreateClient(associateTag, credentialID, credentialSecret strin
 		credentialID:     credentialID,
 		credentialSecret: credentialSecret,
 		version:          s.CredentialVersion(),
+		lwaFlow:          false,
 		// Carry only an explicit server-level override; leaving the
 		// auto-derived endpoint out lets WithCredentialVersion (applied
 		// below) re-resolve through AuthEndpointFor with the new version.
@@ -270,7 +284,8 @@ func (s *Server) CreateClient(associateTag, credentialID, credentialSecret strin
 	if len(cli.authEndpoint) == 0 {
 		cli.authEndpoint = AuthEndpointFor(cli.version)
 	}
-	cli.auth = newTokenManager(cli.tokenHTTPClient, cli.authEndpoint, cli.credentialID, cli.credentialSecret)
+	cli.lwaFlow = isLWACredentialVersion(cli.version)
+	cli.auth = newTokenManager(cli.tokenHTTPClient, cli.authEndpoint, cli.credentialID, cli.credentialSecret, cli.lwaFlow)
 	return cli
 }
 
@@ -305,7 +320,7 @@ func WithCredentialVersion(version string) ClientOptFunc {
 }
 
 // WithAuthEndpoint overrides the OAuth2 token endpoint. Defaults to the
-// Cognito endpoint resolved from the credential version.
+// token endpoint resolved from the credential version (or LWA for v3.x).
 func WithAuthEndpoint(endpoint string) ClientOptFunc {
 	return func(c *client) {
 		if c != nil && len(endpoint) > 0 {

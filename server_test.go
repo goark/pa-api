@@ -23,8 +23,8 @@ func TestServer(t *testing.T) {
 			accept:         defaultAccept,
 			acceptLanguage: "en_US",
 			contentType:    defaultContentType,
-			version:        CredentialVersionNA,
-			authEndpoint:   "https://creatorsapi.auth.us-east-1.amazoncognito.com/oauth2/token",
+			version:        CredentialVersionNAv3,
+			authEndpoint:   "https://api.amazon.com/auth/o2/token",
 			url:            "https://creatorsapi.amazon/catalog/v1/getItems",
 		},
 		{
@@ -35,8 +35,8 @@ func TestServer(t *testing.T) {
 			accept:         defaultAccept,
 			acceptLanguage: "ja_JP",
 			contentType:    defaultContentType,
-			version:        CredentialVersionFE,
-			authEndpoint:   "https://creatorsapi.auth.us-west-2.amazoncognito.com/oauth2/token",
+			version:        CredentialVersionFEv3,
+			authEndpoint:   "https://api.amazon.co.jp/auth/o2/token",
 			url:            "https://creatorsapi.amazon/catalog/v1/getItems",
 		},
 		{
@@ -47,8 +47,8 @@ func TestServer(t *testing.T) {
 			accept:         defaultAccept,
 			acceptLanguage: "de_DE",
 			contentType:    defaultContentType,
-			version:        CredentialVersionEU,
-			authEndpoint:   "https://creatorsapi.auth.eu-south-2.amazoncognito.com/oauth2/token",
+			version:        CredentialVersionEUv3,
+			authEndpoint:   "https://api.amazon.co.uk/auth/o2/token",
 			url:            "https://creatorsapi.amazon/catalog/v1/getItems",
 		},
 	}
@@ -111,10 +111,10 @@ func TestWithCredentialVersionIgnoresUnsupportedValue(t *testing.T) {
 	if !ok {
 		t.Fatalf("Client is not *client: %T", c)
 	}
-	if got, want := cc.version, CredentialVersionNA; got != want {
+	if got, want := cc.version, CredentialVersionNAv3; got != want {
 		t.Errorf("client.version = %q, want %q", got, want)
 	}
-	if got, want := cc.authEndpoint, AuthEndpointFor(CredentialVersionNA); got != want {
+	if got, want := cc.authEndpoint, AuthEndpointFor(CredentialVersionNAv3); got != want {
 		t.Errorf("client.authEndpoint = %q, want %q", got, want)
 	}
 }

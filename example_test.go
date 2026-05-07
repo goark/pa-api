@@ -19,7 +19,7 @@ func ExampleServer() {
 	// Marketplace: www.amazon.com
 	// Region: us-east-1
 	// AcceptLanguage: en_US
-	// CredentialVersion: 2.1
+	// CredentialVersion: 3.1
 	// URL: https://creatorsapi.amazon/catalog/v1/getItems
 }
 
@@ -34,7 +34,7 @@ func ExampleNew() {
 	// Marketplace: www.amazon.co.jp
 	// Region: us-west-2
 	// AcceptLanguage: ja_JP
-	// CredentialVersion: 2.3
+	// CredentialVersion: 3.3
 	// URL: https://creatorsapi.amazon/catalog/v1/getItems
 }
 

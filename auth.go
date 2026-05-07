@@ -2,6 +2,7 @@ package paapi5
 
 import (
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -15,8 +16,10 @@ import (
 )
 
 const (
-	// oauthScope is the scope requested when fetching an access token.
-	oauthScope = "creatorsapi/default"
+	// oauthScopeCognito is the scope for v2.x (Cognito /oauth2/token).
+	oauthScopeCognito = "creatorsapi/default"
+	// oauthScopeLWA is the scope for v3.x (Login with Amazon /auth/o2/token).
+	oauthScopeLWA = "creatorsapi::default"
 	// oauthGrantType is the OAuth2 grant type used for the client_credentials flow.
 	oauthGrantType = "client_credentials"
 	// oauthTokenLeewaySeconds keeps a small buffer before the announced expiration
@@ -38,6 +41,7 @@ type tokenManager struct {
 	endpoint     string
 	clientID     string
 	clientSecret string
+	lwa          bool
 
 	mu          sync.Mutex
 	accessToken string
@@ -46,7 +50,7 @@ type tokenManager struct {
 
 // newTokenManager constructs a tokenManager. httpClient may be nil, in which
 // case http.DefaultClient is used.
-func newTokenManager(httpClient *http.Client, endpoint, clientID, clientSecret string) *tokenManager {
+func newTokenManager(httpClient *http.Client, endpoint, clientID, clientSecret string, lwa bool) *tokenManager {
 	if httpClient == nil {
 		httpClient = http.DefaultClient
 	}
@@ -55,6 +59,7 @@ func newTokenManager(httpClient *http.Client, endpoint, clientID, clientSecret s
 		endpoint:     endpoint,
 		clientID:     clientID,
 		clientSecret: clientSecret,
+		lwa:          lwa,
 	}
 }
 
@@ -96,15 +101,23 @@ func (t *tokenManager) refreshLocked(ctx context.Context) error {
 	}
 	form := url.Values{}
 	form.Set("grant_type", oauthGrantType)
-	form.Set("client_id", t.clientID)
-	form.Set("client_secret", t.clientSecret)
-	form.Set("scope", oauthScope)
+	if t.lwa {
+		form.Set("scope", oauthScopeLWA)
+	} else {
+		form.Set("client_id", t.clientID)
+		form.Set("client_secret", t.clientSecret)
+		form.Set("scope", oauthScopeCognito)
+	}
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, t.endpoint, strings.NewReader(form.Encode()))
 	if err != nil {
 		return errs.Wrap(err, errs.WithContext("endpoint", t.endpoint))
 	}
 	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 	req.Header.Set("Accept", "application/json")
+	if t.lwa {
+		basic := base64.StdEncoding.EncodeToString([]byte(t.clientID + ":" + t.clientSecret))
+		req.Header.Set("Authorization", "Basic "+basic)
+	}
 	resp, err := t.httpClient.Do(req)
 	if err != nil {
 		return errs.Wrap(err, errs.WithContext("endpoint", t.endpoint))
@@ -163,9 +176,13 @@ func truncateForLog(b []byte, max int) string {
 	return string(b[:max]) + "...(truncated)"
 }
 
-// authorizationHeader returns the value of the Authorization header expected
-// by the Creators API: `Bearer <token>, Version <version>`.
-func authorizationHeader(token, version string) string {
+// authorizationHeader returns the Creators API catalog Authorization header.
+// v3.x (Login with Amazon) tokens use `Bearer <token>` only; v2.x Cognito
+// tokens append `, Version <version>`.
+func authorizationHeader(token, version string, lwa bool) string {
+	if lwa {
+		return "Bearer " + token
+	}
 	b := strings.Builder{}
 	b.WriteString("Bearer ")
 	b.WriteString(token)
