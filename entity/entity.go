@@ -93,7 +93,6 @@ type Item struct {
 	ASIN            string
 	ParentASIN      string
 	DetailPageURL   string
-	Score           *float64 `json:",omitempty"`
 	CustomerReviews *struct {
 		Count      *int `json:",omitempty"`
 		StarRating *struct {
@@ -106,10 +105,8 @@ type Item struct {
 			DisplayName      string
 			ContextFreeName  string
 			IsRoot           bool
-			SalesRank        *int      `json:",omitempty"`
 			Ancestor         *Ancestor `json:",omitempty"`
 			WebsiteSalesRank *struct {
-				Id              string `json:"id,omitempty"`
 				DisplayName     string
 				ContextFreeName string
 				SalesRank       int
@@ -121,13 +118,11 @@ type Item struct {
 			Large  *Image `json:",omitempty"`
 			Medium *Image `json:",omitempty"`
 			Small  *Image `json:",omitempty"`
-			HiRes  *Image `json:"hiRes,omitempty"`
 		} `json:",omitempty"`
 		Variants []*struct {
 			Large  *Image `json:",omitempty"`
 			Medium *Image `json:",omitempty"`
 			Small  *Image `json:",omitempty"`
-			HiRes  *Image `json:"hiRes,omitempty"`
 		} `json:",omitempty"`
 	} `json:",omitempty"`
 	ItemInfo *struct {
@@ -321,7 +316,6 @@ type Price struct {
 
 type VariationDimension struct {
 	DisplayName string
-	Locale      string `json:",omitempty"`
 	Name        string
 	Values      []string
 }
@@ -368,7 +362,6 @@ type Response struct {
 			DisplayName     string
 			ContextFreeName string
 			IsRoot          bool
-			SalesRank       *int `json:",omitempty"`
 		} `json:",omitempty"`
 	} `json:",omitempty"`
 }

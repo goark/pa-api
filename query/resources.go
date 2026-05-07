@@ -15,13 +15,12 @@ const (
 )
 
 // Resource string values match the Amazon Creators API enum values
-// (lowerCamelCase). Sourced from the official Amazon Creators API SDK.
+// (lowerCamelCase), scoped to shapes documented for Creators API catalog ops.
 var (
 	//BrowseNodeInfo resource
 	resourcesBrowseNodeInfo = []string{
 		"browseNodeInfo.browseNodes",
 		"browseNodeInfo.browseNodes.ancestor",
-		"browseNodeInfo.browseNodes.salesRank",
 		"browseNodeInfo.websiteSalesRank",
 	}
 	//Images resource
@@ -29,11 +28,9 @@ var (
 		"images.primary.small",
 		"images.primary.medium",
 		"images.primary.large",
-		"images.primary.highRes",
 		"images.variants.small",
 		"images.variants.medium",
 		"images.variants.large",
-		"images.variants.highRes",
 	}
 	//ItemInfo resource
 	resourcesItemInfo = []string{
