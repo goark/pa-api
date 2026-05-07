@@ -2,6 +2,7 @@ package paapi5
 
 import (
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -58,7 +59,7 @@ func TestClientBasics(t *testing.T) {
 	if !ok {
 		t.Fatalf("Client is not *client: %T", c)
 	}
-	if got, want := cc.version, CredentialVersionNA; got != want {
+	if got, want := cc.version, CredentialVersionNAv3; got != want {
 		t.Errorf("client.version = %q, want %q", got, want)
 	}
 }
@@ -73,17 +74,29 @@ func TestClientRequestSendsExpectedHeadersAndBody(t *testing.T) {
 		if got, want := r.Header.Get("Content-Type"), "application/x-www-form-urlencoded"; got != want {
 			t.Errorf("token Content-Type = %q, want %q", got, want)
 		}
+		authz := r.Header.Get("Authorization")
+		if !strings.HasPrefix(authz, "Basic ") {
+			t.Fatalf("token Authorization = %q, want Basic …", authz)
+		}
+		raw, err := base64.StdEncoding.DecodeString(strings.TrimPrefix(authz, "Basic "))
+		if err != nil {
+			t.Fatalf("decode Basic auth: %v", err)
+		}
+		if got, want := string(raw), "credID:credSecret"; got != want {
+			t.Errorf("Basic credentials = %q, want %q", got, want)
+		}
 		body, _ := io.ReadAll(r.Body)
 		form := string(body)
 		for _, want := range []string{
 			"grant_type=client_credentials",
-			"client_id=credID",
-			"client_secret=credSecret",
-			"scope=creatorsapi%2Fdefault",
+			"scope=creatorsapi%3A%3Adefault",
 		} {
 			if !strings.Contains(form, want) {
 				t.Errorf("token request body %q missing %q", form, want)
 			}
+		}
+		if strings.Contains(form, "client_id=") || strings.Contains(form, "client_secret=") {
+			t.Errorf("LwA token request body must not embed client_id/client_secret: %q", form)
 		}
 		_ = json.NewEncoder(w).Encode(map[string]any{
 			"access_token": "tok-abc",
@@ -101,7 +114,7 @@ func TestClientRequestSendsExpectedHeadersAndBody(t *testing.T) {
 		if got, want := r.URL.Path, "/catalog/v1/getItems"; got != want {
 			t.Errorf("api path = %q, want %q", got, want)
 		}
-		if got, want := r.Header.Get("Authorization"), "Bearer tok-abc, Version 2.1"; got != want {
+		if got, want := r.Header.Get("Authorization"), "Bearer tok-abc"; got != want {
 			t.Errorf("Authorization header = %q, want %q", got, want)
 		}
 		if got, want := r.Header.Get(marketplaceHeader), "www.amazon.com"; got != want {
@@ -148,6 +161,45 @@ func TestClientRequestSendsExpectedHeadersAndBody(t *testing.T) {
 	}
 	if got, want := atomic.LoadInt32(&apiCalls), int32(2); got != want {
 		t.Errorf("api endpoint hit %d times, want %d", got, want)
+	}
+}
+
+// TestClientLegacyCognitoCredentialVersion verifies v2.x Cognito credentials:
+// client id/secret in the POST body, slash scope, and Version on catalog calls.
+func TestClientLegacyCognitoCredentialVersion(t *testing.T) {
+	tokenHandler := func(w http.ResponseWriter, r *http.Request) {
+		if got, want := r.Header.Get("Authorization"), ""; got != want {
+			t.Errorf("Cognito token request should not send Authorization header, got %q", got)
+		}
+		body, _ := io.ReadAll(r.Body)
+		form := string(body)
+		for _, want := range []string{
+			"grant_type=client_credentials",
+			"client_id=id",
+			"client_secret=secret",
+			"scope=creatorsapi%2Fdefault",
+		} {
+			if !strings.Contains(form, want) {
+				t.Errorf("token body %q missing %q", form, want)
+			}
+		}
+		_ = json.NewEncoder(w).Encode(map[string]any{
+			"access_token": "tok-v2",
+			"expires_in":   3600,
+		})
+	}
+	apiHandler := func(w http.ResponseWriter, r *http.Request) {
+		if got, want := r.Header.Get("Authorization"), "Bearer tok-v2, Version 2.2"; got != want {
+			t.Errorf("Authorization = %q, want %q", got, want)
+		}
+		_, _ = w.Write([]byte("{}"))
+	}
+	_, _, sv := newServers(t, tokenHandler, apiHandler)
+	c := sv.CreateClient("tag", "id", "secret", WithCredentialVersion(CredentialVersionEU))
+
+	q := stubQuery{op: GetItems, payload: []byte("{}")}
+	if _, err := c.RequestContext(context.Background(), q); err != nil {
+		t.Fatalf("RequestContext: %v", err)
 	}
 }
 
@@ -300,11 +352,14 @@ func TestClientNilQueryError(t *testing.T) {
 }
 
 func TestAuthorizationHeader(t *testing.T) {
-	if got, want := authorizationHeader("abc", "2.1"), "Bearer abc, Version 2.1"; got != want {
+	if got, want := authorizationHeader("abc", "2.1", false), "Bearer abc, Version 2.1"; got != want {
 		t.Errorf("authorizationHeader = %q, want %q", got, want)
 	}
-	if got, want := authorizationHeader("abc", ""), "Bearer abc"; got != want {
+	if got, want := authorizationHeader("abc", "", false), "Bearer abc"; got != want {
 		t.Errorf("authorizationHeader (no version) = %q, want %q", got, want)
+	}
+	if got, want := authorizationHeader("abc", "3.1", true), "Bearer abc"; got != want {
+		t.Errorf("authorizationHeader (LwA) = %q, want %q", got, want)
 	}
 }
 

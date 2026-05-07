@@ -1,12 +1,23 @@
 package paapi5
 
-// Credential version codes for the Amazon Creators API. The version selects
-// which regional Cognito token endpoint a credential pair authenticates
-// against, and is also echoed back to the API in the Authorization header.
+// Credential version codes for the Amazon Creators API.
+//
+// v2.x values select the regional Cognito (`…amazoncognito.com/oauth2/token`)
+// token endpoint and require `Authorization: Bearer <token>, Version <v>` on
+// catalog requests.
+//
+// v3.x values select the regional Login with Amazon (`api.amazon…/auth/o2/token`)
+// endpoint; tokens are obtained with HTTP Basic auth and scope
+// `creatorsapi::default`, and catalog requests use `Authorization: Bearer
+// <token>` without a Version suffix.
 const (
-	CredentialVersionNA = "2.1" // North America (US, CA, MX, BR)
-	CredentialVersionEU = "2.2" // Europe / Middle East / India
-	CredentialVersionFE = "2.3" // Far East (JP, SG, AU)
+	CredentialVersionNA = "2.1" // North America — Cognito pool (legacy)
+	CredentialVersionEU = "2.2" // Europe / Middle East / India — Cognito
+	CredentialVersionFE = "2.3" // Far East — Cognito
+
+	CredentialVersionNAv3 = "3.1" // North America — Login with Amazon
+	CredentialVersionEUv3 = "3.2" // Europe / Middle East / India — LwA
+	CredentialVersionFEv3 = "3.3" // Far East — LwA
 )
 
 // Marketplace is the interface implemented by locale providers.
@@ -25,7 +36,7 @@ type Marketplace interface {
 
 // credentialVersioner is an optional, internal interface satisfied by
 // Marketplace implementations that can report their Creators API credential
-// version (the region group code: 2.1, 2.2, or 2.3). MarketplaceEnum
+// version (the region group code: 2.1–2.3 or 3.1–3.3). MarketplaceEnum
 // satisfies it; external implementations may opt in.
 type credentialVersioner interface {
 	CredentialVersion() string
@@ -150,27 +161,27 @@ var languageMap = map[MarketplaceEnum]string{
 // region-scoped, not marketplace-scoped, so several marketplaces share a
 // single version code.
 var versionMap = map[MarketplaceEnum]string{
-	LocaleUnitedStates:       CredentialVersionNA,
-	LocaleCanada:             CredentialVersionNA,
-	LocaleMexico:             CredentialVersionNA,
-	LocaleBrazil:             CredentialVersionNA,
-	LocaleUnitedKingdom:      CredentialVersionEU,
-	LocaleGermany:            CredentialVersionEU,
-	LocaleFrance:             CredentialVersionEU,
-	LocaleItaly:              CredentialVersionEU,
-	LocaleSpain:              CredentialVersionEU,
-	LocaleNetherlands:        CredentialVersionEU,
-	LocaleEgypt:              CredentialVersionEU,
-	LocaleIndia:              CredentialVersionEU,
-	LocaleIreland:            CredentialVersionEU,
-	LocalePoland:             CredentialVersionEU,
-	LocaleSaudiArabia:        CredentialVersionEU,
-	LocaleSweden:             CredentialVersionEU,
-	LocaleTurkey:             CredentialVersionEU,
-	LocaleUnitedArabEmirates: CredentialVersionEU,
-	LocaleJapan:              CredentialVersionFE,
-	LocaleSingapore:          CredentialVersionFE,
-	LocaleAustralia:          CredentialVersionFE,
+	LocaleUnitedStates:       CredentialVersionNAv3,
+	LocaleCanada:             CredentialVersionNAv3,
+	LocaleMexico:             CredentialVersionNAv3,
+	LocaleBrazil:             CredentialVersionNAv3,
+	LocaleUnitedKingdom:      CredentialVersionEUv3,
+	LocaleGermany:            CredentialVersionEUv3,
+	LocaleFrance:             CredentialVersionEUv3,
+	LocaleItaly:              CredentialVersionEUv3,
+	LocaleSpain:              CredentialVersionEUv3,
+	LocaleNetherlands:        CredentialVersionEUv3,
+	LocaleEgypt:              CredentialVersionEUv3,
+	LocaleIndia:              CredentialVersionEUv3,
+	LocaleIreland:            CredentialVersionEUv3,
+	LocalePoland:             CredentialVersionEUv3,
+	LocaleSaudiArabia:        CredentialVersionEUv3,
+	LocaleSweden:             CredentialVersionEUv3,
+	LocaleTurkey:             CredentialVersionEUv3,
+	LocaleUnitedArabEmirates: CredentialVersionEUv3,
+	LocaleJapan:              CredentialVersionFEv3,
+	LocaleSingapore:          CredentialVersionFEv3,
+	LocaleAustralia:          CredentialVersionFEv3,
 }
 
 // MarketplaceOf function returns Marketplace instance from service domain.
