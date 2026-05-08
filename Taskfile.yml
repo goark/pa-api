@@ -5,6 +5,7 @@ tasks:
     cmds:
       - task: prepare
       - task: test
+      - task: govulncheck
       # - task: nancy
 
   test:
@@ -13,6 +14,14 @@ tasks:
       - go mod verify
       - go test -shuffle on ./...
       - golangci-lint-v2 run --enable gosec --timeout 3m0s ./...
+    sources:
+      - ./go.mod
+      - '**/*.go'
+
+  govulncheck:
+    desc: Check reachable vulnerabilities with latest govulncheck.
+    cmds:
+      - go run golang.org/x/vuln/cmd/govulncheck@latest ./...
     sources:
       - ./go.mod
       - '**/*.go'
@@ -26,7 +35,8 @@ tasks:
       - '**/*.go'
 
   prepare:
-      - go mod tidy -v -go=1.25
+    cmds:
+      - go mod tidy -v -go=1.25.10
 
   clean:
     desc: Initialize module and build cache, and remake go.sum file.
