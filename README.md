@@ -7,7 +7,7 @@
 
 A Go client for [Amazon's Creators API][creatorsapi-docs], the OAuth2-based replacement for the now-retired Product Advertising API v5 (PA-API). The package keeps the import path `github.com/goark/pa-api` and the package name `paapi5` so existing call sites need only minor changes; under the hood the wire protocol, authentication and host all change.
 
-This package requires Go 1.25 or later.
+This package requires Go 1.25.10 or later.
 
 ### Go version policy
 
