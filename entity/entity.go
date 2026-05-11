@@ -333,7 +333,7 @@ type Response struct {
 	} `json:",omitempty"`
 	ItemsResult *struct {
 		Items []Item `json:",omitempty"`
-	} `json:"itemResults,omitempty"`
+	} `json:"itemsResult,omitempty"`
 	SearchResult *struct {
 		Items             []Item `json:",omitempty"`
 		SearchRefinements *struct {

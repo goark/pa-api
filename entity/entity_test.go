@@ -4,7 +4,7 @@ import "testing"
 
 func TestDecodeResponseItemResultsAndCreatorsFields(t *testing.T) {
 	body := []byte(`{
-  "itemResults": {
+  "itemsResult": {
     "items": [
       {
         "asin": "A1",
