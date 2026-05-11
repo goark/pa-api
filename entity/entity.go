@@ -90,9 +90,11 @@ type VariationAttribute struct {
 }
 
 type Item struct {
-	ASIN            string
-	ParentASIN      string
-	DetailPageURL   string
+	ASIN          string
+	ParentASIN    string
+	DetailPageURL string
+	// Deprecated: not described in current Creators API documentation; retained for JSON compatibility.
+	Score           *float64 `json:",omitempty"`
 	CustomerReviews *struct {
 		Count      *int `json:",omitempty"`
 		StarRating *struct {
@@ -101,12 +103,16 @@ type Item struct {
 	} `json:",omitempty"`
 	BrowseNodeInfo *struct {
 		BrowseNodes []struct {
-			Id               string
-			DisplayName      string
-			ContextFreeName  string
-			IsRoot           bool
+			Id              string
+			DisplayName     string
+			ContextFreeName string
+			IsRoot          bool
+			// Deprecated: not described in current Creators API documentation; retained for JSON compatibility.
+			SalesRank        *int      `json:",omitempty"`
 			Ancestor         *Ancestor `json:",omitempty"`
 			WebsiteSalesRank *struct {
+				// Deprecated: not described in current Creators API documentation; retained for JSON compatibility.
+				Id              string `json:"id,omitempty"`
 				DisplayName     string
 				ContextFreeName string
 				SalesRank       int
@@ -118,11 +124,15 @@ type Item struct {
 			Large  *Image `json:",omitempty"`
 			Medium *Image `json:",omitempty"`
 			Small  *Image `json:",omitempty"`
+			// Deprecated: high-resolution image keys are not documented resource paths for Creators API; retained for JSON compatibility.
+			HiRes *Image `json:"hiRes,omitempty"`
 		} `json:",omitempty"`
 		Variants []*struct {
 			Large  *Image `json:",omitempty"`
 			Medium *Image `json:",omitempty"`
 			Small  *Image `json:",omitempty"`
+			// Deprecated: high-resolution image keys are not documented resource paths for Creators API; retained for JSON compatibility.
+			HiRes *Image `json:"hiRes,omitempty"`
 		} `json:",omitempty"`
 	} `json:",omitempty"`
 	ItemInfo *struct {
@@ -316,8 +326,10 @@ type Price struct {
 
 type VariationDimension struct {
 	DisplayName string
-	Name        string
-	Values      []string
+	// Deprecated: not described in current Creators API documentation; retained for JSON compatibility.
+	Locale string `json:",omitempty"`
+	Name   string
+	Values []string
 }
 
 type Response struct {
@@ -327,7 +339,7 @@ type Response struct {
 	} `json:",omitempty"`
 	ItemsResult *struct {
 		Items []Item `json:",omitempty"`
-	} `json:"itemResults,omitempty"`
+	} `json:"itemsResult,omitempty"`
 	SearchResult *struct {
 		Items             []Item `json:",omitempty"`
 		SearchRefinements *struct {
@@ -362,6 +374,8 @@ type Response struct {
 			DisplayName     string
 			ContextFreeName string
 			IsRoot          bool
+			// Deprecated: not described in current Creators API documentation; retained for JSON compatibility.
+			SalesRank *int `json:",omitempty"`
 		} `json:",omitempty"`
 	} `json:",omitempty"`
 }

@@ -4,7 +4,7 @@ import "testing"
 
 func TestDecodeResponseItemResultsOffersV2AndBrowseNodeInfo(t *testing.T) {
 	body := []byte(`{
-  "itemResults": {
+  "itemsResult": {
     "items": [
       {
         "asin": "A1",
@@ -87,6 +87,71 @@ func TestDecodeResponseItemResultsOffersV2AndBrowseNodeInfo(t *testing.T) {
 	}
 }
 
+// Deprecated fields are kept on exported structs for source compatibility; they
+// must still decode when present in arbitrary JSON.
+func TestDeprecatedFieldsStillDecode(t *testing.T) {
+	body := []byte(`{
+  "itemsResult": {
+    "items": [{
+      "asin": "DEP1",
+      "score": 0.91,
+      "images": {
+        "primary": {"hiRes": {"url": "https://example/hi.png", "height": 10, "width": 10}},
+        "variants": [{"hiRes": {"url": "https://example/vhi.png", "height": 11, "width": 11}}]
+      },
+      "browseNodeInfo": {
+        "browseNodes": [{
+          "id": "bn1",
+          "displayName": "Cat",
+          "contextFreeName": "Cat",
+          "salesRank": 99,
+          "websiteSalesRank": {
+            "id": "wsr-id",
+            "displayName": "SiteCat",
+            "contextFreeName": "SiteCat",
+            "salesRank": 5
+          }
+        }]
+      }
+    }]
+  },
+  "browseNodesResult": {
+    "browseNodes": [{
+      "id": "283155",
+      "displayName": "Books",
+      "contextFreeName": "Books",
+      "isRoot": true,
+      "salesRank": 11
+    }]
+  }
+}`)
+	resp, err := DecodeResponse(body)
+	if err != nil {
+		t.Fatalf("DecodeResponse: %+v", err)
+	}
+	it := resp.ItemsResult.Items[0]
+	if it.Score == nil || *it.Score != 0.91 {
+		t.Fatalf("Score = %v, want 0.91", it.Score)
+	}
+	if it.Images.Primary.HiRes == nil || it.Images.Primary.HiRes.URL != "https://example/hi.png" {
+		t.Fatal("deprecated HiRes primary not decoded")
+	}
+	if len(it.Images.Variants) != 1 || it.Images.Variants[0].HiRes == nil {
+		t.Fatal("deprecated HiRes variant not decoded")
+	}
+	bn := it.BrowseNodeInfo.BrowseNodes[0]
+	if bn.SalesRank == nil || *bn.SalesRank != 99 {
+		t.Fatalf("browseNodes[].salesRank = %v, want 99", bn.SalesRank)
+	}
+	if bn.WebsiteSalesRank.Id != "wsr-id" || bn.WebsiteSalesRank.SalesRank != 5 {
+		t.Fatalf("websiteSalesRank: %+v", bn.WebsiteSalesRank)
+	}
+	if len(resp.BrowseNodesResult.BrowseNodes) != 1 || resp.BrowseNodesResult.BrowseNodes[0].SalesRank == nil ||
+		*resp.BrowseNodesResult.BrowseNodes[0].SalesRank != 11 {
+		t.Fatalf("browseNodesResult browseNodes[].salesRank decode failed")
+	}
+}
+
 func TestDecodeResponseVariationSummary(t *testing.T) {
 	body := []byte(`{
   "variationsResult": {
@@ -100,6 +165,7 @@ func TestDecodeResponseVariationSummary(t *testing.T) {
       "variationDimensions": [
         {
           "displayName": "Color",
+          "locale": "en_GB",
           "name": "color_name",
           "values": ["Red", "Blue"]
         }
@@ -133,5 +199,8 @@ func TestDecodeResponseVariationSummary(t *testing.T) {
 	}
 	if got, want := vs.VariationDimensions[0].Name, "color_name"; got != want {
 		t.Errorf("VariationDimensions[0].Name = %q, want %q", got, want)
+	}
+	if got, want := vs.VariationDimensions[0].Locale, "en_GB"; got != want {
+		t.Errorf("VariationDimensions[0].Locale = %q, want %q", got, want)
 	}
 }
