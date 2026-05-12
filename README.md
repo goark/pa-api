@@ -1,7 +1,8 @@
 # [pa-api] -- Go client for the Amazon Creators API
 
-[![check vulns](https://github.com/goark/pa-api/workflows/vulns/badge.svg)](https://github.com/goark/pa-api/actions)
-[![lint status](https://github.com/goark/pa-api/workflows/lint/badge.svg)](https://github.com/goark/pa-api/actions)
+[![ci](https://github.com/goark/pa-api/actions/workflows/ci.yml/badge.svg)](https://github.com/goark/pa-api/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/goark/pa-api/actions/workflows/codeql.yml/badge.svg)](https://github.com/goark/pa-api/actions/workflows/codeql.yml)
+[![Go Reference](https://pkg.go.dev/badge/github.com/goark/pa-api.svg)](https://pkg.go.dev/github.com/goark/pa-api)
 [![GitHub license](https://img.shields.io/badge/license-Apache%202-blue.svg)](https://raw.githubusercontent.com/goark/pa-api/master/LICENSE)
 [![GitHub release](https://img.shields.io/github/release/goark/pa-api.svg)](https://github.com/goark/pa-api/releases/latest)
 
