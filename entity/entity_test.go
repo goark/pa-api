@@ -2,21 +2,21 @@ package entity
 
 import "testing"
 
-func TestDecodeResponseItemResultsAndCreatorsFields(t *testing.T) {
+func TestDecodeResponseItemResultsOffersV2AndBrowseNodeInfo(t *testing.T) {
 	body := []byte(`{
-  "itemResults": {
+  "itemsResult": {
     "items": [
       {
         "asin": "A1",
         "images": {
           "primary": {
             "small": {"url": "https://example/s.jpg", "height": 75, "width": 75},
-            "hiRes": {"url": "https://example/hi.jpg", "height": 1000, "width": 1000}
+            "large": {"url": "https://example/l.jpg", "height": 500, "width": 500}
           },
           "variants": [
             {
               "small": {"url": "https://example/vs.jpg", "height": 75, "width": 75},
-              "hiRes": {"url": "https://example/vh.jpg", "height": 1000, "width": 1000}
+              "large": {"url": "https://example/vl.jpg", "height": 500, "width": 500}
             }
           ]
         },
@@ -27,7 +27,6 @@ func TestDecodeResponseItemResultsAndCreatorsFields(t *testing.T) {
               "displayName": "Books",
               "contextFreeName": "Books",
               "websiteSalesRank": {
-                "id": "999",
                 "displayName": "Books",
                 "contextFreeName": "Books",
                 "salesRank": 7
@@ -60,24 +59,24 @@ func TestDecodeResponseItemResultsAndCreatorsFields(t *testing.T) {
 	}
 
 	item := resp.ItemsResult.Items[0]
-	if item.Images == nil || item.Images.Primary == nil || item.Images.Primary.HiRes == nil {
-		t.Fatal("Images.Primary.HiRes is nil")
+	if item.Images == nil || item.Images.Primary == nil || item.Images.Primary.Large == nil {
+		t.Fatal("Images.Primary.Large is nil")
 	}
-	if got, want := item.Images.Primary.HiRes.URL, "https://example/hi.jpg"; got != want {
-		t.Errorf("Images.Primary.HiRes.URL = %q, want %q", got, want)
+	if got, want := item.Images.Primary.Large.URL, "https://example/l.jpg"; got != want {
+		t.Errorf("Images.Primary.Large.URL = %q, want %q", got, want)
 	}
-	if item.Images.Variants == nil || len(item.Images.Variants) != 1 || item.Images.Variants[0].HiRes == nil {
-		t.Fatal("Images.Variants[0].HiRes is nil")
+	if item.Images.Variants == nil || len(item.Images.Variants) != 1 || item.Images.Variants[0].Large == nil {
+		t.Fatal("Images.Variants[0].Large is nil")
 	}
-	if got, want := item.Images.Variants[0].HiRes.URL, "https://example/vh.jpg"; got != want {
-		t.Errorf("Images.Variants[0].HiRes.URL = %q, want %q", got, want)
+	if got, want := item.Images.Variants[0].Large.URL, "https://example/vl.jpg"; got != want {
+		t.Errorf("Images.Variants[0].Large.URL = %q, want %q", got, want)
 	}
 
 	if item.BrowseNodeInfo == nil || len(item.BrowseNodeInfo.BrowseNodes) != 1 || item.BrowseNodeInfo.BrowseNodes[0].WebsiteSalesRank == nil {
 		t.Fatal("BrowseNodeInfo.BrowseNodes[0].WebsiteSalesRank is nil")
 	}
-	if got, want := item.BrowseNodeInfo.BrowseNodes[0].WebsiteSalesRank.Id, "999"; got != want {
-		t.Errorf("WebsiteSalesRank.Id = %q, want %q", got, want)
+	if got, want := item.BrowseNodeInfo.BrowseNodes[0].WebsiteSalesRank.SalesRank, 7; got != want {
+		t.Errorf("WebsiteSalesRank.SalesRank = %d, want %d", got, want)
 	}
 
 	if item.OffersV2 == nil || item.OffersV2.Listings == nil || len(*item.OffersV2.Listings) != 1 {
@@ -88,7 +87,72 @@ func TestDecodeResponseItemResultsAndCreatorsFields(t *testing.T) {
 	}
 }
 
-func TestDecodeResponseVariationSummaryAndBrowseSalesRank(t *testing.T) {
+// Deprecated fields are kept on exported structs for source compatibility; they
+// must still decode when present in arbitrary JSON.
+func TestDeprecatedFieldsStillDecode(t *testing.T) {
+	body := []byte(`{
+  "itemsResult": {
+    "items": [{
+      "asin": "DEP1",
+      "score": 0.91,
+      "images": {
+        "primary": {"hiRes": {"url": "https://example/hi.png", "height": 10, "width": 10}},
+        "variants": [{"hiRes": {"url": "https://example/vhi.png", "height": 11, "width": 11}}]
+      },
+      "browseNodeInfo": {
+        "browseNodes": [{
+          "id": "bn1",
+          "displayName": "Cat",
+          "contextFreeName": "Cat",
+          "salesRank": 99,
+          "websiteSalesRank": {
+            "id": "wsr-id",
+            "displayName": "SiteCat",
+            "contextFreeName": "SiteCat",
+            "salesRank": 5
+          }
+        }]
+      }
+    }]
+  },
+  "browseNodesResult": {
+    "browseNodes": [{
+      "id": "283155",
+      "displayName": "Books",
+      "contextFreeName": "Books",
+      "isRoot": true,
+      "salesRank": 11
+    }]
+  }
+}`)
+	resp, err := DecodeResponse(body)
+	if err != nil {
+		t.Fatalf("DecodeResponse: %+v", err)
+	}
+	it := resp.ItemsResult.Items[0]
+	if it.Score == nil || *it.Score != 0.91 {
+		t.Fatalf("Score = %v, want 0.91", it.Score)
+	}
+	if it.Images.Primary.HiRes == nil || it.Images.Primary.HiRes.URL != "https://example/hi.png" {
+		t.Fatal("deprecated HiRes primary not decoded")
+	}
+	if len(it.Images.Variants) != 1 || it.Images.Variants[0].HiRes == nil {
+		t.Fatal("deprecated HiRes variant not decoded")
+	}
+	bn := it.BrowseNodeInfo.BrowseNodes[0]
+	if bn.SalesRank == nil || *bn.SalesRank != 99 {
+		t.Fatalf("browseNodes[].salesRank = %v, want 99", bn.SalesRank)
+	}
+	if bn.WebsiteSalesRank.Id != "wsr-id" || bn.WebsiteSalesRank.SalesRank != 5 {
+		t.Fatalf("websiteSalesRank: %+v", bn.WebsiteSalesRank)
+	}
+	if len(resp.BrowseNodesResult.BrowseNodes) != 1 || resp.BrowseNodesResult.BrowseNodes[0].SalesRank == nil ||
+		*resp.BrowseNodesResult.BrowseNodes[0].SalesRank != 11 {
+		t.Fatalf("browseNodesResult browseNodes[].salesRank decode failed")
+	}
+}
+
+func TestDecodeResponseVariationSummary(t *testing.T) {
 	body := []byte(`{
   "variationsResult": {
     "variationSummary": {
@@ -107,17 +171,6 @@ func TestDecodeResponseVariationSummaryAndBrowseSalesRank(t *testing.T) {
         }
       ]
     }
-  },
-  "browseNodesResult": {
-    "browseNodes": [
-      {
-        "id": "283155",
-        "displayName": "Books",
-        "contextFreeName": "Books",
-        "isRoot": true,
-        "salesRank": 11
-      }
-    ]
   }
 }`)
 
@@ -144,17 +197,10 @@ func TestDecodeResponseVariationSummaryAndBrowseSalesRank(t *testing.T) {
 	if got, want := len(vs.VariationDimensions), 1; got != want {
 		t.Fatalf("len(VariationDimensions) = %d, want %d", got, want)
 	}
+	if got, want := vs.VariationDimensions[0].Name, "color_name"; got != want {
+		t.Errorf("VariationDimensions[0].Name = %q, want %q", got, want)
+	}
 	if got, want := vs.VariationDimensions[0].Locale, "en_GB"; got != want {
 		t.Errorf("VariationDimensions[0].Locale = %q, want %q", got, want)
-	}
-
-	if resp.BrowseNodesResult == nil || len(resp.BrowseNodesResult.BrowseNodes) != 1 {
-		t.Fatal("BrowseNodesResult.BrowseNodes is empty")
-	}
-	if resp.BrowseNodesResult.BrowseNodes[0].SalesRank == nil {
-		t.Fatal("BrowseNodes[0].SalesRank is nil")
-	}
-	if got, want := *resp.BrowseNodesResult.BrowseNodes[0].SalesRank, 11; got != want {
-		t.Errorf("BrowseNodes[0].SalesRank = %d, want %d", got, want)
 	}
 }
