@@ -75,7 +75,7 @@ New applications typically receive **v3.x** credentials (Login with Amazon token
 
 Example marketplace groups (same as before): NA — `www.amazon.com`, `www.amazon.ca`, `www.amazon.com.mx`, `www.amazon.com.br`; EU — `www.amazon.co.uk`, `www.amazon.de`, `www.amazon.fr`, `www.amazon.in`, `www.amazon.sa`, `www.amazon.ae`; FE — `www.amazon.co.jp`, `www.amazon.sg`, `www.amazon.com.au`.
 
-If token acquisition fails with an auth error, verify that your credential version and marketplace group match.
+If token acquisition fails with an auth error, verify that your credential version and marketplace group match. To rule out issues in your own code, you can test the same credentials in the browser with [AMZ Scratchpad](https://amzscratchpad.com/).
 
 ### Rate limits and retry guidance
 
